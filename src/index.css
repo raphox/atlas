@@ -1,0 +1,228 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "DM Sans", sans-serif;
+  --font-display: "Manrope", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-c2s-blue: #1f72ea;
+  --color-c2s-deep: #0b48a1;
+  --color-c2s-abyss: #0b2d5f;
+  --color-c2s-navy: #0d2a54; /* nome de produto sobre fundo branco */
+  --color-primary-50: #e3e9f2; /* stop oficial (mais claro) */
+  --color-primary-100: #bed1eb;
+  --color-primary-200: #9ab9e4; /* stop oficial */
+  --color-primary-300: #7ba7e5;
+  --color-primary-400: #5c96e7;
+  --color-primary-500: #3e84e8;
+  --color-primary-600: #1f72ea; /* stop oficial — ação padrão */
+  --color-primary-700: #155dc6;
+  --color-primary-800: #0b48a1; /* stop oficial */
+  --color-primary-900: #0b2d5f; /* stop oficial (mais escuro) */
+  --color-success: #22c55e;
+  --color-success-fg: #166534;
+  --color-success-bg: #dcfce7;
+  --color-warning: #f59e0b;
+  --color-warning-fg: #92400e;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #ef4444;
+  --color-danger-fg: #991b1b;
+  --color-danger-bg: #fee2e2;
+  --color-info: #1f72ea;
+  --color-info-fg: #0b48a1;
+  --color-info-bg: #e3e9f2;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* C2S color tokens: https://github.com/contact2sale/c2s-all-in-one/blob/main/packages/ui/styles/globals.css */
+:root {
+  font-synthesis: none;
+  --radius: 0.5rem; /* 8px — padrão do DS C2S */
+
+  /* Degradê oficial da marca (Profundidade -> Luz) */
+  --gradient-c2s: linear-gradient(
+    90deg,
+    #0b2d5f 0%,
+    #0b48a1 25%,
+    #1f72ea 50%,
+    #9ab9e4 75%,
+    #e3e9f2 90%,
+    #ffffff 100%
+  );
+
+  /* Neutros / superfícies (slate) */
+  --background: #f8fafc; /* page-bg / slate-50 */
+  --foreground: #0f172a; /* ink */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  /* Ação principal — C2S Blue */
+  --primary: #1f72ea; /* primary-600 */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f1f5f9; /* slate-100 */
+  --secondary-foreground: #334155; /* slate-700 */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b; /* slate-500 */
+  --accent: #e3e9f2; /* primary-50 (stop oficial) */
+  --accent-foreground: #155dc6; /* primary-700 */
+
+  --destructive: #ef4444; /* danger-500 */
+
+  --border: #e2e8f0; /* slate-200 */
+  --input: #e2e8f0;
+  --ring: #1f72ea; /* primary */
+
+  /* Gráficos (paleta C2S) */
+  --chart-1: #1f72ea; /* primary */
+  --chart-2: #22c55e; /* success */
+  --chart-3: #f59e0b; /* warning */
+  --chart-4: #7ba7e5; /* primary-300 */
+  --chart-5: #0b48a1; /* primary-800 */
+
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #1f72ea;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3e9f2;
+  --sidebar-active: #c9d6ea;
+  --sidebar-accent-foreground: #155dc6;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #1f72ea;
+}
+
+.dark {
+  /* Neutros invertidos (slate dark do DS C2S) */
+  --background: #0b1220;
+  --foreground: #f8fafc;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --popover: #111827;
+  --popover-foreground: #f8fafc;
+
+  --primary: #1f72ea;
+  --primary-foreground: #ffffff;
+
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #0a2547; /* azul profundo p/ superfície de destaque */
+  --accent-foreground: #7ba7e5; /* primary-300 */
+
+  --destructive: #ef4444;
+
+  --border: #334155;
+  --input: #334155;
+  --ring: #1f72ea;
+
+  --chart-1: #5c96e7; /* primary-400 */
+  --chart-2: #22c55e;
+  --chart-3: #f59e0b;
+  --chart-4: #7ba7e5; /* primary-300 */
+  --chart-5: #9ab9e4; /* primary-200 */
+
+  --sidebar: #111827;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #1f72ea;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0a2547;
+  --sidebar-active: #0f3a70;
+  --sidebar-accent-foreground: #7ba7e5;
+  --sidebar-border: #334155;
+  --sidebar-ring: #1f72ea;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply m-0 bg-background font-sans text-foreground antialiased;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+@utility section-label {
+  @apply text-[9px] font-semibold tracking-[.12em] text-muted-foreground;
+}
+
+/* Canvas snapshots belong to the Three.js slider; all interface styles use Tailwind. */
+#viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.city-slide-snapshot {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: #e9ede4;
+  overflow: hidden;
+}
+.city-slide-snapshot > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.city-slide-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.city-sliding #viewport {
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

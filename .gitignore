@@ -1,0 +1,29 @@
+# Dependências e build
+node_modules/
+dist/
+.vite/
+.vite-temp/
+
+# Logs locais do npm
+npm-debug.log*
+
+# Pacotes e dados gerados
+*.tar.gz
+/public/data/empresas.json
+
+# Resultados de testes
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+
+# Variáveis de ambiente locais; modelos continuam versionáveis
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Metadados do sistema operacional
+.DS_Store
+Thumbs.db
