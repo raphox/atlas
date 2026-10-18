@@ -6,7 +6,6 @@ export class SelectionHighlight extends THREE.Group {
     super();
     this.visible = false;
     this.box = new THREE.BoxGeometry(1, 1, 1);
-    this.cone = new THREE.ConeGeometry(0.71, 1, 4);
     this.shells = [];
     for (const [color, padding, order] of [
       ["#123441", 0.22, 1],
@@ -18,11 +17,10 @@ export class SelectionHighlight extends THREE.Group {
         depthWrite: false,
         toneMapped: false,
       });
-      const body = new THREE.Mesh(this.box, material),
-        roof = new THREE.Mesh(this.box, material);
-      body.renderOrder = roof.renderOrder = order;
-      this.add(body, roof);
-      this.shells.push({ body, roof, padding });
+      const body = new THREE.Mesh(this.box, material);
+      body.renderOrder = order;
+      this.add(body);
+      this.shells.push({ body, padding });
     }
     for (const [color, inner, outer, y] of [
       ["#123441", 1.58, 1.94, 0.17],
@@ -44,25 +42,12 @@ export class SelectionHighlight extends THREE.Group {
   select(company) {
     this.position.set(company.x, 0, company.z);
     this.visible = true;
-    for (const { body, roof, padding } of this.shells) {
+    for (const { body, padding } of this.shells) {
       body.position.set(0, company.height / 2 + 0.13, 0);
       body.scale.set(
         company.width + padding,
         company.height + padding,
         company.depth + padding,
-      );
-      roof.geometry = company.house ? this.cone : this.box;
-      roof.position.set(
-        0,
-        company.height + 0.16 + (company.house ? 0.3 : 0),
-        0,
-      );
-      roof.rotation.y = company.house ? Math.PI / 4 : 0;
-      const roofScale = company.house ? 0.92 * 1.08 : 0.92;
-      roof.scale.set(
-        company.width * roofScale + padding,
-        (company.house ? 0.65 : 0.15) + padding,
-        company.depth * roofScale + padding,
       );
     }
   }

@@ -4,7 +4,7 @@ Cidade interativa em Three.js com uma base de 1.400 empresas fictícias, paginad
 
 ## Executar
 
-Aplicação Vite com React 19, Tailwind CSS 4 e componentes shadcn/ui. Requer Node.js 22.12 ou superior (ou 24 LTS). Consulte EXECUTAR-LOCAL.md.
+Aplicação Vite com React 19, TanStack Charts 1.1.0, Three.js e Tailwind CSS 4. Requer Node.js 22.12 ou superior (ou 24 LTS). Consulte EXECUTAR-LOCAL.md.
 
 ```sh
 npm ci
@@ -16,8 +16,8 @@ Abra http://127.0.0.1:4173. O Vite recompila alterações automaticamente. `npm 
 ## Estrutura da interface
 
 - `src/main.jsx` monta a árvore React; `src/App.jsx` organiza a aplicação.
-- `src/components/` contém cabeçalho, ajuda, filtros, resumo, importação, busca, mapa, controles, detalhes e tabela com paginação. Os controles usam componentes shadcn/ui em `src/components/ui/`, com Radix UI para interação e acessibilidade.
-- `src/hooks/use-atlas.js` concentra os dados e o estado compartilhado entre mapa e tabela. `src/hooks/use-city.js` integra o motor Three.js ao ciclo de vida React e libera recursos ao desmontar.
+- `src/components/` contém cabeçalho, ajuda, filtros, resumo, importação, busca, mapa, controles, detalhes e tabela com paginação. Campos, seletores, busca com sugestões, alternâncias e perspectiva usam HTML nativo (`input`, `select`, `datalist`, checkbox e radio). Cards, botões, diálogo e tooltips mantêm os componentes existentes.
+- `src/hooks/use-atlas.js` concentra os dados e o estado compartilhado entre mapa e tabela. A extensão em `src/charts/city/` usa `createMark`, `defineChart`, `ChartRenderer` e o componente `Chart` oficial do TanStack. Consulte [o guia de desenvolvimento](src/charts/city/README.md) para consumir a cidade em outro projeto, configurar eventos e entender a arquitetura.
 - `src/index.css` configura o Tailwind e os tokens de tema shadcn/ui; o layout e os componentes usam classes utilitárias. O CSS específico restante atende ao canvas e às capturas da animação de cidades.
 - `components.json` configura o shadcn/ui. Para adicionar componentes: `npx shadcn@latest add nome-do-componente`. O utilitário `cn` local fica em `src/lib/utils.js`.
 - `scripts/generate-demo.mjs` gera `public/data/empresas.json` antes de iniciar ou compilar. `public/config.json` continua configurando a fonte de dados.
@@ -30,7 +30,7 @@ Abra http://127.0.0.1:4173. O Vite recompila alterações automaticamente. `npm 
 - Arraste com o botão esquerdo para girar horizontalmente. A inclinação fica travada na isometria padrão; arrastar para cima ou para baixo não inclina o mapa.
 - Use a roda, os botões +/− ou pinça para zoom.
 - Arraste com o botão direito ou dois dedos para mover.
-- Clique em uma construção para selecionar a empresa. Fachada e telhado recebem contorno branco com borda escura, e o lote recebe uma moldura contrastante. O destaque é reutilizado entre seleções e mantém as cores dos sistemas e os efeitos de risco.
+- Clique em uma construção para selecionar a empresa. A construção recebe contorno branco com borda escura, e o lote recebe uma moldura contrastante. O destaque é reutilizado entre seleções e mantém as cores dos sistemas e os efeitos de risco.
 - A tabela abaixo do mapa mostra empresa, sistemas, usuários e saúde. Ela acompanha os mesmos filtros e a mesma paginação da cidade. “Ver no mapa” seleciona, centraliza e aproxima a construção correspondente até o zoom máximo permitido.
 - Use a busca ou os filtros para localizar empresas. O filtro de saúde aparece antes do resumo; as contagens em Sistemas & interseções refletem todos os filtros ativos sobre a base completa, antes da paginação.
 - Escolha 100, 250, 500, 1.000 ou todas as empresas por cidade; os filtros são aplicados antes da paginação.
@@ -68,9 +68,9 @@ O build gera o JSON demonstrativo com 1.400 registros. Para usar um backend, alt
 
 ## Renderização
 
-Toda a cidade adota geometria low poly: construções em blocos, copas e cabeças facetadas, rodas com poucos segmentos e volumes de fogo/fumaça de 20 faces. Os materiais iluminados usam sombreamento plano. A emissão pelas janelas mantém o movimento e a restrição à abertura.
+A cidade usa geometria simplificada: um bloco por construção, janelas/ruas/calçadas em planos, carros sem rodas, pedestres sem pernas, copas/cabeças e volumes de fogo/fumaça de oito faces. O gramado é um plano verde, as calçadas são planos cinza e os lotes dos prédios são planos claros. Não há molduras de janela, telhados extras, fundações ou blocos de grama. Bancos esparsos usam um único bloco baixo e compartilham o instanciamento dos troncos. A geometria base caiu de 96.830 para 26.022 triângulos com 100 empresas e de 804.354 para 198.042 com 1.400; `node scripts/benchmark-city.mjs` reproduz a medição sem efeitos. Os materiais iluminados usam sombreamento plano. A emissão pelas janelas mantém o movimento e a restrição à abertura.
 
-Todo lote sem empresa na cidade exibida recebe piso verde e duas árvores, incluindo os parques reservados e terrenos livres dentro das sete regiões. A vegetação é recalculada após filtros, paginação e importação, sem ocupar ruas ou lotes com empresas. Cores, tamanhos e posições variam por coordenada de forma determinística; as copas permanecem dentro dos jardins. As mesmas geometrias são reutilizadas por instanciamento.
+Todo lote sem empresa na cidade exibida recebe piso verde, com distribuição entre clareiras e grupos de até três árvores, incluindo os parques reservados e terrenos livres dentro das sete regiões. Cerca de 9% dos lotes recebem um banco, em orientações variadas e com espaço livre ao redor. A vegetação é recalculada após filtros, paginação e importação, sem ocupar ruas ou lotes com empresas. Quantidades, cores, tamanhos e posições variam por coordenada de forma determinística; as copas permanecem dentro dos jardins. As mesmas geometrias são reutilizadas por instanciamento.
 
 Construções, janelas, vegetação, veículos e pedestres usam `InstancedMesh`. O trânsito é simulado em `src/traffic.js`, com faixas direcionais, curvas de conversão, aceleração, frenagem e distância mínima entre veículos. Os cruzamentos conectam os quatro braços do asfalto e possuem calçadas, faixas de pedestres, linhas de parada e semáforos. Cada cruzamento reserva sua área para um veículo de cada vez e possui uma fase exclusiva de travessia, com liberação somente após a saída de carros e pedestres. A quantidade de veículos e pedestres acompanha as quadras, limitada a 36 carros e 60 pedestres.
 
@@ -80,7 +80,7 @@ O modelo de porte está em `src/model.js` (`sizeForUsers`) e usa faixas demonstr
 
 Em risco médio, casas emitem fumaça por uma janela; prédios pequenos, médios e grandes usam respectivamente duas, três e cinco janelas, distribuídas entre andares e fachadas. A fumaça continua clara, sem chamas; o alto risco mantém o fogo e a fumaça escura.
 
-Construções em nível crítico também piscam em vermelho nas fachadas e telhados, alternando de forma instantânea com a cor original dos sistemas. Cada empresa possui uma sequência própria de intervalos pseudoaleatórios entre 450 e 1.100 ms, com início deslocado, sem transição gradual. Fachada e telhado compartilham o mesmo ritmo; a sequência é estável por empresa ao trocar filtros ou páginas. O controle “Efeitos de risco” desativa o piscar e restaura as cores originais. Com movimento reduzido, o destaque vermelho fica estático.
+Construções em nível crítico também piscam em vermelho nas construções, alternando de forma instantânea com a cor original dos sistemas. Cada empresa possui uma sequência própria de intervalos pseudoaleatórios entre 450 e 1.100 ms, com início deslocado, sem transição gradual. Todas as faces do bloco compartilham o mesmo ritmo; a sequência é estável por empresa ao trocar filtros ou páginas. O controle “Efeitos de risco” desativa o piscar e restaura as cores originais. Com movimento reduzido, o destaque vermelho fica estático.
 
 ## Formatação
 
@@ -97,3 +97,5 @@ As etiquetas sobre o mapa usam LE, IA e IM, incluindo as combinações nas inter
 A navegação mantém somente uma cidade WebGL ativa e, durante o slider, uma captura 2D temporária da cidade anterior. Geometrias, materiais, texturas e buffers de instâncias da cidade antiga são descartados antes da montagem seguinte. Ao terminar ou cancelar a animação, a captura é removida e seu bitmap é zerado. O indicador animado de carregamento é exibido antes da preparação; cliques repetidos são bloqueados e alterações de filtro cancelam pedidos pendentes.
 
 O alerta de risco médio usa triângulo amarelo vivo, exclamação e contorno escuros e borda externa branca, com tamanho ampliado e cor independente do mapeamento tonal da cena.
+
+A extensão compartilha o layout entre a marca TanStack e o renderer 3D. Mudanças de paleta reaproveitam a geometria; mudanças de usuários ou saúde preservam terreno, trânsito e câmera quando os lotes permanecem iguais. Com animações desligadas e câmera estabilizada, a cena renderiza sob demanda. Os contratos e as regras de atualização estão em `src/charts/city/README.md`.

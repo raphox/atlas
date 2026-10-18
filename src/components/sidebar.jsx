@@ -1,16 +1,8 @@
 import { useRef } from "react";
 import { ArrowDownToLine, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { REGIONS, STATUS } from "@/model";
 import { downloadExample, format } from "@/hooks/use-atlas";
 import { cn } from "@/lib/utils";
@@ -18,25 +10,27 @@ import { cn } from "@/lib/utils";
 function HealthFilter({ value, onChange }) {
   return (
     <div className="space-y-3">
-      <label id="health-label" className="section-label">
+      <label
+        htmlFor="health-filter"
+        id="health-label"
+        className="section-label"
+      >
         SAÚDE DA EMPRESA
       </label>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger
-          aria-labelledby="health-label"
-          className="w-full text-xs"
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos os níveis de risco</SelectItem>
-          {Object.entries(STATUS).map(([key, status]) => (
-            <SelectItem key={key} value={key}>
-              {status.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <select
+        id="health-filter"
+        className="native-select w-full text-xs"
+        value={value}
+        aria-labelledby="health-label"
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="all">Todos os níveis de risco</option>
+        {Object.entries(STATUS).map(([key, status]) => (
+          <option key={key} value={key}>
+            {status.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -159,7 +153,7 @@ function ImportCompanies({ onImport, loading }) {
           JSON
         </Badge>
       </Button>
-      <Input
+      <input
         ref={fileRef}
         type="file"
         accept=".json,application/json"

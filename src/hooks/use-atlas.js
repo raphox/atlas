@@ -29,6 +29,7 @@ export function useAtlas() {
   const [currentView, setCurrentView] = useState("iso");
   const [life, setLife] = useState(true);
   const [effects, setEffects] = useState(true);
+  const [showDistrictLabels, setShowDistrictLabels] = useState(false);
   const mapRef = useRef(null);
   const requestRef = useRef(null);
   const pagination = useMemo(
@@ -107,10 +108,10 @@ export function useAtlas() {
   const changeView = useCallback(
     (view) => {
       cancel();
-      setCurrentView(view);
-      mapRef.current?.view(view);
+      if (view === currentView) mapRef.current?.view(view);
+      else setCurrentView(view);
     },
-    [cancel],
+    [cancel, currentView],
   );
   const zoom = useCallback(
     (factor) => {
@@ -211,6 +212,8 @@ export function useAtlas() {
     currentView,
     life,
     effects,
+    showDistrictLabels,
+    setShowDistrictLabels,
     setLife,
     setEffects,
     mapRef,

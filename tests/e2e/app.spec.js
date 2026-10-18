@@ -40,12 +40,12 @@ test("mapa, tabela, filtros e paginação compartilham o estado React", async ({
     .click();
   await expect.poll(async () => (await summary(page)).page).toBe(1);
   await expect(page.locator("#city-map")).toHaveAttribute("aria-busy", "false");
-  await page.getByRole("combobox", { name: "Por cidade" }).click();
-  await page.getByRole("option", { name: "250", exact: true }).click();
+  await page.getByRole("combobox", { name: "Por cidade" }).selectOption("250");
   await expect(page.locator("tbody tr")).toHaveCount(250);
   await expect.poll(async () => (await summary(page)).pageSize).toBe(250);
-  await page.getByRole("combobox", { name: "SAÚDE DA EMPRESA" }).click();
-  await page.getByRole("option", { name: "Alto risco", exact: true }).click();
+  await page
+    .getByRole("combobox", { name: "SAÚDE DA EMPRESA" })
+    .selectOption("critical");
   await expect
     .poll(async () => (await summary(page)).filtered)
     .toBeGreaterThan(0);
@@ -78,9 +78,10 @@ test("busca, detalhes, controles, ajuda e estado vazio funcionam", async ({
     .fill("Aurora Tecnologia 0001");
   await expect(page.locator("tbody tr")).toHaveCount(1);
   const search = page.getByRole("combobox", { name: "Buscar empresa" });
-  await expect(
-    page.getByRole("option", { name: "Aurora Tecnologia 0001" }),
-  ).toBeVisible();
+  await expect(page.locator("datalist option").first()).toHaveAttribute(
+    "value",
+    "Aurora Tecnologia 0001",
+  );
   await search.press("ArrowDown");
   await search.press("Enter");
   await expect(
@@ -92,25 +93,22 @@ test("busca, detalhes, controles, ajuda e estado vazio funcionam", async ({
     .click();
   await expect(page.locator("tbody tr[aria-current=true]")).toHaveCount(1);
   await page.getByRole("button", { name: "Fechar detalhes" }).click();
-  await page.getByRole("tab", { name: "Vista superior" }).click();
+  await page.getByRole("radio", { name: "Vista superior" }).click();
   await expect(
-    page.getByRole("tab", { name: "Vista superior" }),
-  ).toHaveAttribute("aria-selected", "true");
-  await page.getByRole("tab", { name: "Vista superior" }).press("ArrowLeft");
-  await expect(page.getByRole("tab", { name: "Isométrica" })).toHaveAttribute(
-    "aria-selected",
-    "true",
-  );
+    page.getByRole("radio", { name: "Vista superior" }),
+  ).toBeChecked();
+  await page.getByRole("radio", { name: "Vista superior" }).press("ArrowLeft");
+  await expect(page.getByRole("radio", { name: "Isométrica" })).toBeChecked();
   await page.getByRole("button", { name: "Aproximar", exact: true }).click();
   await page.getByRole("button", { name: "Restaurar visão geral" }).click();
   await page.getByText("Cidade viva", { exact: true }).click();
   await expect(
-    page.getByRole("switch", { name: "Cidade viva" }),
-  ).toHaveAttribute("aria-checked", "false");
-  await page.getByRole("switch", { name: "Efeitos de risco" }).click();
+    page.getByRole("checkbox", { name: "Cidade viva" }),
+  ).not.toBeChecked();
+  await page.getByRole("checkbox", { name: "Efeitos de risco" }).click();
   await expect(
-    page.getByRole("switch", { name: "Efeitos de risco" }),
-  ).toHaveAttribute("aria-checked", "false");
+    page.getByRole("checkbox", { name: "Efeitos de risco" }),
+  ).not.toBeChecked();
   await page.getByRole("button", { name: "Como navegar" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
@@ -202,6 +200,44 @@ test("layouts móvel e tablet mantêm os controles, sem rolagem horizontal", asy
     path: "test-results/atlas-tablet.png",
     fullPage: true,
   });
+});
+
+test("a tabela permanece abaixo do mapa em janelas baixas e durante a rolagem", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await ready(page);
+  const table = page.locator('section[aria-labelledby="table-title"]');
+  const tableScroll = page.getByRole("region", {
+    name: "Tabela de empresas da página atual",
+  });
+  const gap = async () => {
+    const mapBounds = await page.locator("#city-map").boundingBox();
+    const tableBounds = await table.boundingBox();
+    return tableBounds.y - (mapBounds.y + mapBounds.height);
+  };
+  for (const viewport of [
+    { width: 1440, height: 700 },
+    { width: 1440, height: 580 },
+    { width: 872, height: 650 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect.poll(gap).toBeGreaterThanOrEqual(-0.5);
+    await tableScroll.scrollIntoViewIfNeeded();
+    await tableScroll.evaluate((element) => {
+      element.scrollTop = 120;
+    });
+    await expect.poll(gap).toBeGreaterThanOrEqual(-0.5);
+    const header = await table.locator("thead").boundingBox();
+    const scrollBounds = await tableScroll.boundingBox();
+    expect(header.y).toBeGreaterThanOrEqual(scrollBounds.y - 0.5);
+  }
+  await page.setViewportSize({ width: 1440, height: 700 });
+  await page.locator('[data-chart="city-3d"]').evaluate((element) => {
+    element.parentElement.scrollTop = 0;
+  });
+  await page.screenshot({ path: "test-results/atlas-map-table-layout.png" });
 });
 
 test("falha da fonte é exibida e oferece tentar novamente", async ({
@@ -419,4 +455,60 @@ test("tooltip aparece ao passar pela fachada mesmo com o telhado fora do mapa", 
   await expect(tooltip).toBeVisible();
   await page.mouse.move(100, 40);
   await expect(tooltip).toHaveCount(0);
+});
+
+test("tela cheia mantém controles e restaura o mapa e a tabela ao sair", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await ready(page);
+  const original = await page.locator("#city-map").boundingBox();
+  await page.getByRole("button", { name: "Abrir mapa em tela cheia" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        document.fullscreenElement?.getAttribute("data-chart"),
+      ),
+    )
+    .toBe("city-3d");
+  await expect(
+    page.getByRole("button", { name: "Sair da tela cheia" }),
+  ).toBeVisible();
+  await expect
+    .poll(async () => (await page.locator("#city-map").boundingBox()).width)
+    .toBeGreaterThan(original.width);
+  await page.getByRole("checkbox", { name: "Sistemas e interseções" }).check();
+  await expect(page.locator(".district-label").first()).toBeVisible();
+  await page.getByRole("button", { name: "Aproximar", exact: true }).hover();
+  await expect(
+    page.getByRole("tooltip", { name: "Aproximar", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page
+      .getByRole("tooltip", { name: "Aproximar", exact: true })
+      .evaluate((element) => document.fullscreenElement.contains(element)),
+  ).toBe(true);
+  await page.screenshot({ path: "test-results/atlas-fullscreen.png" });
+  await page.getByRole("button", { name: "Sair da tela cheia" }).click();
+  await expect
+    .poll(() => page.evaluate(() => document.fullscreenElement === null))
+    .toBe(true);
+  await expect
+    .poll(async () => (await page.locator("#city-map").boundingBox()).width)
+    .toBe(original.width);
+  await expect(
+    page.getByRole("heading", { name: "Empresas nesta cidade" }),
+  ).toBeVisible();
+  // External exits (e.g. browser Escape) must also synchronize the button.
+  await page.getByRole("button", { name: "Abrir mapa em tela cheia" }).click();
+  await expect
+    .poll(() => page.evaluate(() => Boolean(document.fullscreenElement)))
+    .toBe(true);
+  await page.evaluate(() => document.exitFullscreen());
+  await expect(
+    page.getByRole("button", { name: "Abrir mapa em tela cheia" }),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
 });

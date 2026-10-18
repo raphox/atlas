@@ -10,13 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { REGIONS, PAGE_SIZES } from "@/model";
 import { format } from "@/hooks/use-atlas";
 import { StatusBadge } from "./status-badge";
@@ -59,31 +52,28 @@ function CompanyPagination({ atlas }) {
       <div className="flex items-center gap-2 border-l pl-3">
         <label
           id="page-size-label"
+          htmlFor="page-size"
           className="text-[10px] text-muted-foreground"
         >
           Por cidade
         </label>
-        <Select
+        <select
+          id="page-size"
+          className="native-select w-22 text-xs"
           value={String(atlas.pageSize)}
-          onValueChange={(value) =>
-            atlas.resizePage(value === "all" ? value : Number(value))
-          }
+          aria-labelledby="page-size-label"
+          disabled={busy || loading}
+          onChange={(event) => {
+            const value = event.target.value;
+            atlas.resizePage(value === "all" ? value : Number(value));
+          }}
         >
-          <SelectTrigger
-            aria-labelledby="page-size-label"
-            size="sm"
-            className="w-22 text-xs"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PAGE_SIZES.map((size) => (
-              <SelectItem key={size} value={String(size)}>
-                {size === "all" ? "Todas" : format(size)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {PAGE_SIZES.map((size) => (
+            <option key={size} value={String(size)}>
+              {size === "all" ? "Todas" : format(size)}
+            </option>
+          ))}
+        </select>
       </div>
     </nav>
   );

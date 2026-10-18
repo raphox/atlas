@@ -29,7 +29,13 @@ function TooltipContent({
   ...props
 }) {
   return (
-    <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Portal
+      container={
+        typeof document === "undefined"
+          ? undefined
+          : (document.fullscreenElement ?? undefined)
+      }
+    >
       <TooltipPrimitive.Content
         data-slot="tooltip-content"
         sideOffset={sideOffset}

@@ -9,7 +9,7 @@ import {
   ROAD_EVERY,
 } from "../src/model.js";
 
-test("toda área sem empresa recebe grama e árvores, sem ocupar ruas, em cada filtro e página", () => {
+test("toda área sem empresa recebe jardim, sem ocupar ruas, em cada filtro e página", () => {
   const records = demoCompanies();
   for (const size of PAGE_SIZES)
     for (const filter of [
@@ -37,15 +37,49 @@ test("toda área sem empresa recebe grama e árvores, sem ocupar ruas, em cada f
             assert.equal(green.has(key), !road && !occupied.has(key));
           }
         for (const lot of lots) {
-          assert.ok(lot.trees.length > 0);
+          assert.ok(lot.trees.length <= 3);
           for (const tree of lot.trees) {
-            // Even the full canopy stays inside its grass tile and off sidewalks.
+            // Even the full canopy stays inside its lot and off sidewalks.
             assert.ok(Math.abs(tree.dx) + tree.scale < (2.8 - 0.12) / 2);
             assert.ok(Math.abs(tree.dz) + tree.scale < (2.8 - 0.12) / 2);
+            for (const bench of lot.benches)
+              assert.ok(
+                Math.hypot(tree.dx - bench.dx, tree.dz - bench.dz) >=
+                  tree.scale + 0.55,
+              );
+          }
+          for (const bench of lot.benches) {
+            // The entire rotated bench fits inside the lawn lot.
+            const cos = Math.abs(Math.cos(bench.rotation)),
+              sin = Math.abs(Math.sin(bench.rotation));
+            assert.ok(Math.abs(bench.dx) + 0.24 * cos + 0.08 * sin < 1.34);
+            assert.ok(Math.abs(bench.dz) + 0.24 * sin + 0.08 * cos < 1.34);
           }
         }
       }
     }
+});
+
+test("jardins variam entre clareiras e grupos de árvores, com poucos bancos estáveis", () => {
+  const layout = layoutCity(demoCompanies().slice(0, 100));
+  const lots = greenLots(layout);
+  assert.deepEqual(greenLots(layout), lots);
+  assert.deepEqual(
+    [...new Set(lots.map((lot) => lot.trees.length))].sort(),
+    [0, 1, 2, 3],
+  );
+  const benches = lots.filter((lot) => lot.benches.length > 0);
+  assert.ok(benches.length > 0 && benches.length < lots.length * 0.15);
+  assert.ok(new Set(benches.map((lot) => lot.benches[0].rotation)).size > 1);
+  for (const lot of lots)
+    for (let i = 0; i < lot.trees.length; i++)
+      for (const other of lot.trees.slice(i + 1)) {
+        const tree = lot.trees[i];
+        assert.ok(
+          Math.hypot(tree.dx - other.dx, tree.dz - other.dz) >=
+            tree.scale + other.scale + 0.08,
+        );
+      }
 });
 
 test("um lote liberado vira jardim e volta a receber uma empresa sem vegetação sobreposta", () => {

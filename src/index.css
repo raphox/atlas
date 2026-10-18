@@ -189,8 +189,24 @@
   @apply text-[9px] font-semibold tracking-[.12em] text-muted-foreground;
 }
 
+@utility native-input {
+  @apply h-9 rounded-md border bg-card px-3 text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility native-select {
+  @apply h-9 rounded-md border bg-card px-2 text-foreground shadow-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
 /* Canvas snapshots belong to the Three.js slider; all interface styles use Tailwind. */
-#viewport canvas {
+[data-chart="city-3d"]:fullscreen {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #e9ede4;
+}
+[data-chart="city-3d"]:fullscreen > div {
+  min-height: 0;
+}
+.city-chart-viewport canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -214,7 +230,7 @@
   pointer-events: none;
   overflow: hidden;
 }
-.city-sliding #viewport {
+.city-sliding .city-chart-viewport {
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
