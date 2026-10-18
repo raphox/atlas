@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { random, sizeForUsers } from "../../../model.js";
+import { random, metricFor, sizeForValue } from "../../../model.js";
 import { facadeWindows, windowEmitters } from "../../../plumes.js";
 import { createCriticalBlink } from "../../../critical-blink.js";
 import { instances, material } from "./primitives.js";
@@ -13,7 +13,7 @@ export function buildBuildings(city, companies) {
   city.emitters = [];
   city.warningSources = [];
   for (const c of companies) {
-    const size = sizeForUsers(c.users);
+    const size = sizeForValue(metricFor(c).value);
     c.height = size.height;
     c.house = size.house;
     const shade = 0.88 + rng() * 0.22;

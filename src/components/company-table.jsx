@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { REGIONS, PAGE_SIZES } from "@/model";
+import { categoryLabel, metricFor, PAGE_SIZES } from "@/model";
 import { format } from "@/hooks/use-atlas";
 import { StatusBadge } from "./status-badge";
 
@@ -126,8 +126,8 @@ export function CompanyTable({ atlas }) {
         <TableHeader className="sticky top-0 z-10 bg-muted">
           <TableRow>
             <TableHead className="pl-5">Empresa</TableHead>
-            <TableHead>Sistemas</TableHead>
-            <TableHead className="text-right">Usuários</TableHead>
+            <TableHead>Categorias</TableHead>
+            <TableHead className="text-right">{atlas.valueLabel}</TableHead>
             <TableHead>Saúde</TableHead>
             <TableHead>
               <span className="sr-only">Localizar empresa</span>
@@ -136,9 +136,6 @@ export function CompanyTable({ atlas }) {
         </TableHeader>
         <TableBody>
           {atlas.layout.companies.map((company) => {
-            const region = REGIONS.find(
-              (region) => region.mask === company.mask,
-            );
             return (
               <TableRow
                 key={company.id}
@@ -158,12 +155,21 @@ export function CompanyTable({ atlas }) {
                 <TableCell className="min-w-44 max-w-72 whitespace-normal text-[11px] leading-relaxed text-muted-foreground">
                   <span
                     className="mr-2 inline-block size-2 rounded-sm"
-                    style={{ background: region.color }}
+                    style={{
+                      background: atlas.regions.find(
+                        (region) => region.mask === company.mask,
+                      )?.color,
+                    }}
                   />
-                  {region.label}
+                  {categoryLabel(company)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {format(company.users)}
+                  {format(metricFor(company).value)}
+                  {atlas.valueLabel === "Valor" && (
+                    <small className="block text-[9px] text-muted-foreground">
+                      {metricFor(company).label}
+                    </small>
+                  )}
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={company.status} />

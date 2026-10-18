@@ -1,9 +1,9 @@
 import { createMark } from "@tanstack/charts";
-import { REGIONS, layoutCity } from "../../model.js";
+import { categoryLabel, metricFor, layoutCity } from "../../model.js";
 import { validateCityData } from "./data.js";
 import { cityLayout } from "./layout.js";
 
-// A city is a spatial mark: x/z locate each company and users encode height.
+// A city is a spatial mark: x/z locate each company and a metric encodes height.
 // The semantic scene also remains usable by TanStack's SVG renderer (top view).
 /**
  * @template {import('./data.js').CityDatum} TDatum
@@ -12,15 +12,15 @@ import { cityLayout } from "./layout.js";
  * @returns {import('@tanstack/charts').ChartMark<TDatum, number, number>}
  */
 export function cityMark(data, { id = "companies", layout } = {}) {
-  validateCityData(data);
-  layout ??= layoutCity(data);
+  const rows = validateCityData(data);
+  layout ??= layoutCity(rows);
   return createMark(() => ({
     id,
     channels: {
       x: { scale: "x", values: layout.companies.map((c) => c.x) },
       y: { scale: "y", values: layout.companies.map((c) => c.z) },
       color: { scale: "color", values: layout.companies.map((c) => c.mask) },
-      height: { values: layout.companies.map((c) => c.users) },
+      height: { values: layout.companies.map((c) => metricFor(c).value) },
       health: { values: layout.companies.map((c) => c.status) },
     },
     render({ scales, color }) {
@@ -28,7 +28,7 @@ export function cityMark(data, { id = "companies", layout } = {}) {
         key: `${id}:${company.id}`,
         markId: id,
         group: company.mask,
-        groupLabel: REGIONS.find((r) => r.mask === company.mask).label,
+        groupLabel: categoryLabel(company),
         datum: data[datumIndex],
         datumIndex,
         xValue: company.x,

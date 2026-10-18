@@ -1,6 +1,6 @@
 # City chart: health score como uma cidade 3D
 
-Extensão local do TanStack Charts **1.1.0**. Uma empresa é uma marca espacial: a combinação de sistemas determina seu distrito e sua cor, usuários determinam o porte da construção e a classificação de saúde determina os sinais de risco. O cadastro atual fornece `status`, não um score numérico; o gráfico não inventa nem calcula esse score.
+Extensão local do TanStack Charts **1.1.0**. Uma empresa é uma marca espacial: a combinação de categorias determina seu distrito e sua cor, valores da métrica determinam o porte da construção e a classificação de saúde determina os sinais de risco. O cadastro atual fornece `status`, não um score numérico; o gráfico não inventa nem calcula esse score.
 
 O consumidor usa `defineChart`, `ChartMark`, `ChartRenderer`, `ChartPoint`, foco, tooltip e callbacks do TanStack. O Three.js implementa a superfície 3D. Não é necessário usar a aplicação Atlas, seus filtros ou seus componentes de interface.
 
@@ -19,7 +19,7 @@ export function CompanyHealth({ companies, onCompanySelect }) {
     () => defineCityChart(companies, {
       tooltip: {
         use: tooltip,
-        format: ({ datum }) => `${datum.name} · ${datum.users} usuários · ${datum.status}`,
+        format: ({ datum }) => `${datum.name} · ${datum.metric.label}: ${datum.metric.value} · ${datum.status}`,
       },
     }),
     [companies],
@@ -75,8 +75,8 @@ A cor resolvida pelo TanStack chega ao renderer. `defineCityChart(data, options)
 
 ```js
 const companies = [
-  { id: "aurora", name: "Aurora", users: 2200, mask: 3, status: "critical" },
-  { id: "cedro", name: "Cedro", users: 350, mask: 1, status: "warning" },
+  { id: "aurora", name: "Aurora", metric: { label: "Receita", value: 2200.75 }, categories: [{ label: "Varejo", value: "retail" }], status: "critical" },
+  { id: "cedro", name: "Cedro", metric: { label: "Receita", value: 350 }, categories: [{ label: "Serviços", value: "services" }], status: "warning" },
 ];
 ```
 
@@ -84,11 +84,13 @@ const companies = [
 | --- | --- | --- |
 | `id` | string ou número único e estável | chave da marca e da seleção |
 | `name` | string não vazia | identificação da empresa |
-| `users` | número finito ≥ 0 | altura por faixas de porte |
-| `mask` | inteiro de 1 a 7 | distrito e escala de cor |
+| `metric` | `{ label: string, value: number }`, valor finito ≥ 0 | label na interface; valor define o porte |
+| `categories` | lista de `{ label: string, value: string }` | distrito e cor; até três valores distintos na base |
 | `status` | `healthy`, `warning` ou `critical` | operação normal, fumaça/alerta ou fogo/piscar |
 
-`mask` é a união binária de Leads=1, IA=2 e Imobiliárias=4. Por exemplo, Leads+IA=3 e todos os sistemas=7. O importador do Atlas converte `systems: ["A", "B"]` para esse contrato em `placeCompanies`.
+O contrato genérico pode ser passado diretamente a `defineCityChart`/`cityMark`. `placeCompanies` valida os dados e calcula `mask` (bits 1, 2 e 4 atribuídos aos identificadores das categorias em ordem textual). As combinações determinam até sete regiões. O mesmo `value` deve manter o mesmo `label` em toda a base. O layout deve usar a base já normalizada quando calculado fora da marca, antes da paginação.
+
+Integrações existentes com `{ users, mask }` continuam aceitas pela marca. O importador do Atlas também aceita `{ users, systems: ["A", "B"] }`, convertendo para os campos genéricos. `metric.value` preserva decimais; `sizeForValue` mantém as quatro faixas de porte existentes (<90, <550, <1800 e ≥1800), independentemente do label. `sizeForUsers` permanece como alias de compatibilidade.
 
 O ponto preserva `datum === data[datumIndex]`. A marca não altera as linhas recebidas, inclusive quando estão congeladas. `xValue` e `yValue` são as coordenadas espaciais x/z dos lotes. A geometria mutável do Three.js recebe cópias separadas. Dados novos exigem uma nova definição, como nos demais gráficos TanStack; mantenha os dados imutáveis e memorize definições que capturam props.
 
@@ -112,7 +114,7 @@ O ponto preserva `datum === data[datumIndex]`. A marca não altera as linhas rec
 | `three/effects.js` | alertas, cores de risco e coordenação das partículas |
 | `../../city.js` | cena, câmera, animação e recursos WebGL |
 
-`src/components/city-map.jsx` é o consumidor da extensão: conecta o gráfico aos dados e controles do Atlas. O componente React aceita `showDistrictLabels` (padrão `false`) para exibir as etiquetas dos sistemas e interseções; o checkbox correspondente no Atlas controla essa propriedade sem reconstruir a cena. O renderer não importa `useAtlas`, paginação, shadcn ou React. A simulação do trânsito continua separada em `src/traffic.js`.
+`src/components/city-map.jsx` é o consumidor da extensão: conecta o gráfico aos dados e controles do Atlas. O componente React aceita `showDistrictLabels` (padrão `false`) para exibir as etiquetas das categorias e interseções; o checkbox correspondente no Atlas controla essa propriedade sem reconstruir a cena. O renderer não importa `useAtlas`, paginação, shadcn ou React. A simulação do trânsito continua separada em `src/traffic.js`.
 
 ## Atualizações e renderização
 
@@ -120,8 +122,8 @@ O layout é calculado pela marca (ou fornecido pela aplicação) e acompanha um 
 
 | Mudança | Trabalho necessário |
 | --- | --- |
-| IDs, sistemas, posições ou limites das ruas | reconstruir a cidade e enquadrar o novo layout |
-| Usuários ou saúde, com os mesmos lotes | reconstruir prédios e efeitos; preservar terreno, trânsito, câmera e seleção existente |
+| IDs, categorias, posições ou limites das ruas | reconstruir a cidade e enquadrar o novo layout |
+| Métrica ou saúde, com os mesmos lotes | reconstruir prédios e efeitos; preservar terreno, trânsito, câmera e seleção existente |
 | Paleta | atualizar as cores das instâncias, preservando sombreamento e fase de risco |
 | Nome | atualizar os dados usados pela interface |
 | Tamanho do contêiner | ajustar a câmera e o canvas, sem reconstruir geometria |
@@ -150,7 +152,7 @@ Os testes de navegador verificam repouso sem novos frames ou uploads, retomada d
 
 A distribuição de árvores e bancos usa sementes por coordenada: permanece estável ao reconstruir a mesma cidade, mantém as copas dentro do lote e reserva espaço entre árvores e bancos.
 
-Removidos também os planos extras de sombra por prédio e os telhados duplicados do contorno de seleção. A cor continua representando sistemas; saúde não altera porte nem pertencimento a um distrito.
+Removidos também os planos extras de sombra por prédio e os telhados duplicados do contorno de seleção. A cor continua representando categorias; saúde não altera porte nem pertencimento a um distrito.
 
 Medição determinística da geometria base, sem fogo/fumaça e sem descarte pela câmera:
 

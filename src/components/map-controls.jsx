@@ -163,7 +163,7 @@ export function SceneControls({ atlas, disabled }) {
           },
           {
             id: "district-labels",
-            label: "Sistemas e interseções",
+            label: "Categorias e interseções",
             value: atlas.showDistrictLabels,
             onChange: atlas.setShowDistrictLabels,
           },

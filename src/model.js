@@ -129,15 +129,17 @@ export function demoCompanies(count = 1400) {
     };
   });
 }
-export function sizeForUsers(users) {
-  return users < 90
+export function sizeForValue(value) {
+  return value < 90
     ? { height: 0.95, floors: 1, house: true }
-    : users < 550
+    : value < 550
       ? { height: 2.4, floors: 2, house: false }
-      : users < 1800
+      : value < 1800
         ? { height: 4.3, floors: 4, house: false }
         : { height: 7.2, floors: 6, house: false };
 }
+// Compatibility for integrations using the previous helper name.
+export const sizeForUsers = sizeForValue;
 export function filteredCompanies(
   companies,
   { region = "all", status = "all", query = "" } = {},
@@ -150,41 +152,129 @@ export function filteredCompanies(
       (!q || c.name.toLocaleLowerCase("pt-BR").includes(q)),
   );
 }
+// Legacy records remain readable; all visual consumers use the generic metric.
+export function metricFor(record) {
+  return record.metric ?? { label: "Usuários", value: record.users };
+}
+export function categoryLabel(record) {
+  return (
+    record.categories?.map((category) => category.label).join(" + ") ??
+    REGIONS.find((region) => region.mask === record.mask)?.label ??
+    ""
+  );
+}
+export function metricLabel(records) {
+  const labels = new Set(records.map((record) => metricFor(record).label));
+  return labels.size === 1 ? [...labels][0] : "Valor";
+}
+export function regionsFor(records) {
+  const labels = new Map();
+  for (const record of records) {
+    const bits = [1, 2, 4].filter((bit) => record.mask & bit);
+    record.categories?.forEach((category, index) =>
+      labels.set(bits[index], category.label),
+    );
+  }
+  if (!labels.size) return records.length ? REGIONS : [];
+  return REGIONS.filter((region) =>
+    [1, 2, 4].every((bit) => !(region.mask & bit) || labels.has(bit)),
+  ).map((region) => {
+    const label = [1, 2, 4]
+      .filter((bit) => region.mask & bit)
+      .map((bit) => labels.get(bit))
+      .join(" + ");
+    return { ...region, label, shortLabel: label, name: label };
+  });
+}
 export function placeCompanies(records) {
   if (!Array.isArray(records) || !records.length)
     throw new Error("O arquivo deve conter uma lista de empresas.");
   const ids = new Set();
-  return records.map((r, i) => {
+  const labels = new Map();
+  let hasLegacy = false;
+  const normalized = records.map((r, i) => {
     if (!r || typeof r.name !== "string" || !r.name.trim())
       throw new Error(`Empresa ${i + 1}: informe um nome.`);
-    if (!Number.isFinite(r.users) || r.users < 0)
-      throw new Error(
-        `Empresa ${i + 1}: usuários deve ser um número positivo.`,
-      );
+    const metric = metricFor(r);
     if (
-      !Array.isArray(r.systems) ||
-      !r.systems.length ||
-      r.systems.some((s) => !["A", "B", "C"].includes(s))
+      typeof metric.label !== "string" ||
+      !metric.label.trim() ||
+      !Number.isFinite(metric.value) ||
+      metric.value < 0
     )
-      throw new Error(`Empresa ${i + 1}: sistemas deve conter A, B ou C.`);
-    if (!STATUS[r.status])
+      throw new Error(
+        `Empresa ${i + 1}: metric deve conter label e value numérico não negativo.`,
+      );
+    let categories = r.categories;
+    if (categories === undefined) {
+      hasLegacy = true;
+      if (
+        !Array.isArray(r.systems) ||
+        !r.systems.length ||
+        r.systems.some((value) => !["A", "B", "C"].includes(value))
+      )
+        throw new Error(`Empresa ${i + 1}: sistemas deve conter A, B ou C.`);
+      categories = [...new Set(r.systems)].map((value) => ({
+        value,
+        label: REGIONS.find(
+          (region) => region.mask === { A: 1, B: 2, C: 4 }[value],
+        ).label,
+      }));
+    }
+    if (!Array.isArray(categories) || !categories.length)
+      throw new Error(`Empresa ${i + 1}: informe ao menos uma categoria.`);
+    const unique = new Map();
+    for (const category of categories) {
+      if (
+        !category ||
+        typeof category.value !== "string" ||
+        !category.value.trim() ||
+        typeof category.label !== "string" ||
+        !category.label.trim()
+      )
+        throw new Error(
+          `Empresa ${i + 1}: cada categoria deve conter label e value textuais não vazios.`,
+        );
+      const value = category.value.trim(),
+        label = category.label.trim();
+      if (labels.has(value) && labels.get(value) !== label)
+        throw new Error(
+          `Categoria ${value}: use o mesmo label em toda a base.`,
+        );
+      labels.set(value, label);
+      unique.set(value, { value, label });
+    }
+    if (!Object.hasOwn(STATUS, r.status))
       throw new Error(`Empresa ${i + 1}: status inválido.`);
-    const mask = [...new Set(r.systems)].reduce(
-      (v, s) => v | { A: 1, B: 2, C: 4 }[s],
-      0,
-    );
     const id = String(r.id ?? `importada-${i + 1}`);
-    if (ids.has(id))
-      throw new Error("Há identificadores repetidos no arquivo.");
+    if (!id.trim() || ids.has(id))
+      throw new Error("Há identificadores vazios ou repetidos no arquivo.");
     ids.add(id);
     return {
       id,
       name: r.name.trim(),
-      users: Math.round(r.users),
+      metric: { label: metric.label.trim(), value: metric.value },
+      categories: [...unique.values()],
       status: r.status,
-      mask,
+      ...(r.metric === undefined ? { users: r.users } : {}),
     };
   });
+  const values = hasLegacy
+    ? [...new Set(["A", "B", "C", ...labels.keys()])]
+    : [...labels.keys()].sort();
+  if (values.length > 3)
+    throw new Error("O mapa aceita até três categorias distintas por base.");
+  const bits = new Map(values.map((value, index) => [value, 1 << index]));
+  return normalized.map((record) => ({
+    ...record,
+    categories: record.categories.sort(
+      (a, b) => bits.get(a.value) - bits.get(b.value),
+    ),
+    mask: record.categories.reduce(
+      (mask, category) => mask | bits.get(category.value),
+      0,
+    ),
+  }));
 }
 export const PAGE_SIZE = 100;
 export const PAGE_SIZES = [100, 250, 500, 1000, "all"];

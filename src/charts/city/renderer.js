@@ -179,7 +179,10 @@ export function createCityRenderer({
             sourcePoints.map((point, i) => [
               point.datum.id,
               point.datum.name,
+              point.datum.metric,
               point.datum.users,
+              point.datum.categories,
+              sharedLayout.companies[i].mask,
               point.datum.mask,
               point.datum.status,
               point.color,
@@ -196,6 +199,7 @@ export function createCityRenderer({
                 ...sharedLayout,
                 companies: sourcePoints.map((p, i) => ({
                   ...p.datum,
+                  ...sharedLayout.companies[i],
                   x: sharedLayout.companies[i].x,
                   z: sharedLayout.companies[i].z,
                   col: sharedLayout.companies[i].col,
@@ -204,7 +208,12 @@ export function createCityRenderer({
               };
               const resetView = city.updateCompanies(
                 layout,
-                new Map(sourcePoints.map((p) => [p.datum.mask, p.color])),
+                new Map(
+                  sourcePoints.map((p, i) => [
+                    sharedLayout.companies[i].mask,
+                    p.color,
+                  ]),
+                ),
               );
               if (resetView) city.view(view, true);
               dataKey = nextKey;

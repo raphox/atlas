@@ -1,11 +1,12 @@
-import { REGIONS, STATUS } from "../../model.js";
+import { REGIONS, STATUS, metricFor, placeCompanies } from "../../model.js";
 
 /**
  * @typedef {object} CityDatum
  * @property {string|number} id Stable, unique company key.
  * @property {string} name Company display name.
- * @property {number} users Nonnegative user count; encodes building height.
- * @property {1|2|3|4|5|6|7} mask Exact system intersection; encodes district/color.
+ * @property {{label: string, value: number}} metric Nonnegative metric; encodes building height.
+ * @property {{label: string, value: string}[]} [categories] Generic district memberships.
+ * @property {1|2|3|4|5|6|7} [mask] Normalized category intersection; encodes district/color.
  * @property {"healthy"|"warning"|"critical"} status Health classification.
  */
 
@@ -24,17 +25,35 @@ export function validateCityData(data) {
       throw new TypeError(
         `cityMark: id ausente ou repetido na linha ${index}.`,
       );
+    ids.add(String(datum.id));
+  }
+  let rows = data;
+  if (data.some((datum) => datum.categories !== undefined)) {
+    try {
+      const normalized = placeCompanies(data);
+      if (data.some((datum) => datum.mask === undefined))
+        rows = normalized.map((datum, index) => ({
+          ...datum,
+          id: data[index].id,
+        }));
+    } catch (error) {
+      throw new TypeError(`cityMark: ${error.message}`);
+    }
+  }
+  for (const [index, datum] of rows.entries()) {
     if (
       typeof datum.name !== "string" ||
       !datum.name.trim() ||
-      !Number.isFinite(datum.users) ||
-      datum.users < 0 ||
+      typeof metricFor(datum).label !== "string" ||
+      !metricFor(datum).label.trim() ||
+      !Number.isFinite(metricFor(datum).value) ||
+      metricFor(datum).value < 0 ||
       !REGIONS.some((region) => region.mask === datum.mask) ||
       !Object.hasOwn(STATUS, datum.status)
     )
       throw new TypeError(
-        `cityMark: nome, usuários, sistemas ou saúde inválidos na linha ${index}.`,
+        `cityMark: nome, métrica, categorias ou saúde inválidos na linha ${index}.`,
       );
-    ids.add(String(datum.id));
   }
+  return rows;
 }

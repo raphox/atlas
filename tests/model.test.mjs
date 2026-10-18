@@ -2,6 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   REGIONS,
+  regionsFor,
+  metricLabel,
+  categoryLabel,
+  sizeForValue,
   membership,
   isPark,
   demoCompanies,
@@ -185,5 +189,140 @@ test("importação admite mais de mil empresas numa mesma interseção para post
   assert.equal(
     paginateCompanies(placeCompanies(data), {}, 15).companies.length,
     1,
+  );
+});
+
+test("métricas e categorias genéricas preservam valores decimais e identidades", () => {
+  const source = [
+    {
+      id: "b",
+      name: "Beta",
+      metric: { label: "Receita mensal", value: 1350.75 },
+      categories: [
+        { label: "Serviços", value: "services" },
+        { label: "Varejo", value: "retail" },
+      ],
+      status: "warning",
+    },
+    {
+      id: "a",
+      name: "Alfa",
+      metric: { label: "Receita mensal", value: 0 },
+      categories: [{ label: "Varejo", value: "retail" }],
+      status: "healthy",
+    },
+    {
+      id: "c",
+      name: "Gama",
+      metric: { label: "Receita mensal", value: 2400 },
+      categories: [{ label: "Indústria", value: "industry" }],
+      status: "critical",
+    },
+  ];
+  const original = structuredClone(source);
+  const data = placeCompanies(source);
+  assert.equal(data[0].metric.value, 1350.75);
+  assert.equal(data[0].users, undefined);
+  assert.equal(data[0].mask, 6);
+  assert.equal(data[1].mask, 2);
+  assert.equal(data[2].mask, 1);
+  assert.deepEqual(source, original);
+  assert.deepEqual(placeCompanies([...source].reverse()).reverse(), data);
+  const page = paginateCompanies(data, { region: "6" });
+  assert.equal(page.companies[0].id, "b");
+  assert.equal(layoutCity(page.companies).companies[0].metric.value, 1350.75);
+});
+
+test("o contrato genérico rejeita valores e categorias inconsistentes antes da importação", () => {
+  const row = {
+    name: "Empresa",
+    metric: { label: "Receita", value: 10.5 },
+    categories: [{ label: "Varejo", value: "retail" }],
+    status: "healthy",
+  };
+  for (const metric of [
+    { label: "", value: 1 },
+    { label: "Receita", value: -1 },
+    { label: "Receita", value: "10" },
+    { label: "Receita", value: Infinity },
+  ])
+    assert.throws(() => placeCompanies([{ ...row, metric }]));
+  for (const categories of [
+    [],
+    [null],
+    [{ label: "Varejo", value: "" }],
+    [{ label: "", value: "retail" }],
+  ])
+    assert.throws(() => placeCompanies([{ ...row, categories }]));
+  assert.throws(
+    () =>
+      placeCompanies([
+        row,
+        { ...row, categories: [{ value: "retail", label: "Outro nome" }] },
+      ]),
+    /mesmo label/,
+  );
+  assert.throws(
+    () =>
+      placeCompanies([
+        {
+          ...row,
+          categories: ["a", "b", "c", "d"].map((value) => ({
+            label: value,
+            value,
+          })),
+        },
+      ]),
+    /três categorias/,
+  );
+  assert.equal(
+    placeCompanies([
+      { ...row, categories: [row.categories[0], row.categories[0]] },
+    ])[0].categories.length,
+    1,
+  );
+});
+
+test("nomes das categorias e da métrica acompanham filtros e paginação", () => {
+  const data = placeCompanies([
+    {
+      id: "1",
+      name: "A",
+      metric: { label: "Receita", value: 20 },
+      categories: [
+        { value: "a", label: "Premium" },
+        { value: "b", label: "Regional" },
+      ],
+      status: "healthy",
+    },
+    {
+      id: "2",
+      name: "B",
+      metric: { label: "Receita", value: 2400 },
+      categories: [{ value: "b", label: "Regional" }],
+      status: "healthy",
+    },
+  ]);
+  assert.equal(metricLabel(data), "Receita");
+  assert.equal(categoryLabel(data[0]), "Premium + Regional");
+  assert.deepEqual(
+    regionsFor(data).map((region) => region.label),
+    ["Premium", "Regional", "Premium + Regional"],
+  );
+  assert.deepEqual(
+    regionsFor([data[1]]).map((region) => [region.mask, region.label]),
+    [[2, "Regional"]],
+  );
+  assert.equal(metricLabel([]), "Valor");
+  assert.equal(
+    metricLabel([
+      data[0],
+      { ...data[1], metric: { label: "Contratos", value: 20 } },
+    ]),
+    "Valor",
+  );
+  assert.ok(
+    sizeForValue(data[1].metric.value).height >
+      sizeForValue(data[0].metric.value).height,
   );
 });

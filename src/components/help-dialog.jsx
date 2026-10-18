@@ -31,15 +31,15 @@ export function HelpDialog() {
             A cidade conta uma história.
           </DialogTitle>
           <DialogDescription>
-            Cada construção é uma empresa. A altura representa a quantidade de
-            usuários, e a cor indica os sistemas.
+            Cada construção é uma empresa. A altura representa o valor da
+            métrica informada, e a cor indica as categorias.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
           <p>
-            As sete cores indicam a combinação exata de sistemas. Uma empresa
-            que usa Leads e Inteligência Artificial aparece uma única vez, na
-            interseção dos dois sistemas.
+            As cores indicam a combinação exata de até três categorias. Uma
+            empresa com duas categorias aparece uma única vez, na interseção
+            entre elas.
           </p>
           <p>
             Cada cidade começa com até 100 empresas. Você pode escolher 250,

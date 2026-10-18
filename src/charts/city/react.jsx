@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { REGIONS, STATUS } from "@/model";
+import { regionsFor, categoryLabel, metricFor, STATUS } from "@/model";
 import { format } from "@/hooks/use-atlas";
 import { useCityChart } from "./use-city-chart.js";
 
@@ -17,29 +17,32 @@ function DistrictLabels({ layout, labelsRef, labelNodes, visible }) {
       className="pointer-events-none absolute inset-0 overflow-hidden"
       aria-hidden="true"
     >
-      {REGIONS.filter((region) => layout.anchors[region.mask]).map((region) => (
-        <div
-          key={region.mask}
-          ref={(node) => {
-            if (node) labelNodes.current.set(region.mask, node);
-            else labelNodes.current.delete(region.mask);
-          }}
-          className="district-label absolute flex -translate-1/2 items-center gap-1.5 rounded-md border border-border/80 bg-card/95 px-2 py-1.5 text-[10px] font-bold whitespace-nowrap shadow-md backdrop-blur"
-          style={{ color: region.color }}
-        >
-          <span
-            className="size-1.5 shrink-0 rounded-sm"
-            style={{ background: region.color }}
-          />
-          <span>{region.shortLabel}</span>
-          <small className="text-[9px] font-normal text-muted-foreground">
-            {format(
-              layout.companies.filter((company) => company.mask === region.mask)
-                .length,
-            )}
-          </small>
-        </div>
-      ))}
+      {regionsFor(layout.companies)
+        .filter((region) => layout.anchors[region.mask])
+        .map((region) => (
+          <div
+            key={region.mask}
+            ref={(node) => {
+              if (node) labelNodes.current.set(region.mask, node);
+              else labelNodes.current.delete(region.mask);
+            }}
+            className="district-label absolute flex -translate-1/2 items-center gap-1.5 rounded-md border border-border/80 bg-card/95 px-2 py-1.5 text-[10px] font-bold whitespace-nowrap shadow-md backdrop-blur"
+            style={{ color: region.color }}
+          >
+            <span
+              className="size-1.5 shrink-0 rounded-sm"
+              style={{ background: region.color }}
+            />
+            <span>{region.shortLabel}</span>
+            <small className="text-[9px] font-normal text-muted-foreground">
+              {format(
+                layout.companies.filter(
+                  (company) => company.mask === region.mask,
+                ).length,
+              )}
+            </small>
+          </div>
+        ))}
     </div>
   );
 }
@@ -76,8 +79,8 @@ function CompanyHover({
       >
         <span>{tooltip.company.name}</span>
         <small className="mt-1 block text-[9px] opacity-80">
-          {REGIONS.find((region) => region.mask === tooltip.company.mask).label}{" "}
-          · {format(tooltip.company.users)} usuários ·{" "}
+          {categoryLabel(tooltip.company)} · {metricFor(tooltip.company).label}:{" "}
+          {format(metricFor(tooltip.company).value)} ·{" "}
           {STATUS[tooltip.company.status].label}
         </small>
       </TooltipContent>
@@ -147,7 +150,7 @@ export function CityChart({
           definition={definition}
           renderer={renderer}
           ariaLabel={ariaLabel}
-          ariaDescription="Cada construção representa uma empresa. Altura indica usuários, cor indica sistemas e efeitos indicam o nível de risco."
+          ariaDescription="Cada construção representa uma empresa. Altura indica o valor da métrica, cor indica categorias e efeitos indicam o nível de risco."
           style={{ height: "100%" }}
           onSelect={onSelect}
           onFocusChange={onFocusChange}

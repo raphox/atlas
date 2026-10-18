@@ -3,7 +3,7 @@ import { ArrowDownToLine, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { REGIONS, STATUS } from "@/model";
+import { STATUS } from "@/model";
 import { downloadExample, format } from "@/hooks/use-atlas";
 import { cn } from "@/lib/utils";
 
@@ -74,11 +74,11 @@ function CompanyMetrics({ matching, pageSize, loading }) {
     </section>
   );
 }
-function SystemFilters({ matching, region, onChange, onClear }) {
+function CategoryFilters({ matching, regions, region, onChange, onClear }) {
   return (
     <section className="mt-5">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="section-label">SISTEMAS & INTERSEÇÕES</h2>
+        <h2 className="section-label">CATEGORIAS & INTERSEÇÕES</h2>
         <Button
           size="sm"
           variant="ghost"
@@ -92,10 +92,10 @@ function SystemFilters({ matching, region, onChange, onClear }) {
         {[
           {
             mask: "all",
-            label: "Todos os sistemas",
+            label: "Todas as categorias",
             color: "var(--muted-foreground)",
           },
-          ...REGIONS,
+          ...regions,
         ].map((item) => (
           <Button
             key={item.mask}
@@ -173,9 +173,9 @@ function ImportCompanies({ onImport, loading }) {
         <ArrowDownToLine className="size-3" />
       </Button>
       <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
-        Cor mostra os sistemas.
+        Cor mostra as categorias.
         <br />
-        Altura mostra a quantidade de usuários.
+        Altura mostra o valor da métrica informada.
       </p>
     </footer>
   );
@@ -208,7 +208,8 @@ export function Sidebar({ atlas }) {
         loading={atlas.loading}
       />
       <Separator />
-      <SystemFilters
+      <CategoryFilters
+        regions={atlas.regions}
         matching={atlas.matching}
         region={atlas.filters.region}
         onChange={(region) => atlas.updateFilters({ region })}

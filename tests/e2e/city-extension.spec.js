@@ -20,10 +20,10 @@ test("a extensão funciona no host TanStack sem Atlas, com eventos, tooltip e du
     );
     const data = Object.freeze([
       Object.freeze({
-        id: "one",
+        id: 101,
         name: "Empresa do consumidor",
-        users: 1200,
-        mask: 1,
+        metric: { label: "Contratos", value: 1200 },
+        categories: [{ label: "Premium", value: "premium" }],
         status: "healthy",
       }),
     ]);
@@ -124,7 +124,11 @@ test("a extensão funciona no host TanStack sem Atlas, com eventos, tooltip e du
     const { defineCityChart } = await import("/src/charts/city/index.js");
     const { mounts } = window.cityExtension;
     window.cityExtension.updated = Object.freeze([
-      { ...window.cityExtension.data[0], users: 2400, status: "warning" },
+      {
+        ...window.cityExtension.data[0],
+        metric: { label: "Receita", value: 2400.5 },
+        status: "warning",
+      },
     ]);
     mounts[0].options = {
       ...mounts[0].options,
@@ -147,9 +151,17 @@ test("a extensão funciona no host TanStack sem Atlas, com eventos, tooltip e du
         firstDatum: mounts[0].host.getScene().points[0].datum === updated[0],
         secondDatum: mounts[1].host.getScene().points[0].datum === data[0],
         color: mounts[0].host.getScene().points[0].color,
+        height: window.cityExtension.cities[0].companies[0].height,
+        metric: window.cityExtension.cities[0].companies[0].metric,
       };
     }),
-  ).toEqual({ firstDatum: true, secondDatum: true, color: "#112233" });
+  ).toEqual({
+    firstDatum: true,
+    secondDatum: true,
+    color: "#112233",
+    height: 7.2,
+    metric: { label: "Receita", value: 2400.5 },
+  });
   await page.screenshot({ path: "test-results/city-extension.png" });
   await page.evaluate(() =>
     window.cityExtension.mounts.forEach(({ host }) => host.destroy()),

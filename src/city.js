@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { disposeSceneGroups } from "./scene-resources.js";
 import { SelectionHighlight } from "./selection-highlight.js";
-import { REGIONS } from "./model.js";
+import { REGIONS, metricFor } from "./model.js";
 import { buildTerrain } from "./charts/city/three/terrain.js";
 import { buildBuildings } from "./charts/city/three/buildings.js";
 import { buildTraffic, updateTraffic } from "./charts/city/three/traffic.js";
@@ -170,7 +170,7 @@ export class City {
     }
     const buildingsChanged = next.some(
       (c, i) =>
-        c.users !== this.companies[i].users ||
+        metricFor(c).value !== metricFor(this.companies[i]).value ||
         c.status !== this.companies[i].status,
     );
     for (const [mask, color] of colors)

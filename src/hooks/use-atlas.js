@@ -5,7 +5,8 @@ import {
   layoutCity,
   paginateCompanies,
   placeCompanies,
-  REGIONS,
+  regionsFor,
+  metricLabel,
 } from "@/model";
 import { loadCompanyData } from "@/data-source";
 
@@ -36,6 +37,8 @@ export function useAtlas() {
     () => paginateCompanies(companies, filters, page, pageSize),
     [companies, filters, page, pageSize],
   );
+  const regions = useMemo(() => regionsFor(companies), [companies]);
+  const valueLabel = useMemo(() => metricLabel(companies), [companies]);
   const layout = useMemo(() => layoutCity(pagination.companies), [pagination]);
   const matching = useMemo(
     () => filteredCompanies(companies, filters),
@@ -183,7 +186,8 @@ export function useAtlas() {
           pages: pagination.pages,
           pageSize,
           visible: layout.companies.length,
-          regions: REGIONS.map((region) => ({
+          regions: regions.map((region) => ({
+            label: region.label,
             systems: region.label,
             count: companies.filter((c) => c.mask === region.mask).length,
           })),
@@ -195,10 +199,12 @@ export function useAtlas() {
     return () => {
       if (window.atlas === integration) delete window.atlas;
     };
-  }, [companies, pagination, pageSize, layout]);
+  }, [companies, pagination, pageSize, layout, regions]);
 
   return {
     companies,
+    regions,
+    valueLabel,
     filters,
     pagination,
     layout,
@@ -234,22 +240,29 @@ export function downloadExample() {
     {
       id: "exemplo-1",
       name: "Aurora Tecnologia",
-      users: 2200,
-      systems: ["A", "B", "C"],
+      metric: { label: "Receita mensal", value: 2200 },
+      categories: [
+        { label: "Varejo", value: "retail" },
+        { label: "Serviços", value: "services" },
+        { label: "Indústria", value: "industry" },
+      ],
       status: "critical",
     },
     {
       id: "exemplo-2",
       name: "Cedro Logística",
-      users: 350,
-      systems: ["A", "B"],
+      metric: { label: "Receita mensal", value: 350 },
+      categories: [
+        { label: "Varejo", value: "retail" },
+        { label: "Serviços", value: "services" },
+      ],
       status: "warning",
     },
     {
       id: "exemplo-3",
       name: "Lume Educação",
-      users: 42,
-      systems: ["C"],
+      metric: { label: "Receita mensal", value: 42 },
+      categories: [{ label: "Indústria", value: "industry" }],
       status: "healthy",
     },
   ];

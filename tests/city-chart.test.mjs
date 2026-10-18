@@ -120,3 +120,40 @@ test("o layout acompanha a cena TanStack inclusive vazia, sem recalcular posiç�
       assert.equal(scene.points[0].xValue, layout.companies[0].x);
   }
 });
+
+test("a marca recebe o contrato genérico sem mask e mantém o datum original", () => {
+  const rows = [
+    {
+      id: "generic",
+      name: "Aurora",
+      metric: { label: "Receita", value: 2400.25 },
+      categories: [{ label: "Premium", value: "premium" }],
+      status: "warning",
+    },
+  ];
+  const scene = sceneFor(defineCityChart(rows));
+  const layout = readCityLayout(scene.nodes);
+  assert.equal(scene.points[0].datum, rows[0]);
+  assert.equal(scene.points[0].groupLabel, "Premium");
+  assert.equal(layout.companies[0].mask, 1);
+  assert.equal(layout.companies[0].metric.value, 2400.25);
+  assert.equal(rows[0].mask, undefined);
+});
+
+test("a marca mantém IDs numéricos no contrato genérico e valida categorias normalizadas", () => {
+  const row = {
+    id: 101,
+    name: "Aurora",
+    metric: { label: "Receita", value: 42 },
+    categories: [{ label: "Premium", value: "premium" }],
+    status: "healthy",
+  };
+  const scene = sceneFor(defineCityChart([row]));
+  assert.equal(readCityLayout(scene.nodes).companies[0].id, 101);
+  assert.equal(scene.points[0].datum.id, 101);
+  assert.throws(() => cityMark([{ ...row, id: undefined }]), /cityMark: id/);
+  assert.throws(
+    () => cityMark([{ ...row, mask: 1, categories: [] }]),
+    /cityMark:/,
+  );
+});

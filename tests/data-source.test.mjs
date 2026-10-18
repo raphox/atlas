@@ -50,3 +50,18 @@ test("falhas da fonte não são disfarçadas por dados demonstrativos", async ()
     })),
   );
 });
+
+test("a fonte HTTP aceita a mesma métrica e categorias genéricas da importação", () => {
+  const rows = [
+    {
+      name: "Aurora",
+      metric: { label: "Contratos", value: 128.5 },
+      categories: [{ value: "premium", label: "Premium" }],
+      status: "healthy",
+    },
+  ];
+  const companies = parseCompanyPayload({ companies: rows });
+  assert.deepEqual(companies, parseCompanyPayload(rows));
+  assert.deepEqual(companies[0].metric, rows[0].metric);
+  assert.deepEqual(companies[0].categories, rows[0].categories);
+});

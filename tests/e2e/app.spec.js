@@ -148,8 +148,11 @@ test("importação valida o JSON antes de substituir as empresas e permite baixa
     {
       id: "custom",
       name: "Minha Empresa",
-      users: 128,
-      systems: ["A", "C"],
+      metric: { label: "Receita mensal", value: 128.75 },
+      categories: [
+        { value: "premium", label: "Premium" },
+        { value: "regional", label: "Regional" },
+      ],
       status: "warning",
     },
   ];
@@ -164,6 +167,44 @@ test("importação valida o JSON antes de substituir as empresas e permite baixa
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await expect(page.locator("tbody")).toContainText("Minha Empresa");
   expect((await summary(page)).companies).toBe(1);
+  await expect(
+    page.getByRole("columnheader", { name: "Receita mensal", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("tbody")).toContainText("128,75");
+  await expect(page.locator("tbody")).toContainText("Premium + Regional");
+  await expect(
+    page.getByRole("button", { name: /^Premium exclusivo/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Ver Minha Empresa no mapa" }).click();
+  const details = page.getByRole("region", { name: "Detalhes da empresa" });
+  await expect(details).toContainText("Receita mensal");
+  await expect(details).toContainText("128,75");
+  await expect(details).toContainText("Premium + Regional");
+  await page
+    .getByRole("checkbox", { name: "Categorias e interseções" })
+    .check();
+  await expect(page.locator(".district-label")).toContainText(
+    "Premium + Regional",
+  );
+  await input.setInputFiles({
+    name: "categorias-invalidas.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(
+      JSON.stringify([
+        {
+          ...records[0],
+          categories: ["a", "b", "c", "d"].map((value) => ({
+            label: value,
+            value,
+          })),
+        },
+      ]),
+    ),
+  });
+  await expect(
+    page.getByText("O mapa aceita até três categorias distintas por base."),
+  ).toBeVisible();
+  await expect(page.locator("tbody")).toContainText("Minha Empresa");
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Baixar arquivo de exemplo" }).click();
   expect((await download).suggestedFilename()).toBe("empresas-exemplo.json");
@@ -479,7 +520,9 @@ test("tela cheia mantém controles e restaura o mapa e a tabela ao sair", async 
   await expect
     .poll(async () => (await page.locator("#city-map").boundingBox()).width)
     .toBeGreaterThan(original.width);
-  await page.getByRole("checkbox", { name: "Sistemas e interseções" }).check();
+  await page
+    .getByRole("checkbox", { name: "Categorias e interseções" })
+    .check();
   await expect(page.locator(".district-label").first()).toBeVisible();
   await page.getByRole("button", { name: "Aproximar", exact: true }).hover();
   await expect(

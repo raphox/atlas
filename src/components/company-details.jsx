@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "./status-badge";
-import { REGIONS } from "@/model";
+import { categoryLabel, metricFor } from "@/model";
 import { format } from "@/hooks/use-atlas";
 const descriptions = {
   healthy: "Operação saudável. A construção mantém sua aparência normal.",
@@ -48,15 +48,17 @@ export function CompanyDetails({ company, onClose, onFocus }) {
         <Separator />
         <div className="grid grid-cols-[1fr_1.5fr] gap-5">
           <div>
-            <p className="text-[10px] text-muted-foreground">Usuários</p>
+            <p className="text-[10px] text-muted-foreground">
+              {metricFor(company).label}
+            </p>
             <strong className="font-display text-2xl font-semibold">
-              {format(company.users)}
+              {format(metricFor(company).value)}
             </strong>
           </div>
           <div>
-            <p className="mb-1 text-[10px] text-muted-foreground">Sistemas</p>
+            <p className="mb-1 text-[10px] text-muted-foreground">Categorias</p>
             <strong className="block text-xs leading-relaxed">
-              {REGIONS.find((region) => region.mask === company.mask).label}
+              {categoryLabel(company)}
             </strong>
           </div>
         </div>
