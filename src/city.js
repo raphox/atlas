@@ -7,6 +7,11 @@ import { buildTerrain } from "./charts/city/three/terrain.js";
 import { buildBuildings } from "./charts/city/three/buildings.js";
 import { buildTraffic, updateTraffic } from "./charts/city/three/traffic.js";
 import { buildEffects, updateEffects } from "./charts/city/three/effects.js";
+import {
+  advanceLighting,
+  buildLighting,
+  updateLighting,
+} from "./charts/city/three/lighting.js";
 
 const ISO_POLAR = Math.acos(1 / Math.sqrt(3));
 export class City {
@@ -18,6 +23,7 @@ export class City {
     );
     this.active = new Set();
     this.life = true;
+    this.lightingMode = "auto";
     this.effects = true;
     this.running = true;
     this.elapsed = 0;
@@ -52,13 +58,7 @@ export class City {
     this.controls.screenSpacePanning = true;
     this.controls.target.set(0, 0, 5);
     this.controls.update();
-    this.scene.add(new THREE.HemisphereLight("#fff8e9", "#8b9d8b", 2.5));
-    const sun = new THREE.DirectionalLight("#fff6df", 3.1);
-    sun.position.set(-60, 100, 60);
-    this.scene.add(sun);
-    const fill = new THREE.DirectionalLight("#d8eaff", 0.75);
-    fill.position.set(80, 40, -100);
-    this.scene.add(fill);
+    buildLighting(this);
     this.terrain = new THREE.Group();
     this.scene.add(this.terrain);
     this.buildings = new THREE.Group();
@@ -77,9 +77,11 @@ export class City {
     this.resize();
     this.onVisibility = () => {
       this.previous = 0;
+      this.refreshLighting();
       this.invalidate();
     };
     document.addEventListener("visibilitychange", this.onVisibility);
+    this.syncLightingClock();
     this.invalidate();
   }
   resize() {
@@ -126,6 +128,7 @@ export class City {
     this.plumes = null;
     this.simulation = null;
     this.body = null;
+    this.windows = null;
     this.windowGlow = null;
     this.warning = null;
     this.criticalSurfaces = [];
@@ -317,6 +320,7 @@ export class City {
   }
   dispose() {
     this.running = false;
+    clearInterval(this.lightingTimer);
     cancelAnimationFrame(this.animationId);
     this.observer.disconnect();
     this.controls.removeEventListener("change", this.onCameraChange);
@@ -340,9 +344,31 @@ export class City {
     if (this.life === life && this.effects === effects) return;
     this.life = life;
     this.effects = effects;
+    this.refreshLighting();
+    this.syncLightingClock();
     if (this.traffic) this.traffic.visible = life;
     this.previous = 0;
     this.invalidate();
+  }
+  refreshLighting() {
+    if (updateLighting(this)) this.invalidate();
+  }
+  setLightingMode(mode = "auto") {
+    if (!["auto", "day", "twilight", "night"].includes(mode))
+      throw new RangeError(`Unknown lighting mode: ${mode}`);
+    if (this.lightingMode === mode) return;
+    this.lightingMode = mode;
+    this.refreshLighting();
+    this.syncLightingClock();
+  }
+  syncLightingClock() {
+    clearInterval(this.lightingTimer);
+    this.lightingTimer =
+      this.life && this.lightingMode === "auto"
+        ? setInterval(() => {
+            if (!document.hidden) this.refreshLighting();
+          }, 60_000)
+        : null;
   }
   animate(now) {
     this.animationId = null;
@@ -368,6 +394,7 @@ export class City {
       if (t >= 1) this.fly = null;
     }
     const cameraMoved = this.controls.update();
+    const lightingChanged = advanceLighting(this, now);
     const trafficAnimated = !this.reduceMotion && this.life && this.simulation;
     const effectsAnimated =
       !this.reduceMotion &&
@@ -376,12 +403,18 @@ export class City {
         this.warningSources?.length ||
         this.criticalSurfaces?.some((s) => s.items.length));
     if (trafficAnimated) this.updateTraffic(dt);
-    if (dirty || effectsAnimated || cameraMoved)
+    if (dirty || lightingChanged || effectsAnimated || cameraMoved)
       this.updateEffects(this.elapsed);
     this.camera.updateMatrixWorld();
     this.callbacks.frame?.(this);
     this.renderer.render(this.scene, this.camera);
-    if (this.fly || cameraMoved || trafficAnimated || effectsAnimated)
+    if (
+      this.fly ||
+      this.lightingTransition ||
+      cameraMoved ||
+      trafficAnimated ||
+      effectsAnimated
+    )
       this.invalidate();
     else this.previous = 0;
   }

@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { WindowPlumes } from "../../../plume-renderer.js";
 import { instances, dummy, rgb } from "./primitives.js";
 
-const criticalRed = new THREE.Color("#ff2525");
+const windowLight = new THREE.Color("#ffe0a3");
 
 // Status rendering is independent from terrain, traffic and camera scheduling.
 export function buildEffects(city) {
@@ -36,6 +36,7 @@ export function buildEffects(city) {
   const warningGeo = new THREE.PlaneGeometry(1, 1);
   city.warning = instances(
     warningGeo,
+    // Unlit and untone-mapped: the yellow/white/black icon keeps its colors.
     new THREE.MeshBasicMaterial({
       map: tex,
       transparent: true,
@@ -60,20 +61,21 @@ export function buildEffects(city) {
 
 export function updateEffects(city, t) {
   if (!city.plumes) return;
-  const key = `${city.effects}:${city.effects ? t : 0}:${city.effects ? city.cameraRevision : 0}`;
+  const key = `${city.windowLight}:${city.effects}:${city.effects ? t : 0}:${city.effects ? city.cameraRevision : 0}`;
   if (city.effectsKey === key) return;
   city.effectsKey = key;
   // Separate irregular timing per company; all surfaces of one building agree.
   for (const { mesh, items } of city.criticalSurfaces) {
+    const blink = mesh.geometry.getAttribute("criticalBlink");
     let changed = false;
     for (const item of items) {
       const showRed = city.effects && (city.reduceMotion || item.blink(t));
       if (item.lastRed === showRed) continue;
       item.lastRed = showRed;
-      mesh.setColorAt(item.index, showRed ? criticalRed : item.color);
+      blink.setX(item.index, showRed ? 1 : 0);
       changed = true;
     }
-    if (changed) mesh.instanceColor.needsUpdate = true;
+    if (changed) blink.needsUpdate = true;
   }
   city.plumes.update(t, city.effects, city.active);
   city.warning.visible = city.effects;
@@ -100,7 +102,10 @@ export function updateEffects(city, t) {
         0.12 * Math.sin(t * 13 + source.seed) +
         0.04 * Math.sin(t * 23 + source.seed * 2);
       rgb.setRGB(1, 0.34 * flicker, 0.035);
-    } else rgb.set(city.effects ? "#555956" : "#d9e6e8");
+    } else
+      rgb
+        .set(city.effects ? "#555956" : "#d9e6e8")
+        .lerp(windowLight, city.windowLight ?? 0);
     city.windowGlow.setColorAt(i, rgb);
   });
   if (city.windowGlow.instanceColor)

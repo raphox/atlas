@@ -106,6 +106,7 @@ export function CityMap({ atlas }) {
         onSelect={onSelect}
         view={atlas.currentView}
         life={atlas.life}
+        lightingMode={atlas.lightingMode}
         effects={atlas.effects}
         showDistrictLabels={atlas.showDistrictLabels}
         region={atlas.filters.region}

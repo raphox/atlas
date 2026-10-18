@@ -29,6 +29,7 @@ export function useAtlas() {
   const [busy, setBusy] = useState(false);
   const [currentView, setCurrentView] = useState("iso");
   const [life, setLife] = useState(true);
+  const [lightingMode, setLightingMode] = useState("auto");
   const [effects, setEffects] = useState(true);
   const [showDistrictLabels, setShowDistrictLabels] = useState(false);
   const mapRef = useRef(null);
@@ -217,6 +218,8 @@ export function useAtlas() {
     busy,
     currentView,
     life,
+    lightingMode,
+    setLightingMode,
     effects,
     showDistrictLabels,
     setShowDistrictLabels,

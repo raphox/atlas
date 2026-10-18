@@ -147,7 +147,29 @@ export function SceneControls({ atlas, disabled }) {
         <MoveHorizontal className="size-4" />
         Arraste para girar · Scroll para zoom · Botão direito para mover
       </p>
-      <div className="ml-auto flex flex-wrap gap-2">
+      <div className="ml-auto flex flex-wrap justify-end gap-2">
+        <label
+          className="pointer-events-auto flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs has-disabled:opacity-50"
+          title={
+            !atlas.life
+              ? "Ative Cidade viva para alterar a iluminação"
+              : undefined
+          }
+        >
+          <span>Iluminação</span>
+          <select
+            aria-label="Iluminação da cidade"
+            value={atlas.lightingMode}
+            onChange={(event) => atlas.setLightingMode(event.target.value)}
+            disabled={disabled || !atlas.life}
+            className="min-w-0 cursor-pointer rounded-sm bg-card text-xs outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed"
+          >
+            <option value="auto">Automático</option>
+            <option value="twilight">Nascente/poente</option>
+            <option value="day">Dia</option>
+            <option value="night">Noite</option>
+          </select>
+        </label>
         {[
           {
             id: "life",

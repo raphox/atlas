@@ -110,11 +110,15 @@ O ponto preserva `datum === data[datumIndex]`. A marca não altera as linhas rec
 | `three/primitives.js` | materiais e lotes de instâncias compartilhados |
 | `three/terrain.js` | ruas, calçadas, marcações, árvores e bancos |
 | `three/buildings.js` | construções, janelas e emissores de risco |
+| `three/building-material.js` | vermelho de risco independente da iluminação e exposição |
+| `three/lighting.js` | períodos de luz pelo relógio local e iluminação das janelas |
 | `three/traffic.js` | desenho de carros, pessoas e semáforos |
 | `three/effects.js` | alertas, cores de risco e coordenação das partículas |
 | `../../city.js` | cena, câmera, animação e recursos WebGL |
 
 `src/components/city-map.jsx` é o consumidor da extensão: conecta o gráfico aos dados e controles do Atlas. O componente React aceita `showDistrictLabels` (padrão `false`) para exibir as etiquetas das categorias e interseções; o checkbox correspondente no Atlas controla essa propriedade sem reconstruir a cena. O renderer não importa `useAtlas`, paginação, shadcn ou React. A simulação do trânsito continua separada em `src/traffic.js`.
+
+O vermelho do piscar crítico é uma cor fixa (`#ff2525`), independente das luzes e da exposição. Fora da fase vermelha, o prédio mantém a cor de sua categoria sob a iluminação atual. O ícone de exclamação também preserva suas cores, sem iluminação nem mapeamento de tons. Ambos permanecem constantes durante as transições de período.
 
 ## Atualizações e renderização
 
@@ -129,6 +133,10 @@ O layout é calculado pela marca (ou fornecido pela aplicação) e acompanha um 
 | Tamanho do contêiner | ajustar a câmera e o canvas, sem reconstruir geometria |
 
 Com cidade viva e efeitos desligados, o loop entra em repouso após a câmera estabilizar. Câmera, seleção, dados, controles e redimensionamento solicitam um novo frame; animações mantêm o loop ativo somente enquanto necessário. Ao integrar diretamente com o motor, use `setActivity({ life, effects })` e `select(company)`/`select(null)` para também invalidar a cena.
+
+Com cidade viva ativa, a iluminação segue o horário local do navegador: sol nascente das 6h às 8h, dia das 8h às 17h, sol poente das 17h às 19h e noite das 19h às 6h. Nascente e poente compartilham o mesmo nível de luz quente. As janelas ficam acesas nesses períodos e à noite, inclusive com efeitos de risco desligados; fogo e alertas preservam sua sinalização. A verificação ocorre a cada minuto e ao retornar à aba, inclusive com movimento reduzido. Desativar cidade viva restaura a iluminação diurna original e interrompe a verificação periódica.
+
+O seletor **Iluminação** permite testar **Nascente/poente**, **Dia** e **Noite** manualmente. **Automático** é o padrão e retoma o horário local ao ser selecionado. As mudanças de luz e das janelas são graduais, em 1,8 segundo, inclusive ao ativar/desativar cidade viva. Trocar de opção durante a transição parte da iluminação atual, sem saltos. A primeira renderização já usa o período correto. O seletor fica desabilitado com cidade viva desligada e preserva a escolha para quando ela for reativada. `CityChart` aceita a propriedade `lightingMode` (`auto`, `twilight`, `day`, `night`); integrações diretas com o motor podem usar `setLightingMode(mode)`. A verificação periódica do relógio fica suspensa durante uma escolha manual. A transição de cores funciona com movimento reduzido e mantém o loop ativo apenas até terminar, mesmo sem trânsito ou efeitos animados.
 
 As projeções do TanStack e as etiquetas do Atlas acompanham uma revisão da câmera. Etiquetas também se atualizam quando seus dados ou filtro mudam. O hover e a estratégia de foco compartilham o mesmo resultado de raycasting para a mesma coordenada/câmera; o cache é invalidado quando os dados da cena mudam. Buscas por empresa usam um índice por ID.
 

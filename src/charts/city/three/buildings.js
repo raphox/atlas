@@ -3,6 +3,8 @@ import { random, metricFor, sizeForValue } from "../../../model.js";
 import { facadeWindows, windowEmitters } from "../../../plumes.js";
 import { createCriticalBlink } from "../../../critical-blink.js";
 import { instances, material } from "./primitives.js";
+import { updateWindowLighting } from "./lighting.js";
+import { buildingMaterial } from "./building-material.js";
 
 // One box per company, one plane per window; health never changes its size.
 export function buildBuildings(city, companies) {
@@ -77,14 +79,20 @@ export function buildBuildings(city, companies) {
       });
   }
   const box = new THREE.BoxGeometry(1, 1, 1);
-  city.body = instances(box, material("#ffffff"), bodies, city.buildings);
+  city.body = instances(
+    box,
+    buildingMaterial(box, bodies.length),
+    bodies,
+    city.buildings,
+  );
   const windowPlane = new THREE.PlaneGeometry(1, 1);
-  instances(
+  city.windows = instances(
     windowPlane,
     material("#ffffff", { roughness: 0.6 }),
     windows,
     city.buildings,
   );
+  updateWindowLighting(city);
   city.windowGlow = instances(
     windowPlane,
     new THREE.MeshBasicMaterial({ color: "#ffffff", toneMapped: false }),

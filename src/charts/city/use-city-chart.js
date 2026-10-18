@@ -20,6 +20,7 @@ export function useCityChart({
   region,
   currentView,
   life,
+  lightingMode,
   effects,
   chartRef,
   panelRef,
@@ -203,6 +204,10 @@ export function useCityChart({
   }, [life, effects, layout]);
 
   useLayoutEffect(() => {
+    cityRef.current?.setLightingMode(lightingMode);
+  }, [lightingMode, layout]);
+
+  useLayoutEffect(() => {
     cityRef.current?.view(currentView);
   }, [currentView]);
 
@@ -263,6 +268,8 @@ export function useCityChart({
           triangles: renderer?.info.render.triangles ?? 0,
           chartRenderer: "atlas-city-3d",
           chartPoints: sceneRef.current?.points.length ?? 0,
+          lightingMode: cityRef.current?.lightingMode,
+          lightingPeriod: cityRef.current?.lightingPeriod,
         };
       },
     }),
