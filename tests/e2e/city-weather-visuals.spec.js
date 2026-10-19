@@ -6,9 +6,9 @@ test("snow cover follows rooftops and daylight rain and lightning render without
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/tests/e2e/fixtures/weather-scene.html");
-  await page.evaluate(async () => {
-    const { City } = await import("/src/city.js");
-    const { demoCompanies, layoutCity } = await import("/src/model.js");
+  await page.waitForFunction(() => Boolean(window.weatherFixture));
+  await page.evaluate(() => {
+    const { City, demoCompanies, layoutCity } = window.weatherFixture;
     const container = document.createElement("div");
     container.id = "weather-scene";
     Object.assign(container.style, { position: "fixed", inset: "0" });
@@ -36,9 +36,7 @@ test("snow cover follows rooftops and daylight rain and lightning render without
     )
     .toBe(1);
   await expect
-    .poll(() =>
-      page.evaluate(() => window.weatherCity.lightingTransition === null),
-    )
+    .poll(() => page.evaluate(() => !window.weatherCity.lightingTransition))
     .toBe(true);
   await page.screenshot({ path: "test-results/snow-cover-day.png" });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -46,9 +44,7 @@ test("snow cover follows rooftops and daylight rain and lightning render without
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.evaluate(() => window.weatherCity.setLightingMode("night"));
   await expect
-    .poll(() =>
-      page.evaluate(() => window.weatherCity.lightingTransition === null),
-    )
+    .poll(() => page.evaluate(() => !window.weatherCity.lightingTransition))
     .toBe(true);
   await page.screenshot({ path: "test-results/snow-cover-night.png" });
   await page.evaluate(() => {
@@ -56,9 +52,7 @@ test("snow cover follows rooftops and daylight rain and lightning render without
     window.weatherCity.setLightingMode("day");
   });
   await expect
-    .poll(() =>
-      page.evaluate(() => window.weatherCity.lightingTransition === null),
-    )
+    .poll(() => page.evaluate(() => !window.weatherCity.lightingTransition))
     .toBe(true);
   await expect
     .poll(() =>
@@ -86,6 +80,17 @@ test("snow cover follows rooftops and daylight rain and lightning render without
   });
   expect(flash).toBeGreaterThanOrEqual(3.6);
   await page.screenshot({ path: "test-results/rain-lightning-day.png" });
+  const rainLayers = await page.evaluate(() => {
+    const city = window.weatherCity;
+    const original = city.weatherParticles;
+    for (const type of ["none", "rain", "snow", "rain"]) city.setWeather(type);
+    return {
+      reused: city.weatherParticles === original,
+      groups: city.scene.children.filter((child) => child === original).length,
+      drops: original.rain.geometry.drawRange.count / 2,
+    };
+  });
+  expect(rainLayers).toEqual({ reused: true, groups: 1, drops: 800 });
   await page.evaluate(() => window.weatherCity.setActivity({ life: false }));
   await expect
     .poll(() =>

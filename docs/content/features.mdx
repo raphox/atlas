@@ -1,55 +1,55 @@
 <div id="features" className="page-intro">
-  <div className="eyebrow"><span /> RECURSOS DO ATLAS</div>
-  <h1>Uma cidade que conta <span>a história dos seus dados.</span></h1>
-  <p className="lead">Conheça os recursos implementados, como eles se conectam e o que acontece entre os dados recebidos e a cena na tela.</p>
-  <div className="intro-tags"><span>Visualização 3D</span><span>Monitoramento</span><span>Clima e ambiente</span></div>
+  <div className="eyebrow"><span /> ATLAS FEATURES</div>
+  <h1>A city that tells <span>the story of your data.</span></h1>
+  <p className="lead">Explore the implemented features, how they connect, and what happens between incoming company records and the scene on your screen.</p>
+  <div className="intro-tags"><span>3D visualization</span><span>Monitoring</span><span>Weather and environment</span></div>
 </div>
 
 <div className="feature-grid">
-  <a href="#visualizacao"><span className="feature-number">01 / VISUALIZAÇÃO</span><h2>Empresas viram edifícios</h2><p>Altura por métrica, bairros por categorias e interseções sem duplicar empresas.</p><span className="feature-link">Explorar o mapa ↗</span></a>
-  <a href="#interacao"><span className="feature-number">02 / INTERAÇÃO</span><h2>Do panorama ao detalhe</h2><p>Busca, seleção, zoom, perspectivas e tela cheia em um componente reutilizável.</p><span className="feature-link">Ver interações ↗</span></a>
-  <a href="#clima"><span className="feature-number">03 / AMBIENTE</span><h2>O clima entra na cena</h2><p>Chuva e neve a partir da Open-Meteo, com localização aproximada e atualização a cada 15 minutos.</p><span className="feature-link">Entender a integração ↗</span></a>
-  <a href="#monitoramento"><span className="feature-number">04 / OPERAÇÃO</span><h2>Saúde em perspectiva</h2><p>Efeitos de risco, eventos recentes, filtros e paginação para acompanhar a carteira.</p><span className="feature-link">Ver monitoramento ↗</span></a>
+  <a href="#visualization"><span className="feature-number">01 / VISUALIZATION</span><h2>Companies become buildings</h2><p>Height reflects metrics. Categories form districts and intersections without duplicating companies.</p><span className="feature-link">Explore the map ↗</span></a>
+  <a href="#interaction"><span className="feature-number">02 / INTERACTION</span><h2>From overview to detail</h2><p>Search, selection, zoom, perspectives, and fullscreen in one reusable component.</p><span className="feature-link">Explore interactions ↗</span></a>
+  <a href="#weather"><span className="feature-number">03 / ENVIRONMENT</span><h2>Weather joins the scene</h2><p>Rain and snow from Open-Meteo, using approximate location and updates every 15 minutes.</p><span className="feature-link">Understand the integration ↗</span></a>
+  <a href="#monitoring"><span className="feature-number">04 / OPERATIONS</span><h2>Company health in perspective</h2><p>Risk effects, recent events, filters, and pagination help you monitor your company portfolio.</p><span className="feature-link">Explore monitoring ↗</span></a>
 </div>
 
 <div className="prose">
 
-<h2 id="visualizacao">Visualização e organização</h2>
+<h2 id="visualization">Visualization and organization</h2>
 
-O Atlas transforma os registros no navegador, usando Three.js e uma extensão do TanStack Charts. O backend envia dados de empresas; não precisa calcular posições nem geometria.
+Atlas transforms records in the browser using Three.js and a TanStack Charts extension. Your backend sends company data; it does not need to calculate positions or geometry.
 
-| Recurso | Como funciona |
+| Feature | How it works |
 | --- | --- |
-| Bairros e interseções | Até três categorias distintas formam até sete combinações. Cada empresa aparece exatamente uma vez. |
-| Edifícios por métrica | `metric.value` controla o tamanho; o rótulo da métrica aparece nos detalhes e tooltips. |
-| Saúde visual | `healthy`, `warning` e `critical` identificam os estados; os efeitos de risco podem ser desligados. |
-| Cidade viva | Carros, pedestres, semáforos e vegetação complementam a cena. |
-| Renderização | Instâncias de geometria são reutilizadas em edifícios, janelas, vegetação, trânsito e partículas. |
+| Districts and intersections | Up to three distinct categories form up to seven combinations. Each company appears exactly once. |
+| Buildings sized by metric | `metric.value` controls size; its label appears in details and tooltips. |
+| Visual health | `healthy`, `warning`, and `critical` identify health states. Risk effects can be disabled. |
+| City life | Cars, pedestrians, traffic lights, and vegetation complete the scene. |
+| Rendering | Instanced geometry is reused for buildings, windows, vegetation, traffic, and particles. |
 
-<h2 id="interacao">Navegação e interação</h2>
+<h2 id="interaction">Navigation and interaction</h2>
 
-Arraste com o botão esquerdo para girar horizontalmente, use a roda ou pinça para zoom e o botão direito ou dois dedos para deslocar. Alterne entre as vistas isométrica e superior e pressione `0` para voltar à visão geral.
+Drag with the left mouse button to rotate horizontally, use the wheel or a pinch gesture to zoom, and use the right mouse button or two fingers to pan. Switch between isometric and top views. Press `0` to restore the overview.
 
-A busca localiza empresas por nome. Selecionar um edifício abre os detalhes e emite `onSelect`. O modo de tela cheia solicita Screen Wake Lock, quando disponível, para manter a tela ativa; a saída da tela cheia, a aba oculta e a desmontagem liberam o bloqueio. A rotação automática é opcional e pausa durante interações.
+Search finds companies by name. Selecting a building opens its details and emits `onSelect`. Fullscreen requests a Screen Wake Lock, when available, to keep the display awake. Exiting fullscreen, hiding the tab, or unmounting releases the lock. Optional automatic rotation pauses during interactions.
 
-O mapa traduz a interface para `pt-BR` ou `en-US` a partir do navegador; outros idiomas usam inglês. Nomes e rótulos enviados nos dados são preservados. A preferência por movimento reduzido desativa partículas e reduz animações. WebGL é necessário para a cena 3D.
+Map controls follow the browser's language: `pt-BR` or `en-US`, with English for other locales. Supplied names and labels are preserved. Reduced-motion preferences disable particles and reduce animations. The 3D scene requires WebGL.
 
-<h2 id="clima">Consumo da API de clima</h2>
+<h2 id="weather">Weather API integration</h2>
 
-**Na aplicação Atlas**, `useWeather` consulta a Open-Meteo enquanto **Cidade viva** está habilitada. **No pacote `atlas-city-chart` e neste playground**, o mapa recebe `weather` como propriedade e não faz consultas meteorológicas nem pede geolocalização. Os seletores do playground simulam o ambiente localmente.
+**In the Atlas application**, `useWeather` queries Open-Meteo while **City life** is enabled. **In the `atlas-city-chart` package and this playground**, the map receives a `weather` prop and does not query weather services or request geolocation. The playground's selectors simulate the environment locally.
 
-<div className="weather-flow" aria-label="Fluxo da integração de clima">
-  <div><span>01</span><strong>Permissão</strong><small>Localização do navegador</small></div><b aria-hidden="true">→</b>
-  <div><span>02</span><strong>Consulta</strong><small>Coordenadas aproximadas</small></div><b aria-hidden="true">→</b>
-  <div><span>03</span><strong>Validação</strong><small>Dados atuais e completos</small></div><b aria-hidden="true">→</b>
-  <div><span>04</span><strong>Cena</strong><small>Sem precipitação, chuva ou neve</small></div>
+<div className="weather-flow" aria-label="Weather integration flow">
+  <div><span>01</span><strong>Permission</strong><small>Browser geolocation</small></div><b aria-hidden="true">→</b>
+  <div><span>02</span><strong>Request</strong><small>Approximate coordinates</small></div><b aria-hidden="true">→</b>
+  <div><span>03</span><strong>Validation</strong><small>Fresh, complete data</small></div><b aria-hidden="true">→</b>
+  <div><span>04</span><strong>Scene</strong><small>No precipitation, rain, or snow</small></div>
 </div>
 
-### 1. Localização e requisição
+### 1. Location and request
 
-A aplicação solicita localização sem alta precisão, com timeout de **10 segundos**, em HTTPS ou localhost. Latitude e longitude são arredondadas para **duas casas decimais**. As coordenadas e o cache ficam somente em memória; não são gravados em cookies, `localStorage` ou registros de empresas.
+The application requests location without high accuracy, with a **10-second** timeout, over HTTPS or localhost. Latitude and longitude are rounded to **two decimal places**. Coordinates and cached results stay in memory; they are not written to cookies, `localStorage`, or company records.
 
-O cliente usa o endpoint `https://api.open-meteo.com/v1/forecast` e envia uma requisição GET com `credentials: "omit"` e estes parâmetros:
+The client sends a GET request to `https://api.open-meteo.com/v1/forecast` with `credentials: "omit"` and these parameters:
 
 ```text
 latitude=-23.55
@@ -59,78 +59,78 @@ timeformat=unixtime
 forecast_days=1
 ```
 
-Essas coordenadas são apenas um exemplo. A aplicação usa a localização aproximada autorizada pelo visitante. O provedor recebe o IP da conexão e as coordenadas enviadas.
+These coordinates are illustrative. The application uses the approximate location authorized by the visitor. The provider receives the connection's IP address and the submitted coordinates.
 
-### 2. Resposta e interpretação
+### 2. Response and interpretation
 
-O adaptador lê `current.time` em segundos Unix, `weather_code`, `rain`, `showers` e `snowfall`. Rejeita respostas incompletas, códigos não reconhecidos, valores de precipitação negativos e horários com diferença superior a **90 minutos** em relação ao relógio do cliente.
+The adapter reads `current.time` in Unix seconds, `weather_code`, `rain`, `showers`, and `snowfall`. It rejects incomplete responses, unrecognized codes, negative precipitation values, and timestamps more than **90 minutes** away from the client's clock.
 
-| Condição | Resultado na cena |
+| Condition | Scene result |
 | --- | --- |
-| Neve positiva ou código de neve | `snow`, com prioridade sobre chuva. |
-| Chuva + pancadas positivas ou código de chuva | `rain`. |
-| Nenhuma das anteriores | `none`. |
+| Positive snowfall or a snow code | `snow`, taking priority over rain. |
+| Positive rain + showers or a rain code | `rain`. |
+| Neither condition applies | `none`. |
 
-Os efeitos representam uma estimativa regional. A chuva inclui partículas e relâmpagos simulados; os relâmpagos não indicam uma detecção de raios reais. A neve acumula uma camada parcial em solo e telhados enquanto a simulação está ativa.
+Effects represent a regional estimate. Rain includes particles and simulated lightning; flashes do not indicate actual lightning detection. Rain particle counts scale with city area, capped at 800, so smaller examples do not receive the same number of drops in less space. Snow gradually adds a partial layer to the ground and rooftops while the simulation is active.
 
-### 3. Cache, atualizações e falhas
+### 3. Cache, refreshes, and failures
 
-| Situação | Comportamento da aplicação |
+| Situation | Application behavior |
 | --- | --- |
-| Consulta bem-sucedida | Resultado em memória por 15 minutos. |
-| Aba oculta | Pausa novos refreshes; ao voltar, consulta se necessário. Uma requisição já em andamento pode terminar. |
-| API lenta | Cancela a requisição após 10 segundos. |
-| Falha de rede ou resposta inválida | Remove a precipitação, informa indisponibilidade e tenta novamente após 15 minutos. |
-| Permissão negada ou localização indisponível | Mantém o mapa funcionando sem precipitação e mostra o motivo. |
-| Permissão revogada | Quando a Permissions API suporta o aviso, limpa coordenadas e cache e cancela a consulta. |
-| Cidade viva desabilitada | Cancela consultas e timers, pausa partículas e restaura a iluminação diurna. |
+| Successful request | Keeps results in memory for 15 minutes. |
+| Hidden tab | Pauses new refreshes and checks on return. An in-flight request may still finish. |
+| Slow API | Cancels the request after 10 seconds. |
+| Network failure or invalid response | Removes precipitation, displays an unavailable message, and retries after 15 minutes. |
+| Permission denied or location unavailable | Keeps the map working without precipitation and displays the reason. |
+| Permission revoked | When supported by the Permissions API, clears coordinates and cache and cancels the request. |
+| City life disabled | Cancels requests and timers, pauses particles, and restores daylight. |
 
-Para tentar obter a localização novamente, reative **Cidade viva**. O cache ainda válido pode ser reutilizado. Os seletores manuais mudam a cena, mas, na aplicação, as consultas automáticas continuam seguindo o estado de **Cidade viva**.
+Re-enable **City life** to request location again. A still-valid cache may be reused. Manual environment selectors override the scene, but automatic requests in the application continue to follow the **City life** setting.
 
-### 4. Endpoint próprio
+### 4. Custom endpoint
 
-Configure o endpoint no build da **aplicação Atlas**:
+Configure the endpoint when building the **Atlas application**:
 
 ```sh
 VITE_WEATHER_API_URL=https://weather.example.com/v1/forecast npm run build
 ```
 
-O serviço precisa aceitar os parâmetros acima, responder com o contrato `current` da [Forecast API](https://open-meteo.com/en/docs) e permitir CORS para a origem da aplicação. Variáveis `VITE_*` são públicas no bundle: chaves privadas devem ser adicionadas por um backend, nunca pela URL do cliente.
+The service must accept the parameters above, return the [Forecast API](https://open-meteo.com/en/docs) `current` contract, and allow CORS for your application origin. `VITE_*` variables are public in the bundle: add private keys on a backend, never in the client URL.
 
-Para um projeto que usa apenas o pacote, conecte seu próprio provedor e passe o resultado já convertido:
+If your project uses only the package, connect your own provider and pass the converted weather state:
 
 ```jsx
 <CityMap
   data={companies}
-  weather={weatherState.type} // "none", "rain" ou "snow"
+  weather={weatherState.type} // "none", "rain", or "snow"
   lightingMode="auto"
 />
 ```
 
-`weatherState` pertence à integração do projeto consumidor. O hook e o adaptador do Atlas são implementados em [`use-weather.js`](https://github.com/raphox/atlas/blob/main/src/hooks/use-weather.js) e [`weather.js`](https://github.com/raphox/atlas/blob/main/src/weather.js); não são exports do pacote.
+`weatherState` belongs to your application's integration. The Atlas hook and adapter are implemented in [`use-weather.js`](https://github.com/raphox/atlas/blob/main/src/hooks/use-weather.js) and [`weather.js`](https://github.com/raphox/atlas/blob/main/src/weather.js); they are not package exports.
 
-### Atribuição e uso comercial
+### Attribution and commercial use
 
-Os dados da Open-Meteo usam [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Preserve a atribuição ao provedor quando exibir seus dados. Os termos do serviço são independentes da licença dos dados: antes de operar uma instância, confira os [termos da Open-Meteo](https://open-meteo.com/en/terms), inclusive elegibilidade comercial e limites. O endpoint gratuito é destinado a uso não comercial; uma operação comercial precisa de um serviço compatível. O playground desta documentação usa somente simulação.
+Open-Meteo data uses [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Preserve provider attribution when displaying its data. Service access terms are separate from the data license: check the [Open-Meteo terms](https://open-meteo.com/en/terms), including commercial eligibility and request limits, before operating an instance. The free endpoint is intended for noncommercial use; commercial deployments need a compatible service. This documentation's playground uses simulation only.
 
-<h2 id="iluminacao">Iluminação e simulação</h2>
+<h2 id="lighting">Lighting and simulation</h2>
 
-A iluminação automática usa o relógio local do navegador, independentemente da API de clima: amanhecer entre 6h e 8h, dia entre 8h e 17h, entardecer entre 17h e 19h e noite no restante. Os seletores permitem combinar dia, amanhecer/entardecer ou noite com chuva, neve ou nenhuma precipitação.
+Automatic lighting follows the browser's local clock independently of the weather API: sunrise from 6–8 a.m., day from 8 a.m.–5 p.m., sunset from 5–7 p.m., and night at other times. Selectors let you combine day, sunrise/sunset, or night with rain, snow, or no precipitation.
 
-[Experimente o exemplo de clima no playground](./#playground).
+[Try the weather example in the playground](./#playground).
 
-<h2 id="monitoramento">Monitoramento e dados da aplicação</h2>
+<h2 id="monitoring">Monitoring and application data</h2>
 
-Na aplicação Atlas, a tabela, os filtros e a paginação acompanham a cidade. É possível filtrar por saúde e categorias, pesquisar empresas e escolher 100, 250, 500, 1.000 ou todas as empresas por cidade. Os filtros são aplicados antes da paginação.
+In the Atlas application, the table, filters, and pagination stay synchronized with the city. Filter by health or categories, search companies, and display 100, 250, 500, 1,000, or all companies per city. Filters are applied before pagination.
 
-O painel de monitoramento mostra um relógio local e até quatro empresas atualmente em alto risco, ordenadas pelo início do status (`statusChangedAt`), considerando o conjunto completo de dados. Registros sem esse timestamp são contabilizados separadamente. O painel reflete o último carregamento ou importação; não há polling automático dos dados empresariais.
+The monitoring panel shows a local clock and up to four companies currently at high risk, ordered by the start of their current status (`statusChangedAt`), using the full dataset. Records without that timestamp are counted separately. The panel reflects the latest load or import; company records are not polled automatically.
 
-Importações JSON de até 5 MB são validadas no navegador e não persistem após recarregar. Uma importação inválida preserva a cidade anterior. Para conectar um backend, configure `dataUrl` e `mode` em `public/config.json`; o endpoint pode retornar uma lista ou `{ companies: [...] }`. Esse fluxo pertence à aplicação; o pacote reutilizável recebe a lista pela propriedade `data`.
+JSON imports up to 5 MB are validated in the browser and do not persist after reload. An invalid import preserves the previous city. To connect a backend, set `dataUrl` and `mode` in `public/config.json`; the endpoint can return an array or `{ companies: [...] }`. This flow belongs to the application. The reusable package receives records through `data`.
 
-<h2 id="integracao">Integração e distribuição</h2>
+<h2 id="integration">Integration and distribution</h2>
 
-O pacote oferece tema CSS puro, integração com Tailwind 4, callbacks e API imperativa de câmera. Pode ser renderizado em um shell SSR, mas o WebGL inicia apenas no navegador. Em frameworks com Server Components, coloque o componente em uma fronteira de cliente.
+The package provides plain CSS and Tailwind 4 themes, callbacks, and an imperative camera API. It can render an SSR shell, but WebGL starts only in the browser. In frameworks with Server Components, place the map inside a client boundary.
 
-[Veja instalação, propriedades e exemplos executáveis](./#instalacao).
+[Read installation instructions, props, and runnable examples](./#installation).
 
 </div>

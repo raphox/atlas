@@ -4,5 +4,11 @@
     <meta charset="UTF-8">
     <title>Weather visual fixture</title>
   </head>
-  <body></body>
+  <body>
+    <script type="module">
+    import { City } from "/src/city.js";
+    import { demoCompanies, layoutCity } from "/src/model.js";
+    window.weatherFixture = { City, demoCompanies, layoutCity };
+    </script>
+  </body>
 </html>

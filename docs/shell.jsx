@@ -19,7 +19,7 @@ function Playground() {
     <Suspense
       fallback={
         <div className="playground-loading" role="status">
-          Carregando o playground…
+          Loading the playground…
         </div>
       }
     >
@@ -29,23 +29,23 @@ function Playground() {
 }
 
 const sections = [
-  ["visao-geral", "Visão geral"],
+  ["overview", "Overview"],
   ["playground", "Playground"],
-  ["instalacao", "Instalação"],
-  ["dados", "Formato dos dados"],
-  ["propriedades", "Propriedades"],
-  ["eventos", "Eventos e controles"],
-  ["temas", "Temas e aparência"],
-  ["publicacao", "GitHub Pages"],
+  ["installation", "Installation"],
+  ["data", "Data format"],
+  ["props", "Props"],
+  ["events", "Events and controls"],
+  ["themes", "Themes and styling"],
+  ["deployment", "GitHub Pages"],
 ];
 const featureSections = [
-  ["features", "Todas as features"],
-  ["visualizacao", "Visualização 3D"],
-  ["interacao", "Navegação e interação"],
-  ["clima", "API de clima"],
-  ["iluminacao", "Iluminação"],
-  ["monitoramento", "Monitoramento e dados"],
-  ["integracao", "Integração"],
+  ["features", "All features"],
+  ["visualization", "3D visualization"],
+  ["interaction", "Navigation and interaction"],
+  ["weather", "Weather API"],
+  ["lighting", "Lighting"],
+  ["monitoring", "Monitoring and data"],
+  ["integration", "Integration"],
 ];
 
 export function Docs() {
@@ -67,11 +67,11 @@ export function Docs() {
   }, [isFeatures, firstSection]);
   return (
     <div className="docs">
-      <a className="skip-link" href="#conteudo">
-        Pular para o conteúdo
+      <a className="skip-link" href="#content">
+        Skip to content
       </a>
       <header className="docs-header">
-        <a className="brand" href="./" aria-label="Atlas Docs, início">
+        <a className="brand" href="./" aria-label="Atlas Docs, home">
           <Layers3 size={27} strokeWidth={1.8} />
           <span>atlas</span>
           <span className="brand-divider" />
@@ -83,7 +83,7 @@ export function Docs() {
             href="./"
             aria-current={!isFeatures ? "page" : undefined}
           >
-            Documentação
+            Documentation
           </a>
           <a
             className="header-page-link"
@@ -104,7 +104,7 @@ export function Docs() {
           </a>
           <button
             className="mobile-menu icon-button"
-            aria-label={menuOpen ? "Fechar navegação" : "Abrir navegação"}
+            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={menuOpen}
             aria-controls="docs-nav"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -115,9 +115,9 @@ export function Docs() {
       </header>
       <aside className={`docs-sidebar ${menuOpen ? "is-open" : ""}`}>
         <div className="sidebar-label">
-          <BookOpen size={14} /> DOCUMENTAÇÃO
+          <BookOpen size={14} /> DOCUMENTATION
         </div>
-        <nav id="docs-nav" aria-label="Documentação">
+        <nav id="docs-nav" aria-label="Documentation">
           {navigation.map(([id, label]) => (
             <a
               key={id}
@@ -135,33 +135,33 @@ export function Docs() {
         </nav>
         <div className="sidebar-note">
           <Box size={20} />
-          <strong>Seu dado. Sua cidade.</strong>
-          <p>Um componente React, uma cidade inteira para explorar.</p>
-          <a href="./#instalacao">
-            Começar a integrar <ArrowUpRight size={14} />
+          <strong>Your data. Your city.</strong>
+          <p>One React component. An entire city to explore.</p>
+          <a href="./#installation">
+            Start building <ArrowUpRight size={14} />
           </a>
         </div>
         <div className="sidebar-footer">
           React + Three.js
           <br />
-          Construído com TanStack Charts
+          Built with TanStack Charts
         </div>
       </aside>
-      <main id="conteudo" className="docs-main">
+      <main id="content" className="docs-main">
         <div className="breadcrumbs">
-          {isFeatures ? "Projeto" : "Componentes"} <span>/</span>{" "}
-          {isFeatures ? "Recursos e integrações" : "Visualização de dados"}{" "}
+          {isFeatures ? "Project" : "Components"} <span>/</span>{" "}
+          {isFeatures ? "Features and integrations" : "Data visualization"}{" "}
           <span>/</span> <strong>{isFeatures ? "Features" : "CityMap"}</strong>
         </div>
         {isFeatures ? <Features /> : <Content components={{ Playground }} />}
         <footer className="docs-footer">
-          <span>Atlas · Documentação do projeto</span>
+          <span>Atlas · Project documentation</span>
           <a
             href={`https://github.com/raphox/atlas/blob/main/docs/content/${isFeatures ? "features" : "city-map"}.mdx`}
             target="_blank"
             rel="noreferrer"
           >
-            Editar esta página <ArrowUpRight size={14} />
+            Edit this page <ArrowUpRight size={14} />
           </a>
         </footer>
       </main>

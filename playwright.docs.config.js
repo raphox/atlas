@@ -9,7 +9,7 @@ export default defineConfig({
   use: {
     ...devices["Desktop Chrome"],
     viewport: { width: 1512, height: 1100 },
-    locale: "pt-BR",
+    locale: "en-US",
     baseURL: `http://127.0.0.1:4174${basePath}`,
     trace: "retain-on-failure",
     launchOptions: {

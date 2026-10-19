@@ -1,23 +1,23 @@
 const categories = [
-  { label: "Comércio", value: "commerce" },
-  { label: "Serviços", value: "services" },
-  { label: "Tecnologia", value: "technology" },
+  { label: "Commerce", value: "commerce" },
+  { label: "Services", value: "services" },
+  { label: "Technology", value: "technology" },
 ];
 const names = [
   "Aurora",
-  "Horizonte",
-  "Vértice",
-  "Nexo",
-  "Órbita",
-  "Ponte",
-  "Farol",
+  "Horizon",
+  "Vertex",
+  "Nexus",
+  "Orbit",
+  "Bridge",
+  "Beacon",
 ];
 
 export const initialData = JSON.stringify(
   Array.from({ length: 28 }, (_, i) => ({
-    id: `empresa-${i + 1}`,
+    id: `company-${i + 1}`,
     name: `${names[i % names.length]} ${Math.floor(i / names.length) + 1}`,
-    metric: { label: "Receita mensal", value: 1200 + ((i * 7919) % 24000) },
+    metric: { label: "Monthly revenue", value: 1200 + ((i * 7919) % 24000) },
     categories: categories.filter((_, bit) => ((i % 7) + 1) & (1 << bit)),
     status: i % 9 === 0 ? "critical" : i % 5 === 0 ? "warning" : "healthy",
   })),
@@ -28,17 +28,17 @@ export const initialData = JSON.stringify(
 export const examples = [
   {
     id: "basic",
-    title: "Mapa de empresas",
-    label: "01 · Mapa de empresas",
+    title: "Company map",
+    label: "01 · Company map",
     description:
-      "Categorias viram bairros. Métricas dão altura aos edifícios. Saúde ganha forma e cor.",
-    code: `// Edite as propriedades e clique em Executar.
-// Os registros estão na aba data.json.
+      "Categories become districts. Metrics give buildings height. Health takes shape and color.",
+    code: `// Edit the props, then click Run.
+// Company records live in the data.json tab.
 function Example() {
   return (
     <CityMap
       data={companies}
-      title="Minha cidade"
+      title="My city"
       lightingMode="day"
       showEnvironmentControls
     />
@@ -49,15 +49,15 @@ render(<Example />);`,
   },
   {
     id: "weather",
-    title: "Clima e iluminação",
-    label: "02 · Clima e iluminação",
+    title: "Weather and lighting",
+    label: "02 · Weather and lighting",
     description:
-      "Experimente chuva, neve e iluminação noturna com simulação local, sem chamadas a serviços de clima.",
+      "Explore rain, snow and nighttime lighting with local simulation and no weather service requests.",
     code: `function Example() {
   return (
     <CityMap
       data={companies}
-      title="Uma noite na cidade"
+      title="A night in the city"
       weather="rain"
       lightingMode="night"
       showEnvironmentControls
@@ -70,10 +70,10 @@ render(<Example />);`,
   },
   {
     id: "selection",
-    title: "Seleção e eventos",
-    label: "03 · Seleção e eventos",
+    title: "Selection and events",
+    label: "03 · Selection and events",
     description:
-      "Clique em um edifício ou busque uma empresa. O evento onSelect entrega o registro original à sua aplicação.",
+      "Click a building or search for a company. onSelect passes the original record to your application.",
     code: `function Example() {
   const [selected, setSelected] = React.useState(null);
 
@@ -81,14 +81,15 @@ render(<Example />);`,
     <div>
       <CityMap
         data={companies}
-        title="Explore e selecione"
+        title="Explore and select"
         lightingMode="day"
+      showEnvironmentControls
         onSelect={setSelected}
       />
       <p className="selection-output" role="status">
         {selected
-          ? "Empresa selecionada: " + selected.name
-          : "Selecione uma empresa no mapa."}
+          ? "Selected company: " + selected.name
+          : "Select a company on the map."}
       </p>
     </div>
   );

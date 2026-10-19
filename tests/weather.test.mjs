@@ -137,6 +137,38 @@ test("particles animate both types, follow layout, sleep when disabled and relea
   assert.equal(weather.children.length, 0);
 });
 
+test("rain density follows city area without reallocating or duplicating weather layers", () => {
+  const weather = new CityWeather();
+  const geometry = weather.rain.geometry;
+  const buffer = geometry.attributes.position;
+  const small = { roadBounds: { x1: -8, x2: 8, z1: -8, z2: 8 }, companies: [] };
+  const regular = {
+    roadBounds: { x1: -12, x2: 12, z1: -12, z2: 8 },
+    companies: [],
+  };
+  weather.setLayout(small);
+  weather.update(1, "rain", true);
+  const smallCount = geometry.drawRange.count / 2;
+  assert.ok(smallCount > 0 && smallCount < 800);
+  assert.ok(Math.abs(smallCount / 400 - 1.2) < 0.01);
+  assert.ok(buffer.array.slice(0, smallCount * 6).every(Number.isFinite));
+  weather.setLayout(regular);
+  weather.update(2, "rain", true);
+  assert.equal(geometry.drawRange.count / 2, 800);
+  for (const type of ["none", "snow", "rain", "none", "rain"]) {
+    weather.setLayout(small);
+    weather.update(3, type, true);
+  }
+  assert.equal(geometry.drawRange.count / 2, smallCount);
+  assert.equal(weather.rain.geometry.attributes.position, buffer);
+  assert.equal(
+    weather.children.filter((child) => child.isLineSegments).length,
+    1,
+  );
+  assert.equal(weather.snow.geometry.attributes.position.count, 800);
+  disposeSceneGroups([weather]);
+});
+
 test("snow accumulates modestly inside rooftops, rebuilds with the city and clears outside snow", () => {
   const weather = new CityWeather();
   const company = { x: 0, z: 0, roofTop: 8, width: 1.6, depth: 1.5 };

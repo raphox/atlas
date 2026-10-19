@@ -26,10 +26,10 @@ function ExecutionStatus({ dirty, dataError }) {
         className={error || dataError ? "status-dot error" : "status-dot"}
       />
       {dataError || error
-        ? "Corrija o erro e execute novamente"
+        ? "Fix the error and run again"
         : dirty
-          ? "Alterações não executadas"
-          : "Prévia atualizada"}
+          ? "Unapplied changes"
+          : "Preview up to date"}
     </div>
   );
 }
@@ -66,7 +66,9 @@ export function Playground() {
         revision: current.revision + 1,
       }));
     } catch (error) {
-      setDataError(`data.json: ${error.message}`);
+      setDataError(
+        `data.json: ${error instanceof SyntaxError ? error.message : "Invalid company data. Check unique IDs, nonempty names, nonnegative metrics, consistent categories, health states, and timestamps."}`,
+      );
     }
   }
 
@@ -82,9 +84,9 @@ export function Playground() {
   async function copy() {
     try {
       await navigator.clipboard.writeText(file === "jsx" ? draft : data);
-      setCopyMessage("Copiado");
+      setCopyMessage("Copied");
     } catch {
-      setCopyMessage("Não foi possível copiar. Selecione o texto no editor.");
+      setCopyMessage("Could not copy. Select the text in the editor.");
     }
     clearTimeout(copyTimer.current);
     copyTimer.current = setTimeout(() => setCopyMessage(""), 3500);
@@ -93,7 +95,7 @@ export function Playground() {
   return (
     <section
       className="playground"
-      aria-label="Playground interativo"
+      aria-label="Interactive playground"
       onKeyDown={(event) => {
         if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
           event.preventDefault();
@@ -103,7 +105,7 @@ export function Playground() {
     >
       <div className="playground-toolbar">
         <label className="example-select">
-          <span className="sr-only">Exemplo</span>
+          <span className="sr-only">Example</span>
           <select
             value={exampleId}
             onChange={(event) => reset(event.target.value)}
@@ -118,15 +120,15 @@ export function Playground() {
         <div className="playground-actions">
           <button
             className="icon-button"
-            title="Restaurar exemplo"
-            aria-label="Restaurar exemplo"
+            title="Reset example"
+            aria-label="Reset example"
             onClick={() => reset()}
           >
             <RotateCcw size={16} />
           </button>
           <button className="run-button" onClick={() => run()}>
             <Play size={13} fill="currentColor" />
-            Executar<span className="run-shortcut">⌘ / Ctrl ↵</span>
+            Run<span className="run-shortcut">⌘ / Ctrl ↵</span>
           </button>
         </div>
       </div>
@@ -138,9 +140,9 @@ export function Playground() {
           aria-label="Layout do playground"
         >
           {[
-            ["split", "Dividido", Columns2],
-            ["preview", "Prévia", Eye],
-            ["code", "Código", Code2],
+            ["split", "Split", Columns2],
+            ["preview", "Preview", Eye],
+            ["code", "Code", Code2],
           ].map(([value, label, Icon]) => (
             <button
               key={value}
@@ -152,7 +154,7 @@ export function Playground() {
             </button>
           ))}
         </div>
-        <span className="runtime-label">React · execução no navegador</span>
+        <span className="runtime-label">React · browser runtime</span>
       </div>
       <LiveProvider
         key={execution.revision}
@@ -164,7 +166,7 @@ export function Playground() {
           <div className="preview-panel" hidden={layout === "code"}>
             <div className="panel-heading">
               <span>
-                <span className="status-dot" /> PRÉVIA INTERATIVA
+                <span className="status-dot" /> INTERACTIVE PREVIEW
               </span>
               <span>Three.js</span>
             </div>
@@ -172,7 +174,7 @@ export function Playground() {
           </div>
           <div className="editor-panel" hidden={layout === "preview"}>
             <div className="file-bar">
-              <div role="group" aria-label="Arquivo do exemplo">
+              <div role="group" aria-label="Example file">
                 {[
                   ["jsx", "example.jsx"],
                   ["json", "data.json"],
@@ -188,11 +190,11 @@ export function Playground() {
               </div>
               <button
                 className="icon-button"
-                aria-label="Copiar arquivo"
-                title="Copiar arquivo"
+                aria-label="Copy file"
+                title="Copy file"
                 onClick={copy}
               >
-                {copyMessage === "Copiado" ? (
+                {copyMessage === "Copied" ? (
                   <Check size={15} />
                 ) : (
                   <Copy size={15} />
@@ -201,7 +203,7 @@ export function Playground() {
             </div>
             <div className="code-editor">
               <label className="sr-only" htmlFor="playground-source">
-                {file === "jsx" ? "Código do exemplo" : "Dados do exemplo"}
+                {file === "jsx" ? "Example code" : "Example data"}
               </label>
               <Editor
                 key={file}
@@ -235,15 +237,15 @@ export function Playground() {
             </div>
             <div className="editor-note">
               {file === "jsx"
-                ? "React, CityMap e companies já estão disponíveis. Use render(<Example />)."
-                : "Edite os registros JSON. Cada empresa precisa de um id único."}
+                ? "React, CityMap and companies are in scope. Add showEnvironmentControls to show weather and lighting controls; remove it to hide them."
+                : "Edit the JSON records. Each company needs a unique id."}
             </div>
           </div>
         </div>
         <div className="playground-footer">
           <ExecutionStatus dirty={dirty} dataError={dataError} />
           <span role="status">
-            {copyMessage || "Edite e execute com Ctrl / ⌘ + Enter"}
+            {copyMessage || "Edit and run with Ctrl / ⌘ + Enter"}
           </span>
         </div>
         {dataError && (

@@ -11,6 +11,9 @@ export default defineConfig(({ command, isPreview }) => ({
       ? "/"
       : process.env.DOCS_BASE_PATH || "/atlas/",
   publicDir: false,
+  cacheDir: fileURLToPath(
+    new URL("./node_modules/.vite-docs", import.meta.url),
+  ),
   plugins: [
     { enforce: "pre", ...mdx({ remarkPlugins: [remarkGfm] }) },
     react({ include: /\.(jsx|js|mdx)$/ }),

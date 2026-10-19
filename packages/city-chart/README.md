@@ -144,7 +144,7 @@ Interface components do not generate `style` attributes. Dynamic label and toolt
 | `weather` | `"none"` | `"none"`, `"rain"`, or `"snow"` |
 | `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"`, or `"night"` |
 | `showControls` | `true` | camera, scene, and environment controls |
-| `showEnvironmentControls` | `true` | weather and lighting selectors |
+| `showEnvironmentControls` | `false` | opt in to weather and lighting selectors with `showEnvironmentControls` |
 | `showSearch` / `showDetails` | `true` | search / selection panel |
 | `busy` | `false` | temporary interaction lock and update indicator |
 | `title` / `ariaLabel` | text in the browser's language | title / accessible name |

@@ -4,6 +4,9 @@ import { random } from "../../../model.js";
 import { SnowCover } from "./snow-cover.js";
 
 const COUNT = 800;
+// Keep small examples from receiving a full-size city's rain in less space.
+// The usual 100-company city still reaches the existing 800-drop budget.
+const RAIN_DROPS_PER_CELL = 1.2;
 const fraction = (value) => value - Math.floor(value);
 const rainDay = new THREE.Color("#356b91");
 const rainNight = new THREE.Color("#b5d4eb");
@@ -112,6 +115,14 @@ export class CityWeather extends THREE.Group {
       width: (x2 - x1 + 4) * STEP,
       depth: (z2 - z1 + 4) * STEP,
     };
+    this.rainCount = Math.min(
+      COUNT,
+      Math.max(
+        1,
+        Math.round((x2 - x1 + 4) * (z2 - z1 + 4) * RAIN_DROPS_PER_CELL),
+      ),
+    );
+    this.rain.geometry.setDrawRange(0, this.rainCount * 2);
     this.height = Math.max(
       18,
       ...layout.companies.map((c) => (c.roofTop ?? c.height ?? 0) + 12),
@@ -196,7 +207,7 @@ export class CityWeather extends THREE.Group {
     const positions = attribute.array;
     const { x, z, width, depth } = this.bounds;
     const speed = rain ? 22 : 3;
-    for (let i = 0; i < COUNT; i++) {
+    for (let i = 0; i < (rain ? this.rainCount : COUNT); i++) {
       const flake = this.flakes[i];
       const phase = rain ? fraction(i * 0.61803398875) : flake.phase;
       const px =

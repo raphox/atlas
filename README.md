@@ -1,6 +1,12 @@
-# Atlas · Company health
+# Atlas CityMap
 
-An interactive Three.js city with a dataset of 1,400 fictional companies, initially paginated into cities of 100 companies. Each company appears exactly once, in the region matching its exact combination of categories.
+![Atlas CityMap showing company health in an interactive 3D city](docs/images/city-map-preview.png)
+
+Atlas CityMap is a reusable React component that turns company data into an interactive 3D city. Embed it in your website or dashboard by passing an array of company records and importing the included CSS. Building size represents a metric such as revenue or users, districts group companies by category, and visual effects highlight health risks—helping people explore a portfolio, spot problems, and inspect individual companies.
+
+Start with the [interactive documentation](https://raphox.github.io/atlas/) or the [package integration guide](packages/city-chart/README.md) for installation, props, events, and styling. The component includes search, selection, camera controls, weather effects, and fullscreen, without requiring the Atlas demo application or Tailwind.
+
+This repository also includes a demo application with 1,400 fictional companies, initially displayed in cities of 100 companies.
 
 ## Getting started
 
@@ -16,6 +22,8 @@ Open http://127.0.0.1:4173. Vite rebuilds changes automatically. `npm start` als
 ## Interactive documentation
 
 The documentation is published at [raphox.github.io/atlas](https://raphox.github.io/atlas/), with a separate [Features screen](https://raphox.github.io/atlas/?page=features) covering the map, monitoring, and the weather API lifecycle.
+
+Documentation, navigation, and examples are written in English. The embedded map keeps its browser-language behavior. Rain density scales with city area up to 800 drops, so compact examples do not compress a full city's precipitation into a smaller footprint.
 
 ```sh
 npm run dev:docs      # http://127.0.0.1:4174
@@ -62,7 +70,7 @@ With **City life** enabled (the default), the browser requests location permissi
 
 Automatic lighting uses only the browser's local clock: sunrise from 6:00 to 8:00 a.m., day from 8:00 a.m. to 5:00 p.m., sunset from 5:00 to 7:00 p.m., and night from 7:00 p.m. to 6:00 a.m. The selector allows these periods to be chosen manually. Weather does not change the time or time zone used for lighting.
 
-The boolean `showEnvironmentControls` prop on the Atlas `CityMap` wrapper and `CityChart` displays the **Lighting** and **Weather** dropdowns. It defaults to `false` on these components; the demo in `src/App.jsx` sets it to `true`. To hide them, omit the prop or use `showEnvironmentControls={false}`:
+The boolean `showEnvironmentControls` prop defaults to `false` on `CityMap` and `CityChart`, including the reusable package. Add `showEnvironmentControls` without a value to display the **Lighting** and **Weather** dropdowns, as the demo in `src/App.jsx` does. Omit the prop or use `showEnvironmentControls={false}` to hide them:
 
 ```jsx
 <CityMap atlas={atlas} showEnvironmentControls />

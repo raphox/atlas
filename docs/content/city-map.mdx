@@ -1,32 +1,32 @@
-<div id="visao-geral" className="page-intro">
-  <div className="eyebrow"><span /> COMPONENTE REACT</div>
-  <h1>Dados que ganham <span>uma nova dimensão.</span></h1>
-  <p className="lead">Transforme empresas em uma cidade interativa. Explore o mapa, experimente o código e leve o CityMap para o seu projeto.</p>
-  <div className="intro-tags"><span>React 18 / 19</span><span>WebGL · Three.js</span><span>CSS personalizável</span></div>
+<div id="overview" className="page-intro">
+  <div className="eyebrow"><span /> REACT COMPONENT</div>
+  <h1>Your data. <span>A whole new dimension.</span></h1>
+  <p className="lead">Turn company data into an interactive city. Explore the map, experiment with the code, and bring CityMap into your project.</p>
+  <div className="intro-tags"><span>React 18 / 19</span><span>WebGL · Three.js</span><span>Customizable CSS</span></div>
 </div>
 
-<div id="playground" className="section-heading"><h2>Explore o CityMap</h2><span>EXEMPLOS EXECUTÁVEIS</span></div>
+<div id="playground" className="section-heading"><h2>Explore CityMap</h2><span>RUNNABLE EXAMPLES</span></div>
 
 <Playground />
 
-<div className="callout">**Experimente:** altere `lightingMode="day"` para `"night"` e clique em **Executar**. A aba `data.json` permite mudar empresas, métricas e categorias. As edições ficam nesta sessão e são descartadas ao recarregar a página ou trocar de exemplo.</div>
+<div className="callout">**Try it:** change `lightingMode="day"` to `"night"` and click **Run**. The `data.json` tab lets you edit companies, metrics, and categories. Changes stay in this session and are discarded when you reload the page or switch examples.</div>
 
 <div className="prose">
 
-<h2 id="instalacao">Instalação</h2>
+<h2 id="installation">Installation</h2>
 
-O `atlas-city-chart` é o pacote reutilizável deste repositório. Ainda não está publicado no registro npm: gere o arquivo localmente a partir do projeto.
+`atlas-city-chart` is this repository's reusable package. It has not been published to the npm registry yet. Build a local package from the repository first.
 
 ```sh
-# No repositório Atlas (Node.js 22.12+ na série 22, ou 24+)
+# In the Atlas repository (Node.js 22.12+ on the 22.x line, or 24+)
 npm ci
 npm run pack:package
 
-# No projeto React que vai consumir o mapa
-npm install /caminho/atlas-city-chart-0.1.0.tgz
+# In your React application
+npm install /path/to/atlas-city-chart-0.1.0.tgz
 ```
 
-Importe o componente e seu CSS. O tema padrão não exige Tailwind nem o CSS da aplicação Atlas.
+Import the component and its stylesheet. The default theme does not require Tailwind or the Atlas application's CSS.
 
 ```jsx
 import { CityMap } from "atlas-city-chart/react";
@@ -35,8 +35,8 @@ import "atlas-city-chart/styles.css";
 const companies = [{
   id: "aurora",
   name: "Aurora",
-  metric: { label: "Receita mensal", value: 2400.5 },
-  categories: [{ label: "Comércio", value: "commerce" }],
+  metric: { label: "Monthly revenue", value: 2400.5 },
+  categories: [{ label: "Commerce", value: "commerce" }],
   status: "healthy",
 }];
 
@@ -45,51 +45,61 @@ export default function Dashboard() {
 }
 ```
 
-O playground disponibiliza `React`, `CityMap` e `companies` no escopo; finalize o exemplo com `render(<Example />)`. Imports arbitrários não são suportados pelo editor. Na sua aplicação, use os imports acima e exporte o componente normalmente. O editor executa o JavaScript no próprio navegador, sem um serviço de compilação remoto.
+The playground provides `React`, `CityMap`, and `companies` in scope. Finish an example with `render(<Example />)`. Arbitrary imports are not supported by the editor. In your own application, use the imports above and export your component normally. JavaScript runs in your browser without a remote compilation service.
 
-<h2 id="dados">Formato dos dados</h2>
+<h2 id="data">Data format</h2>
 
-Cada empresa ocupa um único lote, no bairro correspondente à combinação exata de categorias. A métrica determina o tamanho do edifício; o status determina os efeitos de risco.
+Each company occupies one lot in the district matching its exact combination of categories. The metric controls building size; status controls risk effects.
 
-| Campo | Tipo | Contrato |
+| Field | Type | Contract |
 | --- | --- | --- |
-| `id` | `string \| number` | Obrigatório e único no componente reutilizável. |
-| `name` | `string` | Nome não vazio, exibido na busca e nos detalhes. |
-| `metric` | `{ label, value }` | Rótulo não vazio e número finito, não negativo. |
-| `categories` | `{ label, value }[]` | De 1 a 3 categorias por empresa; até 3 valores distintos no conjunto. |
-| `status` | `string` | `healthy`, `warning` ou `critical`. |
-| `updatedAt` | `string?` | Última atualização, ISO 8601 com fuso horário. |
-| `statusChangedAt` | `string?` | Início do status atual; não pode ser posterior a `updatedAt`. |
+| `id` | `string \| number` | Required and unique in the reusable component. |
+| `name` | `string` | Nonempty name shown in search and details. |
+| `metric` | `{ label, value }` | Nonempty label and a finite, nonnegative number. |
+| `categories` | `{ label, value }[]` | 1–3 categories per company; up to 3 distinct values across the dataset. |
+| `status` | `string` | `healthy`, `warning`, or `critical`. |
+| `updatedAt` | `string?` | Last update, in ISO 8601 with a time zone. |
+| `statusChangedAt` | `string?` | Start of the current status; cannot be later than `updatedAt`. |
 
-Mantenha o mesmo rótulo para cada identificador de categoria. Para atualizar o mapa, passe uma **nova lista** em `data`; uma lista vazia mostra a cidade sem empresas. Ao mudar o status, atualize os dois timestamps; ao mudar apenas a métrica, preserve `statusChangedAt`.
+Use a consistent label for each category identifier. To update the map, pass a **new array** to `data`; an empty array displays a city with no companies. When health changes, update both timestamps. When only the metric changes, preserve `statusChangedAt`.
 
-<h2 id="propriedades">Propriedades</h2>
+<h2 id="props">Props</h2>
 
-Estas são as propriedades do `CityMap` de `atlas-city-chart/react`. Componentes internos da aplicação podem ter padrões diferentes.
+These props belong to `CityMap` from `atlas-city-chart/react`. Internal application wrappers may have different defaults.
 
-| Propriedade | Padrão | Comportamento |
+| Prop | Default | Behavior |
 | --- | --- | --- |
-| `data` | Obrigatória | Lista de empresas. |
-| `theme` | `"default"` | `"default"`, `"tailwind"` ou `null` para tema próprio. |
-| `view` | `"iso"` | Perspectiva `"iso"` ou `"top"`. |
-| `life` / `effects` | `true` | Animação da cidade / efeitos de risco. |
-| `autoRotate` | `false` | Rotação lenta da câmera. |
-| `showDistrictLabels` | `false` | Rótulos de categorias e interseções. |
-| `weather` | `"none"` | `"none"`, `"rain"` ou `"snow"`. |
-| `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"` ou `"night"`. |
-| `showControls` | `true` | Controles de câmera e cena. |
-| `showEnvironmentControls` | `true` | Seletores de clima e iluminação. |
-| `showSearch` / `showDetails` | `true` | Busca e painel de seleção. |
-| `busy` | `false` | Bloqueio temporário durante atualizações. |
-| `title` / `ariaLabel` | Idioma do navegador | Título e nome acessível do mapa. |
-| `className` / `children` | — | Personalização CSS e conteúdo adicional. |
-| `onSelect` | — | Recebe a empresa original selecionada ou `null`. |
+| `data` | Required | Company records. |
+| `theme` | `"default"` | `"default"`, `"tailwind"`, or `null` for a custom theme. |
+| `view` | `"iso"` | `"iso"` or `"top"` perspective. |
+| `life` / `effects` | `true` | City animation / risk effects. |
+| `autoRotate` | `false` | Slow camera rotation. |
+| `showDistrictLabels` | `false` | Category and intersection labels. |
+| `weather` | `"none"` | `"none"`, `"rain"`, or `"snow"`. |
+| `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"`, or `"night"`. |
+| `showControls` | `true` | Camera and scene controls. |
+| `showEnvironmentControls` | `false` | Opt in to weather and lighting selectors. |
+| `showSearch` / `showDetails` | `true` | Search and selection details. |
+| `busy` | `false` | Temporary interaction lock during updates. |
+| `title` / `ariaLabel` | Browser language | Map title and accessible name. |
+| `className` / `children` | — | CSS customization and additional content. |
+| `onSelect` | — | Receives the selected original company record or `null`. |
 
-Com `life={false}`, as partículas de clima são pausadas e a iluminação volta para o dia. Os seletores de ambiente mantêm escolhas locais; **Automático** volta a seguir as propriedades recebidas. Veja [todas as features e a integração de clima](?page=features#clima).
+With `life={false}`, weather particles pause and lighting returns to daylight. Environment selectors keep local overrides; **Automatic** resumes following the supplied props. See [all features and the weather integration](?page=features#weather).
 
-<h2 id="eventos">Eventos e controles</h2>
+**Environment controls are opt-in:** `showEnvironmentControls` defaults to `false`. Add the boolean prop without a value (equivalent to `showEnvironmentControls={true}`) to show the lighting and weather selectors:
 
-Use `onSelect` para conectar o mapa a um painel ou formulário. O terceiro exemplo do playground demonstra esse fluxo. As propriedades `onViewChange`, `onLifeChange`, `onEffectsChange`, `onAutoRotateChange` e `onDistrictLabelsChange` permitem controlar esses estados pela aplicação.
+```jsx
+<CityMap data={companies} showEnvironmentControls />
+```
+
+Remove the prop or set `showEnvironmentControls={false}` to hide the selectors. In the playground, click **Run** to apply the change. The scene still follows the `weather` and `lightingMode` props; to remove rain, set `weather="none"`.
+
+The documentation is in English. The embedded map demonstrates the component's actual localization behavior: its controls follow the browser's language (`pt-BR` or `en-US`, with English as the fallback).
+
+<h2 id="events">Events and controls</h2>
+
+Use `onSelect` to connect the map to a detail panel or form. The third playground example demonstrates this flow. `onViewChange`, `onLifeChange`, `onEffectsChange`, `onAutoRotateChange`, and `onDistrictLabelsChange` let your application control those settings.
 
 ```jsx
 const [view, setView] = React.useState("iso");
@@ -103,16 +113,16 @@ const mapRef = React.useRef(null);
   onSelect={(company) => console.log(company)}
 />;
 
-// Em um evento, depois que o mapa estiver pronto:
+// Inside an event handler, after the map is ready:
 mapRef.current?.zoom(1.2);
 mapRef.current?.select(companies[0], true);
 ```
 
-A referência também expõe `view`, `deselect`, `cancel`, `capture`, `play`, `scrollIntoView` e `stats`. Para composição avançada, o pacote exporta `CityChart` e `EnvironmentControls`; o ponto de entrada principal exporta `defineCityChart`, `cityMark`, `createCityRenderer` e `cityFocus`.
+The ref also exposes `view`, `deselect`, `cancel`, `capture`, `play`, `scrollIntoView`, and `stats`. For advanced composition, the package exports `CityChart` and `EnvironmentControls`. The main entry point exports `defineCityChart`, `cityMark`, `createCityRenderer`, and `cityFocus`.
 
-<h2 id="temas">Temas e aparência</h2>
+<h2 id="themes">Themes and styling</h2>
 
-Passe uma classe e sobrescreva os tokens CSS da instância. O componente não possui propriedade `style`.
+Pass a class and override CSS tokens for that instance. The component does not accept a `style` prop.
 
 ```css
 .my-city {
@@ -128,20 +138,20 @@ Passe uma classe e sobrescreva os tokens CSS da instância. O componente não po
 <CityMap data={companies} className="my-city" theme="default" />
 ```
 
-Em projetos com Tailwind 4, importe também `atlas-city-chart/tailwind.css` no CSS processado pelo Tailwind e use `theme="tailwind"`. As classes públicas e a lista completa de tokens estão no [guia do pacote](https://github.com/raphox/atlas/blob/main/packages/city-chart/README.md).
+For Tailwind 4 projects, also import `atlas-city-chart/tailwind.css` in your Tailwind-processed stylesheet and use `theme="tailwind"`. Public classes and the complete list of tokens are documented in the [package guide](https://github.com/raphox/atlas/blob/main/packages/city-chart/README.md).
 
-<h2 id="publicacao">Publicação no GitHub Pages</h2>
+<h2 id="deployment">Deploying to GitHub Pages</h2>
 
-A documentação tem build próprio: MDX compila com `@mdx-js/rollup` e os exemplos usam React Live. O resultado contém apenas arquivos estáticos; os exemplos são executados no cliente.
+Documentation has its own build: `@mdx-js/rollup` compiles MDX, and React Live runs the examples. The output is entirely static, with examples executed on the client.
 
 ```sh
-npm run dev:docs      # Documentação em http://127.0.0.1:4174
-npm run build:docs    # Gera dist/docs
-npm run preview:docs # Prévia em http://127.0.0.1:4174/atlas/
+npm run dev:docs      # http://127.0.0.1:4174
+npm run build:docs    # Builds dist/docs
+npm run preview:docs # http://127.0.0.1:4174/atlas/
 ```
 
-O workflow **Documentation → GitHub Pages** publica `dist/docs` a cada push em `main`, depois de testar a documentação. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**. `DOCS_BASE_PATH` define o caminho base; o workflow obtém esse caminho da configuração do Pages. No build local, o padrão é `/atlas/`.
+The **Documentation → GitHub Pages** workflow publishes `dist/docs` on each push to `main`, after testing the documentation. Set the repository's **Settings → Pages → Source** to **GitHub Actions**. `DOCS_BASE_PATH` sets the base path; the workflow reads it from Pages metadata. Local production builds default to `/atlas/`.
 
-As telas usam parâmetros de URL e âncoras, então links diretos e recarregamentos funcionam no hosting estático sem regras de redirecionamento. Edite os arquivos em `docs/content/` para manter o conteúdo em MDX e `docs/examples.js` para acrescentar exemplos.
+Screens use query parameters and fragment links, so direct links and reloads work on static hosting without rewrite rules. Edit `docs/content/` to maintain the MDX content, and `docs/examples.js` to add examples.
 
 </div>
