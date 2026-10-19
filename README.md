@@ -47,6 +47,8 @@ The `Documentation → GitHub Pages` workflow runs on pushes to `main` or manual
 
 `npm test` covers data validation, filters, pagination, layout, camera math, localization, weather parsing, particles, lighting, traffic, and resource disposal without launching a browser.
 
+CI runs unit tests once in a dedicated job, in parallel with the Playwright jobs. The unit job skips browser downloads and does not install Chromium or its system dependencies. Only the browser jobs (including documentation checks) install Chromium's headless shell, avoiding the additional full-browser download. Pages deployment still waits for every required job to pass.
+
 The browser suite is deliberately limited to **eight scenarios**: six application/package checks (`npm run test:e2e`) and two documentation checks (`npm run test:docs`). They cover React/map/table integration, native file upload/download, mobile layout/fullscreen, the two distributed CSS themes with independent map instances, the browser geolocation/weather lifecycle, and the editable documentation with mobile navigation. Run `npx playwright install chromium` before the first use. The application tests use a dedicated server on port 4176, prebundle their fixtures, and disable hot reload to prevent a development reload from resetting a test.
 
 Keep new domain rules and animation calculations in unit tests. Add a browser scenario only when the behavior requires browser rendering, DOM integration, or a native browser API; extend an existing scenario when possible. Tests use small deterministic datasets and mocked network responses. Each browser action has a 15-second timeout instead of waiting for the entire test budget.
