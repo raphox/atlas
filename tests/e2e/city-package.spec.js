@@ -44,6 +44,37 @@ for (const theme of ["package", "package-tailwind"]) {
     await expect
       .poll(() => stats(1))
       .toMatchObject({ weather: "rain", lightingPeriod: "day" });
+    const hideControls = first.getByRole("button", {
+      name: "Ocultar controles",
+    });
+    const fullscreen = first.locator(".atlas-city-camera-button--fullscreen");
+    const fullscreenBox = await fullscreen.boundingBox();
+    const toggleBox = await hideControls.boundingBox();
+    expect(toggleBox.x).toBe(fullscreenBox.x);
+    expect(toggleBox.y).toBeGreaterThanOrEqual(
+      fullscreenBox.y + fullscreenBox.height,
+    );
+    await hideControls.click();
+    await expect(first.getByRole("searchbox")).toBeHidden();
+    await expect(first.locator(".atlas-city-scene-controls")).toBeHidden();
+    await expect(fullscreen).toBeVisible();
+    await expect(first.locator("canvas")).toBeVisible();
+    await expect(second.getByRole("searchbox")).toBeVisible();
+    await expect
+      .poll(() => stats(0))
+      .toMatchObject({
+        weather: "snow",
+        lightingPeriod: "night",
+        weatherVisible: true,
+      });
+    const showControls = first.getByRole("button", {
+      name: "Mostrar controles",
+    });
+    await expect(showControls).toHaveAttribute("aria-pressed", "true");
+    await showControls.press("Enter");
+    await expect(first.getByRole("searchbox")).toBeVisible();
+    await expect(first.getByLabel("Clima da cidade")).toHaveValue("snow");
+    await expect(first.getByLabel("Iluminação da cidade")).toHaveValue("night");
     await first.getByRole("checkbox", { name: "Cidade viva" }).uncheck();
     await expect(first.getByLabel("Clima da cidade")).toBeDisabled();
     await expect.poll(() => stats(0)).toMatchObject({ weatherVisible: false });

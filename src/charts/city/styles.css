@@ -207,6 +207,10 @@
   gap: var(--atlas-city-overlay-gap, 12px);
   pointer-events: none;
 }
+.atlas-city-top-controls[hidden],
+.atlas-city-scene-controls[hidden] {
+  display: none;
+}
 .atlas-city-header {
   position: relative;
   z-index: 1;
@@ -270,6 +274,8 @@
   gap: 4px;
 }
 .atlas-city-zoom button {
+  display: grid;
+  place-items: center;
   width: 36px;
   height: 36px;
   padding: 0;

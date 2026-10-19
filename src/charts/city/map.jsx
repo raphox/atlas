@@ -74,6 +74,7 @@ export const CityMap = forwardRef(function CityMap(
   );
   const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState("");
+  const [controlsVisible, setControlsVisible] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false);
   const [fullscreenError, setFullscreenError] = useState(null);
@@ -178,7 +179,10 @@ export const CityMap = forwardRef(function CityMap(
           const disabled = busy || !ready || Boolean(error);
           return (
             <>
-              <div className="atlas-city-top-controls">
+              <div
+                className="atlas-city-top-controls"
+                hidden={showControls && !controlsVisible}
+              >
                 <header className="atlas-city-header">
                   <strong className="atlas-city-title">{title}</strong>
                   {showSearch && (
@@ -336,8 +340,40 @@ export const CityMap = forwardRef(function CityMap(
                         {icon}
                       </button>
                     ))}
+                    <button
+                      className="atlas-city-camera-button atlas-city-camera-button--visibility"
+                      type="button"
+                      aria-label={t(
+                        controlsVisible ? "hideControls" : "showControls",
+                      )}
+                      title={t(
+                        controlsVisible ? "hideControls" : "showControls",
+                      )}
+                      aria-pressed={!controlsVisible}
+                      onClick={() => setControlsVisible((visible) => !visible)}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                        <circle cx="12" cy="12" r="3" />
+                        {controlsVisible && <path d="m3 3 18 18" />}
+                      </svg>
+                    </button>
                   </div>
-                  <div className="atlas-city-scene-controls">
+                  <div
+                    className="atlas-city-scene-controls"
+                    hidden={!controlsVisible}
+                  >
                     {environmentControls}
                     {[
                       ["life", t("life"), life, setLife],

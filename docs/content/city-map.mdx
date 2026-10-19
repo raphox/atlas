@@ -77,7 +77,7 @@ These props belong to `CityMap` from `atlas-city-chart/react`. Internal applicat
 | `showDistrictLabels` | `false` | Category and intersection labels. |
 | `weather` | `"none"` | `"none"`, `"rain"`, or `"snow"`. |
 | `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"`, or `"night"`. |
-| `showControls` | `true` | Camera and scene controls. |
+| `showControls` | `true` | Camera and scene controls, including the visibility toggle below fullscreen. |
 | `showEnvironmentControls` | `false` | Opt in to weather and lighting selectors. |
 | `showSearch` / `showDetails` | `true` | Search and selection details. |
 | `busy` | `false` | Temporary interaction lock during updates. |
@@ -86,6 +86,8 @@ These props belong to `CityMap` from `atlas-city-chart/react`. Internal applicat
 | `onSelect` | — | Receives the selected original company record or `null`. |
 
 With `life={false}`, weather particles pause and lighting returns to daylight. Environment selectors keep local overrides; **Automatic** resumes following the supplied props. See [all features and the weather integration](?page=features#weather).
+
+The eye button directly below fullscreen hides or restores the map's header, search, perspectives, details, and scene controls. Camera buttons remain available, and hiding controls preserves the current weather, lighting, and other scene settings. Setting `showControls={false}` removes the camera toolbar and scene controls entirely.
 
 **Environment controls are opt-in:** `showEnvironmentControls` defaults to `false`. Add the boolean prop without a value (equivalent to `showEnvironmentControls={true}`) to show the lighting and weather selectors:
 

@@ -116,7 +116,7 @@ Controls, search, details, health states, tooltips, messages, and accessible lab
 | Header | `.atlas-city-top-controls`, `.atlas-city-header`, `.atlas-city-title` |
 | Search | `.atlas-city-search`, `.atlas-city-search-input`, `.atlas-city-results`, `.atlas-city-search-result`, `.atlas-city-search-empty` |
 | Perspective | `.atlas-city-perspectives`, `.atlas-city-perspective-button` (`aria-pressed` state) |
-| Camera | `.atlas-city-zoom`, `.atlas-city-camera-button`, modifiers `--zoom-in`, `--zoom-out`, `--reset`, `--fullscreen` |
+| Camera | `.atlas-city-zoom`, `.atlas-city-camera-button`, modifiers `--zoom-in`, `--zoom-out`, `--reset`, `--fullscreen`, `--visibility` |
 | Environment | `.atlas-city-scene-controls`, `.atlas-city-environment-control--lighting`, `.atlas-city-environment-control--weather`, `.atlas-city-select` |
 | Options | `.atlas-city-control`, `.atlas-city-control-label`, `.atlas-city-toggle`, modifiers `--life`, `--effects`, `--auto-rotate`, `--labels` |
 | Labels | `.atlas-city-labels`, `.atlas-city-label`, `.atlas-city-label-dot`, `.atlas-city-label-name`, `.atlas-city-label-count` |
@@ -143,7 +143,7 @@ Interface components do not generate `style` attributes. Dynamic label and toolt
 | `showDistrictLabels` | `false` | categories and intersections |
 | `weather` | `"none"` | `"none"`, `"rain"`, or `"snow"` |
 | `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"`, or `"night"` |
-| `showControls` | `true` | camera, scene, and environment controls |
+| `showControls` | `true` | camera, scene, and environment controls, including the visibility toggle below fullscreen |
 | `showEnvironmentControls` | `false` | opt in to weather and lighting selectors with `showEnvironmentControls` |
 | `showSearch` / `showDetails` | `true` | search / selection panel |
 | `busy` | `false` | temporary interaction lock and update indicator |
