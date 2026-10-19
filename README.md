@@ -13,6 +13,21 @@ npm run dev
 
 Open http://127.0.0.1:4173. Vite rebuilds changes automatically. `npm start` also starts the development environment. For production, run `npm run build` and `npm run preview` to inspect the result. Deployment uses only the static files in `dist/`; Three.js is included in the bundle, with no CDN dependency for the scene.
 
+## Interactive documentation
+
+The documentation is published at [raphox.github.io/atlas](https://raphox.github.io/atlas/), with a separate [Features screen](https://raphox.github.io/atlas/?page=features) covering the map, monitoring, and the weather API lifecycle.
+
+```sh
+npm run dev:docs      # http://127.0.0.1:4174
+npm run build:docs    # static output in dist/docs (default base: /atlas/)
+npm run preview:docs # http://127.0.0.1:4174/atlas/
+npm run test:docs    # build + production browser tests
+```
+
+Content lives in `docs/content/*.mdx`, compiled with `@mdx-js/rollup`. The React Live playground uses the actual shared `CityMap` source, with editable JSX and JSON, explicit execution, reset, copy, and error reporting. It runs locally in the browser and uses simulated weather; it does not request location or call a weather API. Examples live in `docs/examples.js`. Arbitrary imports are not supported; `React`, `CityMap`, and `companies` are supplied in scope. Finish a playground snippet with `render(<Example />)`.
+
+The `Documentation → GitHub Pages` workflow builds, tests, and deploys only `dist/docs` on pushes to `main` or manual dispatch. Enable **Settings → Pages → Source → GitHub Actions**. The workflow obtains `DOCS_BASE_PATH` from Pages metadata; local builds default to `/atlas/`. Set `DOCS_BASE_PATH=/` for a root/custom-domain deployment. Query-string screens and fragment links work on static hosting without SPA rewrites. The Atlas SPA keeps its existing build and development commands.
+
 ## Interface structure
 
 - `src/main.jsx` mounts the React tree; `src/App.jsx` organizes the application.

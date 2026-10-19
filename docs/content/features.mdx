@@ -1,0 +1,136 @@
+<div id="features" className="page-intro">
+  <div className="eyebrow"><span /> RECURSOS DO ATLAS</div>
+  <h1>Uma cidade que conta <span>a história dos seus dados.</span></h1>
+  <p className="lead">Conheça os recursos implementados, como eles se conectam e o que acontece entre os dados recebidos e a cena na tela.</p>
+  <div className="intro-tags"><span>Visualização 3D</span><span>Monitoramento</span><span>Clima e ambiente</span></div>
+</div>
+
+<div className="feature-grid">
+  <a href="#visualizacao"><span className="feature-number">01 / VISUALIZAÇÃO</span><h2>Empresas viram edifícios</h2><p>Altura por métrica, bairros por categorias e interseções sem duplicar empresas.</p><span className="feature-link">Explorar o mapa ↗</span></a>
+  <a href="#interacao"><span className="feature-number">02 / INTERAÇÃO</span><h2>Do panorama ao detalhe</h2><p>Busca, seleção, zoom, perspectivas e tela cheia em um componente reutilizável.</p><span className="feature-link">Ver interações ↗</span></a>
+  <a href="#clima"><span className="feature-number">03 / AMBIENTE</span><h2>O clima entra na cena</h2><p>Chuva e neve a partir da Open-Meteo, com localização aproximada e atualização a cada 15 minutos.</p><span className="feature-link">Entender a integração ↗</span></a>
+  <a href="#monitoramento"><span className="feature-number">04 / OPERAÇÃO</span><h2>Saúde em perspectiva</h2><p>Efeitos de risco, eventos recentes, filtros e paginação para acompanhar a carteira.</p><span className="feature-link">Ver monitoramento ↗</span></a>
+</div>
+
+<div className="prose">
+
+<h2 id="visualizacao">Visualização e organização</h2>
+
+O Atlas transforma os registros no navegador, usando Three.js e uma extensão do TanStack Charts. O backend envia dados de empresas; não precisa calcular posições nem geometria.
+
+| Recurso | Como funciona |
+| --- | --- |
+| Bairros e interseções | Até três categorias distintas formam até sete combinações. Cada empresa aparece exatamente uma vez. |
+| Edifícios por métrica | `metric.value` controla o tamanho; o rótulo da métrica aparece nos detalhes e tooltips. |
+| Saúde visual | `healthy`, `warning` e `critical` identificam os estados; os efeitos de risco podem ser desligados. |
+| Cidade viva | Carros, pedestres, semáforos e vegetação complementam a cena. |
+| Renderização | Instâncias de geometria são reutilizadas em edifícios, janelas, vegetação, trânsito e partículas. |
+
+<h2 id="interacao">Navegação e interação</h2>
+
+Arraste com o botão esquerdo para girar horizontalmente, use a roda ou pinça para zoom e o botão direito ou dois dedos para deslocar. Alterne entre as vistas isométrica e superior e pressione `0` para voltar à visão geral.
+
+A busca localiza empresas por nome. Selecionar um edifício abre os detalhes e emite `onSelect`. O modo de tela cheia solicita Screen Wake Lock, quando disponível, para manter a tela ativa; a saída da tela cheia, a aba oculta e a desmontagem liberam o bloqueio. A rotação automática é opcional e pausa durante interações.
+
+O mapa traduz a interface para `pt-BR` ou `en-US` a partir do navegador; outros idiomas usam inglês. Nomes e rótulos enviados nos dados são preservados. A preferência por movimento reduzido desativa partículas e reduz animações. WebGL é necessário para a cena 3D.
+
+<h2 id="clima">Consumo da API de clima</h2>
+
+**Na aplicação Atlas**, `useWeather` consulta a Open-Meteo enquanto **Cidade viva** está habilitada. **No pacote `atlas-city-chart` e neste playground**, o mapa recebe `weather` como propriedade e não faz consultas meteorológicas nem pede geolocalização. Os seletores do playground simulam o ambiente localmente.
+
+<div className="weather-flow" aria-label="Fluxo da integração de clima">
+  <div><span>01</span><strong>Permissão</strong><small>Localização do navegador</small></div><b aria-hidden="true">→</b>
+  <div><span>02</span><strong>Consulta</strong><small>Coordenadas aproximadas</small></div><b aria-hidden="true">→</b>
+  <div><span>03</span><strong>Validação</strong><small>Dados atuais e completos</small></div><b aria-hidden="true">→</b>
+  <div><span>04</span><strong>Cena</strong><small>Sem precipitação, chuva ou neve</small></div>
+</div>
+
+### 1. Localização e requisição
+
+A aplicação solicita localização sem alta precisão, com timeout de **10 segundos**, em HTTPS ou localhost. Latitude e longitude são arredondadas para **duas casas decimais**. As coordenadas e o cache ficam somente em memória; não são gravados em cookies, `localStorage` ou registros de empresas.
+
+O cliente usa o endpoint `https://api.open-meteo.com/v1/forecast` e envia uma requisição GET com `credentials: "omit"` e estes parâmetros:
+
+```text
+latitude=-23.55
+longitude=-46.63
+current=weather_code,rain,showers,snowfall
+timeformat=unixtime
+forecast_days=1
+```
+
+Essas coordenadas são apenas um exemplo. A aplicação usa a localização aproximada autorizada pelo visitante. O provedor recebe o IP da conexão e as coordenadas enviadas.
+
+### 2. Resposta e interpretação
+
+O adaptador lê `current.time` em segundos Unix, `weather_code`, `rain`, `showers` e `snowfall`. Rejeita respostas incompletas, códigos não reconhecidos, valores de precipitação negativos e horários com diferença superior a **90 minutos** em relação ao relógio do cliente.
+
+| Condição | Resultado na cena |
+| --- | --- |
+| Neve positiva ou código de neve | `snow`, com prioridade sobre chuva. |
+| Chuva + pancadas positivas ou código de chuva | `rain`. |
+| Nenhuma das anteriores | `none`. |
+
+Os efeitos representam uma estimativa regional. A chuva inclui partículas e relâmpagos simulados; os relâmpagos não indicam uma detecção de raios reais. A neve acumula uma camada parcial em solo e telhados enquanto a simulação está ativa.
+
+### 3. Cache, atualizações e falhas
+
+| Situação | Comportamento da aplicação |
+| --- | --- |
+| Consulta bem-sucedida | Resultado em memória por 15 minutos. |
+| Aba oculta | Pausa novos refreshes; ao voltar, consulta se necessário. Uma requisição já em andamento pode terminar. |
+| API lenta | Cancela a requisição após 10 segundos. |
+| Falha de rede ou resposta inválida | Remove a precipitação, informa indisponibilidade e tenta novamente após 15 minutos. |
+| Permissão negada ou localização indisponível | Mantém o mapa funcionando sem precipitação e mostra o motivo. |
+| Permissão revogada | Quando a Permissions API suporta o aviso, limpa coordenadas e cache e cancela a consulta. |
+| Cidade viva desabilitada | Cancela consultas e timers, pausa partículas e restaura a iluminação diurna. |
+
+Para tentar obter a localização novamente, reative **Cidade viva**. O cache ainda válido pode ser reutilizado. Os seletores manuais mudam a cena, mas, na aplicação, as consultas automáticas continuam seguindo o estado de **Cidade viva**.
+
+### 4. Endpoint próprio
+
+Configure o endpoint no build da **aplicação Atlas**:
+
+```sh
+VITE_WEATHER_API_URL=https://weather.example.com/v1/forecast npm run build
+```
+
+O serviço precisa aceitar os parâmetros acima, responder com o contrato `current` da [Forecast API](https://open-meteo.com/en/docs) e permitir CORS para a origem da aplicação. Variáveis `VITE_*` são públicas no bundle: chaves privadas devem ser adicionadas por um backend, nunca pela URL do cliente.
+
+Para um projeto que usa apenas o pacote, conecte seu próprio provedor e passe o resultado já convertido:
+
+```jsx
+<CityMap
+  data={companies}
+  weather={weatherState.type} // "none", "rain" ou "snow"
+  lightingMode="auto"
+/>
+```
+
+`weatherState` pertence à integração do projeto consumidor. O hook e o adaptador do Atlas são implementados em [`use-weather.js`](https://github.com/raphox/atlas/blob/main/src/hooks/use-weather.js) e [`weather.js`](https://github.com/raphox/atlas/blob/main/src/weather.js); não são exports do pacote.
+
+### Atribuição e uso comercial
+
+Os dados da Open-Meteo usam [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Preserve a atribuição ao provedor quando exibir seus dados. Os termos do serviço são independentes da licença dos dados: antes de operar uma instância, confira os [termos da Open-Meteo](https://open-meteo.com/en/terms), inclusive elegibilidade comercial e limites. O endpoint gratuito é destinado a uso não comercial; uma operação comercial precisa de um serviço compatível. O playground desta documentação usa somente simulação.
+
+<h2 id="iluminacao">Iluminação e simulação</h2>
+
+A iluminação automática usa o relógio local do navegador, independentemente da API de clima: amanhecer entre 6h e 8h, dia entre 8h e 17h, entardecer entre 17h e 19h e noite no restante. Os seletores permitem combinar dia, amanhecer/entardecer ou noite com chuva, neve ou nenhuma precipitação.
+
+[Experimente o exemplo de clima no playground](./#playground).
+
+<h2 id="monitoramento">Monitoramento e dados da aplicação</h2>
+
+Na aplicação Atlas, a tabela, os filtros e a paginação acompanham a cidade. É possível filtrar por saúde e categorias, pesquisar empresas e escolher 100, 250, 500, 1.000 ou todas as empresas por cidade. Os filtros são aplicados antes da paginação.
+
+O painel de monitoramento mostra um relógio local e até quatro empresas atualmente em alto risco, ordenadas pelo início do status (`statusChangedAt`), considerando o conjunto completo de dados. Registros sem esse timestamp são contabilizados separadamente. O painel reflete o último carregamento ou importação; não há polling automático dos dados empresariais.
+
+Importações JSON de até 5 MB são validadas no navegador e não persistem após recarregar. Uma importação inválida preserva a cidade anterior. Para conectar um backend, configure `dataUrl` e `mode` em `public/config.json`; o endpoint pode retornar uma lista ou `{ companies: [...] }`. Esse fluxo pertence à aplicação; o pacote reutilizável recebe a lista pela propriedade `data`.
+
+<h2 id="integracao">Integração e distribuição</h2>
+
+O pacote oferece tema CSS puro, integração com Tailwind 4, callbacks e API imperativa de câmera. Pode ser renderizado em um shell SSR, mas o WebGL inicia apenas no navegador. Em frameworks com Server Components, coloque o componente em uma fronteira de cliente.
+
+[Veja instalação, propriedades e exemplos executáveis](./#instalacao).
+
+</div>

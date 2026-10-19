@@ -18,7 +18,11 @@
     "pack:package": "npm pack ./packages/city-chart",
     "test:package": "npm run build:package && node --test tests/city-package.test.mjs",
     "pretest:e2e": "npm run build:package",
-    "audit:contrast": "node scripts/audit-city-contrast.mjs"
+    "audit:contrast": "node scripts/audit-city-contrast.mjs",
+    "dev:docs": "vite --config vite.docs.config.js",
+    "build:docs": "vite build --config vite.docs.config.js",
+    "preview:docs": "vite preview --config vite.docs.config.js",
+    "test:docs": "npm run build:docs && playwright test --config playwright.docs.config.js"
   },
   "dependencies": {
     "@tanstack/charts": "1.1.0",
@@ -26,9 +30,12 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "lucide-react": "^1.59.0",
+    "prism-react-renderer": "^2.4.1",
     "radix-ui": "^1.8.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-live": "^5.0.1",
+    "react-simple-code-editor": "^0.14.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
     "three": "0.180.0",
@@ -36,9 +43,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@mdx-js/rollup": "^3.1.1",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.2",
+    "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.4"
   },
