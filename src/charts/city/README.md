@@ -1,10 +1,10 @@
-# City chart: health score como uma cidade 3D
+# City chart: company health as a 3D city
 
-Extensão local do TanStack Charts **1.1.0**. Uma empresa é uma marca espacial: a combinação de categorias determina seu distrito e sua cor, valores da métrica determinam o porte da construção e a classificação de saúde determina os sinais de risco. O cadastro atual fornece `status`, não um score numérico; o gráfico não inventa nem calcula esse score.
+A local extension for TanStack Charts **1.1.0**. A company is a spatial mark: its category combination determines its district and color, metric values determine building size, and its health classification determines risk indicators. Current records provide `status`, not a numeric score; the chart neither invents nor calculates such a score.
 
-O consumidor usa `defineChart`, `ChartMark`, `ChartRenderer`, `ChartPoint`, foco, tooltip e callbacks do TanStack. O Three.js implementa a superfície 3D. Não é necessário usar a aplicação Atlas, seus filtros ou seus componentes de interface.
+Consumers use TanStack's `defineChart`, `ChartMark`, `ChartRenderer`, `ChartPoint`, focus, tooltip, and callbacks. Three.js implements the 3D surface. The Atlas application, its filters, and its interface components are not required.
 
-## Uso com React
+## Using React
 
 ```jsx
 import { useMemo } from "react";
@@ -12,7 +12,7 @@ import { Chart } from "@tanstack/charts/react/core";
 import { tooltip } from "@tanstack/charts/tooltip";
 import { defineCityChart, createCityRenderer } from "./src/charts/city";
 
-const renderer = createCityRenderer(); // identidade estável entre renders
+const renderer = createCityRenderer(); // Stable identity across renders.
 
 export function CompanyHealth({ companies, onCompanySelect }) {
   const definition = useMemo(
@@ -30,7 +30,7 @@ export function CompanyHealth({ companies, onCompanySelect }) {
       definition={definition}
       renderer={renderer}
       height={480}
-      ariaLabel="Saúde das empresas"
+      ariaLabel="Company health"
       onSelect={(point) => onCompanySelect(point?.datum ?? null)}
       onFocusChange={(point) => console.log(point?.datum)}
     />
@@ -38,11 +38,11 @@ export function CompanyHealth({ companies, onCompanySelect }) {
 }
 ```
 
-`createCityRenderer()` é uma fábrica de `ChartRenderer`, não um novo host. Cada montagem tem câmera, seleção, contexto WebGL e recursos próprios, mesmo ao compartilhar a definição e o renderer. Para JavaScript sem React, passe os mesmos `definition` e `renderer` para `mountChartRenderer` de `@tanstack/charts/renderer` e chame `host.destroy()` ao remover o gráfico.
+`createCityRenderer()` is a `ChartRenderer` factory, not a new host. Each mount has its own camera, selection, WebGL context, and resources, even when sharing a definition and renderer. For JavaScript without React, pass the same `definition` and `renderer` to `mountChartRenderer` from `@tanstack/charts/renderer` and call `host.destroy()` when removing the chart.
 
-## Composição da definição
+## Composing the definition
 
-`defineCityChart` é somente um preset. Quem já cria definições pode usar a marca diretamente:
+`defineCityChart` is a preset. Consumers that already create definitions can use the mark directly:
 
 ```js
 import { defineChart } from "@tanstack/charts";
@@ -67,132 +67,131 @@ const definition = defineChart({
 });
 ```
 
-A cor resolvida pelo TanStack chega ao renderer. `defineCityChart(data, options)` também aceita as opções habituais da definição, como `color`, `tooltip` e `keyboard`. A opção interna `layout` evita recalcular a distribuição quando a aplicação já possui o resultado de `layoutCity`.
+The color resolved by TanStack reaches the renderer. `defineCityChart(data, options)` also accepts the usual definition options, such as `color`, `tooltip`, and `keyboard`. The internal `layout` option avoids recalculating placement when the application already has the result of `layoutCity`.
 
-`cityFocus` resolve o prédio atingido por raycasting, em vez de procurar o ponto mais próximo em uma projeção antiga. `getPresentationPoints` e `subscribePresentationPoints` atualizam as posições dos `ChartPoint`s quando a câmera muda. Assim, foco e tooltips do próprio TanStack acompanham zoom, giro e redimensionamento. Arrastar a câmera não dispara seleção. Setas, Home/End e Enter usam o teclado do host TanStack.
+`cityFocus` resolves the building hit by raycasting instead of finding the nearest point in an outdated projection. `getPresentationPoints` and `subscribePresentationPoints` update `ChartPoint` positions when the camera changes. This lets TanStack's own focus and tooltips follow zoom, rotation, and resizing. Dragging the camera does not trigger selection. Arrow keys, Home/End, and Enter use the TanStack host's keyboard handling.
 
-## Dados e semântica
+## Data and semantics
 
 ```js
 const companies = [
-  { id: "aurora", name: "Aurora", metric: { label: "Receita", value: 2200.75 }, categories: [{ label: "Varejo", value: "retail" }], status: "critical" },
-  { id: "cedro", name: "Cedro", metric: { label: "Receita", value: 350 }, categories: [{ label: "Serviços", value: "services" }], status: "warning" },
+  { id: "aurora", name: "Aurora", metric: { label: "Revenue", value: 2200.75 }, categories: [{ label: "Retail", value: "retail" }], status: "critical" },
+  { id: "cedar", name: "Cedar", metric: { label: "Revenue", value: 350 }, categories: [{ label: "Services", value: "services" }], status: "warning" },
 ];
 ```
 
-| Campo | Contrato | Representação |
+| Field | Contract | Representation |
 | --- | --- | --- |
-| `id` | string ou número único e estável | chave da marca e da seleção |
-| `name` | string não vazia | identificação da empresa |
-| `metric` | `{ label: string, value: number }`, valor finito ≥ 0 | label na interface; valor define o porte |
-| `categories` | lista de `{ label: string, value: string }` | distrito e cor; até três valores distintos na base |
-| `status` | `healthy`, `warning` ou `critical` | operação normal, fumaça/alerta ou fogo/piscar |
+| `id` | unique, stable string or number | mark and selection key |
+| `name` | nonempty string | company identification |
+| `metric` | `{ label: string, value: number }`, finite value ≥ 0 | label in the interface; value determines size |
+| `categories` | list of `{ label: string, value: string }` | district and color; up to three distinct values across the dataset |
+| `status` | `healthy`, `warning`, or `critical` | normal operation, smoke/warning, or fire/flashing |
 
-O contrato genérico pode ser passado diretamente a `defineCityChart`/`cityMark`. `placeCompanies` valida os dados e calcula `mask` (bits 1, 2 e 4 atribuídos aos identificadores das categorias em ordem textual). As combinações determinam até sete regiões. O mesmo `value` deve manter o mesmo `label` em toda a base. O layout deve usar a base já normalizada quando calculado fora da marca, antes da paginação.
+The generic contract can be passed directly to `defineCityChart`/`cityMark`. `placeCompanies` validates the data and calculates `mask` (bits 1, 2, and 4 assigned to category identifiers in text order). Combinations determine up to seven regions. The same `value` must retain the same `label` throughout the dataset. When calculated outside the mark, the layout must use the already normalized dataset, before pagination.
 
-Integrações existentes com `{ users, mask }` continuam aceitas pela marca. O importador do Atlas também aceita `{ users, systems: ["A", "B"] }`, convertendo para os campos genéricos. `metric.value` preserva decimais; `sizeForValue` mantém as quatro faixas de porte existentes (<90, <550, <1800 e ≥1800), independentemente do label. `sizeForUsers` permanece como alias de compatibilidade.
+Existing integrations with `{ users, mask }` are still accepted by the mark. The Atlas importer also accepts `{ users, systems: ["A", "B"] }`, converting them to the generic fields. `metric.value` preserves decimals; `sizeForValue` retains the four existing size ranges (<90, <550, <1800, and ≥1800), regardless of the label. `sizeForUsers` remains as a compatibility alias.
 
-O ponto preserva `datum === data[datumIndex]`. A marca não altera as linhas recebidas, inclusive quando estão congeladas. `xValue` e `yValue` são as coordenadas espaciais x/z dos lotes. A geometria mutável do Three.js recebe cópias separadas. Dados novos exigem uma nova definição, como nos demais gráficos TanStack; mantenha os dados imutáveis e memorize definições que capturam props.
+The point preserves `datum === data[datumIndex]`. The mark does not mutate input rows, including frozen ones. `xValue` and `yValue` are the lots' spatial x/z coordinates. Mutable Three.js geometry receives separate copies. New data requires a new definition, as in other TanStack charts; keep data immutable and memoize definitions that capture props.
 
-## Organização
+## Organization
 
-| Arquivo | Responsabilidade |
+| File | Responsibility |
 | --- | --- |
-| `index.js` | entrada pública sem React ou componentes do Atlas |
-| `data.js` | contrato JSDoc e validação dos dados |
-| `mark.js` | `createMark`: canais, identidade, geometria semântica e pontos |
-| `definition.js` | preset de escalas, cor, foco e layout |
-| `layout.js` | transporte interno do layout na cena, sem alterar os dados do consumidor |
-| `interaction.js` | associação de pontos à superfície e estratégia de foco 3D |
-| `renderer.js` | `ChartRenderer`/`ChartSurface`: montagem, projeção, eventos e descarte |
-| `react.jsx` | integração visual do Atlas sobre o `Chart` oficial |
-| `use-city-chart.js` | ponte do Atlas para câmera, labels, tooltip visual e transição de páginas |
-| `three/primitives.js` | materiais e lotes de instâncias compartilhados |
-| `three/terrain.js` | ruas, calçadas, marcações, árvores e bancos |
-| `three/buildings.js` | construções, janelas e emissores de risco |
-| `three/building-material.js` | vermelho de risco independente da iluminação e exposição |
-| `three/lighting.js` | períodos de luz pelo relógio local e iluminação das janelas |
-| `three/weather.js` | partículas, contraste da chuva e clarões de relâmpagos |
-| `three/snow-cover.js` | cobertura parcial de neve no solo e nos telhados |
-| `three/traffic.js` | desenho de carros, pessoas e semáforos |
-| `three/effects.js` | alertas, cores de risco e coordenação das partículas |
-| `../../city.js` | cena, câmera, animação e recursos WebGL |
+| `index.js` | public entry point without React or Atlas components |
+| `data.js` | JSDoc contract and data validation |
+| `mark.js` | `createMark`: channels, identity, semantic geometry, and points |
+| `definition.js` | preset for scales, color, focus, and layout |
+| `layout.js` | internal layout transport within the scene, without mutating consumer data |
+| `interaction.js` | point-to-surface association and 3D focus strategy |
+| `renderer.js` | `ChartRenderer`/`ChartSurface`: mounting, projection, events, and disposal |
+| `react.jsx` | Atlas visual integration over the official `Chart` |
+| `use-city-chart.js` | Atlas bridge for camera, labels, visual tooltips, and page transitions |
+| `three/primitives.js` | shared materials and instance batches |
+| `three/terrain.js` | streets, sidewalks, markings, trees, and benches |
+| `three/buildings.js` | buildings, windows, and risk emitters |
+| `three/building-material.js` | risk red independent of lighting and exposure |
+| `three/lighting.js` | lighting periods based on the local clock and window lighting |
+| `three/weather.js` | particles, rain contrast, and lightning flashes |
+| `three/snow-cover.js` | partial snow cover on the ground and rooftops |
+| `three/traffic.js` | rendering cars, people, and traffic lights |
+| `three/effects.js` | warnings, risk colors, and particle coordination |
+| `../../city.js` | scene, camera, animation, and WebGL resources |
 
-`src/components/city-map.jsx` é o consumidor da extensão: conecta o gráfico aos dados e controles do Atlas. O componente React aceita `showDistrictLabels` (padrão `false`) para exibir as etiquetas das categorias e interseções; o checkbox correspondente no Atlas controla essa propriedade sem reconstruir a cena. O renderer não importa `useAtlas`, paginação, shadcn ou React. A simulação do trânsito continua separada em `src/traffic.js`.
+`src/components/city-map.jsx` consumes the extension, connecting the chart to Atlas data and controls. The React component accepts `showDistrictLabels` (default `false`) to display category and intersection labels; the corresponding Atlas checkbox controls this prop without rebuilding the scene. The renderer does not import `useAtlas`, pagination, shadcn, or React. Traffic simulation remains separate in `src/traffic.js`.
 
-O vermelho do piscar crítico é uma cor fixa (`#ff2525`), independente das luzes e da exposição. Fora da fase vermelha, o prédio mantém a cor de sua categoria sob a iluminação atual. O ícone de exclamação também preserva suas cores, sem iluminação nem mapeamento de tons. Ambos permanecem constantes durante as transições de período.
+Critical flashing uses a fixed red (`#ff2525`), independent of lights and exposure. Outside the red phase, the building retains its category color under the current lighting. The exclamation icon also preserves its colors, without lighting or tone mapping. Both remain constant during lighting period transitions.
 
-## Atualizações e renderização
+## Updates and rendering
 
-O layout é calculado pela marca (ou fornecido pela aplicação) e acompanha um grupo da cena por um símbolo interno. O renderer reutiliza esse resultado, inclusive em cidades vazias, e copia somente as linhas que o motor Three.js precisa alterar. Cada montagem mantém sua própria câmera, geometria e cache de interação.
+The layout is calculated by the mark (or supplied by the application) and attached to a scene group through an internal symbol. The renderer reuses this result, including for empty cities, and copies only rows the Three.js engine needs to mutate. Each mount maintains its own camera, geometry, and interaction cache.
 
-| Mudança | Trabalho necessário |
+| Change | Required work |
 | --- | --- |
-| IDs, categorias, posições ou limites das ruas | reconstruir a cidade e enquadrar o novo layout |
-| Métrica ou saúde, com os mesmos lotes | reconstruir prédios e efeitos; preservar terreno, trânsito, câmera e seleção existente |
-| Paleta | atualizar as cores das instâncias, preservando sombreamento e fase de risco |
-| Nome | atualizar os dados usados pela interface |
-| Tamanho do contêiner | ajustar a câmera e o canvas, sem reconstruir geometria |
+| IDs, categories, positions, or street bounds | rebuild the city and frame the new layout |
+| Metric or health, with the same lots | rebuild buildings and effects; preserve terrain, traffic, camera, and existing selection |
+| Palette | update instance colors while preserving shading and risk phase |
+| Name | update data used by the interface |
+| Container size | adjust the camera and canvas without rebuilding geometry |
 
-Com cidade viva, efeitos e rotação automática desligados, o loop entra em repouso após a câmera estabilizar. Câmera, seleção, dados, controles e redimensionamento solicitam um novo frame; animações mantêm o loop ativo somente enquanto necessário. Ao integrar diretamente com o motor, use `setActivity({ life, effects })` e `select(company)`/`select(null)` para também invalidar a cena.
+With City life, effects, and auto-rotation disabled, the loop sleeps after the camera settles. Camera, selection, data, controls, and resizing request a new frame; animations keep the loop active only while needed. When integrating directly with the engine, use `setActivity({ life, effects })` and `select(company)`/`select(null)` to invalidate the scene as well.
 
-Com cidade viva ativa, a iluminação segue o horário local do navegador: sol nascente das 6h às 8h, dia das 8h às 17h, sol poente das 17h às 19h e noite das 19h às 6h. Nascente e poente compartilham o mesmo nível de luz quente. As janelas ficam acesas nesses períodos e à noite, inclusive com efeitos de risco desligados; fogo e alertas preservam sua sinalização. A verificação ocorre a cada minuto e ao retornar à aba, inclusive com movimento reduzido. Desativar cidade viva restaura a iluminação diurna original e interrompe a verificação periódica.
+With City life enabled, lighting follows the browser's local time: sunrise from 6:00 to 8:00 a.m., day from 8:00 a.m. to 5:00 p.m., sunset from 5:00 to 7:00 p.m., and night from 7:00 p.m. to 6:00 a.m. Sunrise and sunset share the same warm lighting level. Windows are lit during those periods and at night, including when risk effects are disabled; fire and warnings retain their signals. The time is checked every minute and when returning to the tab, including with reduced motion. Disabling City life restores the original daylight and stops periodic checks.
 
-O seletor **Iluminação** permite testar **Nascente/poente**, **Dia** e **Noite** manualmente. **Automático** é o padrão e retoma o horário local ao ser selecionado. As mudanças de luz e das janelas são graduais, em 1,8 segundo, inclusive ao ativar/desativar cidade viva. Trocar de opção durante a transição parte da iluminação atual, sem saltos. A primeira renderização já usa o período correto. O seletor fica desabilitado com cidade viva desligada e preserva a escolha para quando ela for reativada. `CityChart` aceita a propriedade `lightingMode` (`auto`, `twilight`, `day`, `night`); integrações diretas com o motor podem usar `setLightingMode(mode)`. A verificação periódica do relógio fica suspensa durante uma escolha manual. A transição de cores funciona com movimento reduzido e mantém o loop ativo apenas até terminar, mesmo sem trânsito ou efeitos animados.
+The **Lighting** selector allows manual testing of **Sunrise/sunset**, **Day**, and **Night**. **Automatic** is the default and resumes local time when selected. Lighting and window changes are gradual, taking 1.8 seconds, including when toggling City life. Changing the option during a transition starts from the current lighting, without jumps. The first render already uses the correct period. The selector is disabled when City life is off and preserves the choice for when it is re-enabled. `CityChart` accepts the `lightingMode` prop (`auto`, `twilight`, `day`, `night`); direct engine integrations can use `setLightingMode(mode)`. Periodic clock checks are suspended during a manual selection. The color transition works with reduced motion and keeps the loop active only until it finishes, even without traffic or animated effects.
 
-As projeções do TanStack e as etiquetas do Atlas acompanham uma revisão da câmera. Etiquetas também se atualizam quando seus dados ou filtro mudam. O hover e a estratégia de foco compartilham o mesmo resultado de raycasting para a mesma coordenada/câmera; o cache é invalidado quando os dados da cena mudam. Buscas por empresa usam um índice por ID.
+TanStack projections and Atlas labels follow a camera revision. Labels also update when their data or filter changes. Hover and the focus strategy share the same raycasting result for the same coordinate/camera; the cache is invalidated when scene data changes. Company lookups use an ID index.
 
-Os testes de navegador verificam repouso sem novos frames ou uploads, retomada das animações e da câmera, uma consulta por movimento do ponteiro, layout personalizado e preservação de geometria/zoom nas atualizações de cor. Não há promessa de ganho fixo de FPS: ele depende do dispositivo e da quantidade de efeitos ativos.
+Browser tests verify sleeping without new frames or uploads, animation and camera resumption, one query per pointer move, custom layouts, and geometry/zoom preservation during color updates. There is no promise of a fixed FPS improvement: it depends on the device and the number of active effects.
 
-## Clima opcional
+## Optional weather
 
-`CityChart` aceita `weather="none" | "rain" | "snow"` (padrão `none`); integrações diretas usam `city.setWeather(type)`. A cena não consulta APIs nem solicita localização: a aplicação Atlas faz isso em `src/hooks/use-weather.js` e `src/weather.js`, seguindo **Cidade viva**. A extensão continua independente do provedor.
+`CityChart` accepts `weather="none" | "rain" | "snow"` (default `none`); direct integrations use `city.setWeather(type)`. The scene does not query APIs or request location: the Atlas application does that in `src/hooks/use-weather.js` and `src/weather.js`, following **City life**. The extension remains provider-independent.
 
-As partículas só aparecem e mantêm o loop ativo com `life=true` e sem movimento reduzido. A camada reutiliza duas geometrias e materiais entre condições e páginas, ajusta seus limites ao layout e libera seus recursos junto com a cena. Os efeitos meteorológicos não alteram a iluminação pelo relógio nem dependem de `effects`, que controla apenas o risco. Créditos, configuração do endpoint e responsabilidade comercial estão no README principal.
+Particles only appear and keep the loop active with `life=true` and without reduced motion. The layer reuses two geometries and materials across conditions and pages, adjusts its bounds to the layout, and releases its resources with the scene. Weather effects do not alter clock-based lighting or depend on `effects`, which controls only risk. Attribution, endpoint configuration, and commercial responsibilities are documented in the main README.
 
-## Geometria simplificada
+## Simplified geometry
 
-| Elemento | Geometria atual |
+| Element | Current geometry |
 | --- | --- |
-| Prédio/casa | um bloco; face superior já é o telhado |
-| Janela | um plano de dois triângulos, sem moldura |
-| Rua/calçada | faixas contínuas planas, em vez de blocos por lote |
-| Faixas e linhas de parada | planos; travessias com três faixas largas |
-| Terreno | um plano verde de gramado; lotes dos prédios em bege e calçadas em cinza, todos planos |
-| Árvores | zero a três por lote vazio; tronco e copa de oito faces, com posições e tamanhos variados |
-| Bancos | um único bloco baixo em cerca de 9% dos lotes vazios; compartilham o instanciamento dos troncos |
-| Carro | carroceria e cabine; sem rodas |
-| Pedestre | corpo e cabeça de oito faces; sem pernas |
-| Semáforo | poste, caixas e luzes simples; mantém as fases de veículos e pedestres |
-| Fogo/fumaça | volumes instanciados de oito faces |
+| Building/house | one block; its top face is already the roof |
+| Window | one two-triangle plane, without a frame |
+| Street/sidewalk | continuous flat strips instead of blocks per lot |
+| Crosswalks and stop lines | planes; crosswalks use three wide stripes |
+| Terrain | one green lawn plane; beige building lots and gray sidewalks, all planar |
+| Trees | zero to three per empty lot; eight-sided trunk and canopy, with varied positions and sizes |
+| Benches | one low block on about 9% of empty lots; share the trunk instance batch |
+| Car | body and cabin; no wheels |
+| Pedestrian | body and eight-sided head; no legs |
+| Traffic light | pole, housings, and simple lights; retains vehicle and pedestrian phases |
+| Fire/smoke | instanced eight-sided volumes |
 
-A distribuição de árvores e bancos usa sementes por coordenada: permanece estável ao reconstruir a mesma cidade, mantém as copas dentro do lote e reserva espaço entre árvores e bancos.
+Tree and bench placement uses coordinate-based seeds: it stays stable when rebuilding the same city, keeps canopies within the lot, and reserves space between trees and benches.
 
-Removidos também os planos extras de sombra por prédio e os telhados duplicados do contorno de seleção. A cor continua representando categorias; saúde não altera porte nem pertencimento a um distrito.
+Extra per-building shadow planes and duplicate roofs in the selection outline have also been removed. Color still represents categories; health does not change size or district membership.
 
-Medição determinística da geometria base, sem fogo/fumaça e sem descarte pela câmera:
+Deterministic measurement of base geometry, without fire/smoke or camera culling:
 
-| Empresas | Triângulos antes | Triângulos atuais | Redução | Lotes de desenho antes → atuais |
+| Companies | Previous triangles | Current triangles | Reduction | Previous → current draw batches |
 | --- | ---: | ---: | ---: | ---: |
-| 100 | 96.830 | 26.022 | 73,1% | 26 → 17 |
-| 1.400 | 804.354 | 198.042 | 75,4% | 26 → 17 |
+| 100 | 96,830 | 26,022 | 73.1% | 26 → 17 |
+| 1,400 | 804,354 | 198,042 | 75.4% | 26 → 17 |
 
-Reproduza com `node scripts/benchmark-city.mjs`. São contagens de geometria, não uma promessa de FPS. A contagem real por frame também depende de efeitos, seleção, visibilidade e câmera.
+Reproduce with `node scripts/benchmark-city.mjs`. These are geometry counts, not an FPS promise. Actual per-frame counts also depend on effects, selection, visibility, and camera.
 
-## Verificação e limites
+## Verification and limitations
 
-- `npm test`: contratos da marca, dados imutáveis, SSR, isolamento entre superfícies, orçamento de geometria, simulação, emissores e liberação de recursos.
-- `npm run test:e2e`: consumo direto pelo host TanStack, eventos/teclado/tooltip, duas montagens e os fluxos do Atlas em desktop e mobile.
-- `npm run build` e `npm run format:check`: build de produção e formatação.
+- `npm test`: mark contracts, immutable data, SSR, surface isolation, geometry budget, simulation, emitters, and resource release.
+- `npm run test:e2e`: direct use through the TanStack host, events/keyboard/tooltips, two mounts, and Atlas flows on desktop and mobile.
+- `npm run build` and `npm run format:check`: production build and formatting.
 
-A superfície é dedicada a uma cidade: não desenha eixos, grids ou marcas cartesianas arbitrárias sobre o WebGL. Use uma `cityMark` por superfície. SVG e Canvas não se tornam renderers 3D; a geometria semântica da marca permite uma representação plana quando desenhada por SVG, mas a cidade requer `createCityRenderer`. SSR produz um shell acessível determinístico; WebGL só inicia na montagem do navegador. O pacote npm é gerado em `packages/city-chart`; consulte seu README para distribuição, temas CSS/Tailwind e uso do componente completo.
+The surface is dedicated to a city: it does not draw axes, grids, or arbitrary Cartesian marks over WebGL. Use one `cityMark` per surface. SVG and Canvas do not become 3D renderers; the mark's semantic geometry allows a flat representation when drawn with SVG, but the city requires `createCityRenderer`. SSR produces a deterministic accessible shell; WebGL starts only when mounted in the browser. The npm package is generated in `packages/city-chart`; see its README for distribution, CSS/Tailwind themes, and use of the complete component.
 
-Referências de API: [custom marks and renderers](https://tanstack.com/charts/latest/docs/guides/custom-marks-and-renderers), [React renderer entry points](https://tanstack.com/charts/latest/docs/framework/react/reference/chart), [fonte da versão 1.1.0](https://github.com/TanStack/charts/tree/v1.1.0).
+API references: [custom marks and renderers](https://tanstack.com/charts/latest/docs/guides/custom-marks-and-renderers), [React renderer entry points](https://tanstack.com/charts/latest/docs/framework/react/reference/chart), [version 1.1.0 source](https://github.com/TanStack/charts/tree/v1.1.0).
 
+### Optional selectors in the React component
 
-### Seletores opcionais no componente React
-
-`CityChart` aceita `showEnvironmentControls={true}` para exibir dois dropdowns independentes de iluminação e clima. O padrão é `false`. `CityMap` encaminha a mesma propriedade; a demonstração Atlas a habilita em `src/App.jsx`.
+`CityChart` accepts `showEnvironmentControls={true}` to display two independent lighting and weather dropdowns. It defaults to `false`. The Atlas `CityMap` wrapper forwards the same prop; the Atlas demo enables it in `src/App.jsx`. The reusable package's `CityMap` defaults to showing these controls.
 
 ```jsx
 <CityChart
@@ -204,11 +203,11 @@ Referências de API: [custom marks and renderers](https://tanstack.com/charts/la
 />
 ```
 
-Iluminação oferece `auto`, `day`, `twilight` e `night`; clima oferece `auto`, `none`, `rain` e `snow`. Todas as combinações são possíveis. As escolhas manuais são locais a cada instância e não alteram as propriedades recebidas. A opção **Automático** volta a seguir `lightingMode` ou `weather` fornecido pelo consumidor. Com `showEnvironmentControls={false}`, os valores das propriedades são aplicados mesmo se havia uma escolha manual. Reexibir os controles recupera as escolhas anteriores.
+Lighting offers `auto`, `day`, `twilight`, and `night`; weather offers `auto`, `none`, `rain`, and `snow`. All combinations are supported. Manual choices are local to each instance and do not modify incoming props. **Automatic** resumes following the consumer's `lightingMode` or `weather`. With `showEnvironmentControls={false}`, prop values apply even if there was a manual choice. Showing the controls again restores previous choices.
 
-Os dropdowns ficam desabilitados durante carregamento/erro e com `life={false}`; desligar Cidade viva oculta as partículas e restaura a luz diurna, preservando as seleções. Movimento reduzido continua ocultando as partículas, inclusive na simulação.
+Dropdowns are disabled during loading/errors and with `life={false}`; turning off City life hides particles and restores daylight while preserving selections. Reduced motion continues to hide particles, including in simulations.
 
-Por padrão os seletores são posicionados no rodapé do gráfico. Ao usar `children` como função, o consumidor deve posicionar o elemento `environmentControls` retornado junto de `ready`, `error` e `weatherMode` (`auto`, `none`, `rain` ou `snow`). O Atlas o insere nos controles existentes e usa `weatherMode` para identificar a simulação:
+By default, selectors are positioned at the bottom of the chart. When using `children` as a function, the consumer must position the `environmentControls` element returned alongside `ready`, `error`, and `weatherMode` (`auto`, `none`, `rain`, or `snow`). Atlas places it within the existing controls and uses `weatherMode` to identify simulations:
 
 ```jsx
 <CityChart definition={definition} showEnvironmentControls>
@@ -220,9 +219,8 @@ Por padrão os seletores são posicionados no rodapé do gráfico. Ao usar `chil
 </CityChart>
 ```
 
+### Weather appearance and animation
 
-### Aparência e animação do clima
+Snow uses 3px points with a white center and blue-gray edge to maintain contrast over both light ground and nighttime scenes, with irregular clusters and individual phase, speed, and sway for each flake. `SnowCover` draws soft patches using instances of a shared plane: partial coverage grows from 20% to its limit over 24 seconds of animation, preserving uncovered rooftop areas. When the layout changes, instances follow the new buildings and heights; geometry, material, and texture are reused. Coverage disappears outside snow mode.
 
-A neve usa pontos de 3 px, com centro branco e borda azul-acinzentada para manter contraste tanto sobre o solo claro quanto à noite, com agrupamentos irregulares e fase, velocidade e oscilação próprias por floco. `SnowCover` desenha manchas suaves com instâncias de um plano compartilhado: a cobertura parcial cresce de 20% até o limite em 24 segundos de animação, preservando áreas descobertas dos telhados. Ao mudar o layout, as instâncias acompanham os novos prédios e alturas; geometria, material e textura são reutilizados. A cobertura desaparece fora do modo neve.
-
-A cor da chuva interpola entre azul escuro e claro usando a luminância atual do fundo, inclusive durante transições de iluminação. Os relâmpagos são uma luz direcional adicional, com direção variável e uma sequência de dois ou três flashes por evento: início imediato, pico de 20 ms, queda rápida e pausas escuras irregulares. Cada flash dura 80–140 ms, com pausas de 60–220 ms; os flashes secundários têm 30–60% da intensidade do primeiro. A sequência é sorteada uma vez por evento, mantendo a animação independente da taxa de quadros. O primeiro aguarda 12–24 segundos; os demais aguardam 18–38 segundos entre inícios. O relógio da animação evita disparar clarões atrasados ao retornar de uma aba suspensa. Partículas, cobertura e relâmpagos seguem Cidade viva e movimento reduzido; nenhum efeito altera as cores base nem os materiais dos prédios.
+Rain color interpolates between dark and light blue using the current background luminance, including during lighting transitions. Lightning uses an additional directional light, with a variable direction and a sequence of two or three flashes per event: immediate onset, a 20ms peak, rapid decay, and irregular dark pauses. Each flash lasts 80–140ms, with 60–220ms pauses; secondary flashes have 30–60% of the first flash's intensity. The sequence is randomized once per event, keeping animation independent of the frame rate. The first event waits 12–24 seconds; subsequent events wait 18–38 seconds between starts. The animation clock avoids triggering delayed flashes when returning from a suspended tab. Particles, coverage, and lightning follow City life and reduced motion; no effect changes base building colors or materials.

@@ -20,7 +20,7 @@ const data = [
   },
 ];
 
-test("pacote compilado preserva dados e gera SSR sem DOM", () => {
+test("compiled package preserves data and renders SSR without a DOM", () => {
   const definition = defineCityChart(data);
   const scene = createChartRuntime().render(definition, {
     width: 800,
@@ -48,7 +48,7 @@ test("pacote compilado preserva dados e gera SSR sem DOM", () => {
   );
 });
 
-test("distribuição contém entradas, tipos e dois temas sem dependências da aplicação", async () => {
+test("distribution includes entry points, types and two themes without application dependencies", async () => {
   const manifest = JSON.parse(
     await readFile(
       new URL("../packages/city-chart/package.json", import.meta.url),

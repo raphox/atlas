@@ -42,17 +42,17 @@
   --color-c2s-blue: #1f72ea;
   --color-c2s-deep: #0b48a1;
   --color-c2s-abyss: #0b2d5f;
-  --color-c2s-navy: #0d2a54; /* nome de produto sobre fundo branco */
-  --color-primary-50: #e3e9f2; /* stop oficial (mais claro) */
+  --color-c2s-navy: #0d2a54; /* product name on a white background */
+  --color-primary-50: #e3e9f2; /* official color stop (lightest) */
   --color-primary-100: #bed1eb;
-  --color-primary-200: #9ab9e4; /* stop oficial */
+  --color-primary-200: #9ab9e4; /* official color stop */
   --color-primary-300: #7ba7e5;
   --color-primary-400: #5c96e7;
   --color-primary-500: #3e84e8;
-  --color-primary-600: #1f72ea; /* stop oficial — ação padrão */
+  --color-primary-600: #1f72ea; /* official color stop — default action */
   --color-primary-700: #155dc6;
-  --color-primary-800: #0b48a1; /* stop oficial */
-  --color-primary-900: #0b2d5f; /* stop oficial (mais escuro) */
+  --color-primary-800: #0b48a1; /* official color stop */
+  --color-primary-900: #0b2d5f; /* official color stop (darkest) */
   --color-success: #22c55e;
   --color-success-fg: #166534;
   --color-success-bg: #dcfce7;
@@ -74,9 +74,9 @@
 /* C2S color tokens: https://github.com/contact2sale/c2s-all-in-one/blob/main/packages/ui/styles/globals.css */
 :root {
   font-synthesis: none;
-  --radius: 0.5rem; /* 8px — padrão do DS C2S */
+  --radius: 0.5rem; /* 8px — C2S design system default */
 
-  /* Degradê oficial da marca (Profundidade -> Luz) */
+  /* Official brand gradient (Depth -> Light) */
   --gradient-c2s: linear-gradient(
     90deg,
     #0b2d5f 0%,
@@ -87,7 +87,7 @@
     #ffffff 100%
   );
 
-  /* Neutros / superfícies (slate) */
+  /* Neutrals / surfaces (slate) */
   --background: #f8fafc; /* page-bg / slate-50 */
   --foreground: #0f172a; /* ink */
   --card: #ffffff;
@@ -95,7 +95,7 @@
   --popover: #ffffff;
   --popover-foreground: #0f172a;
 
-  /* Ação principal — C2S Blue */
+  /* Primary action — C2S Blue */
   --primary: #1f72ea; /* primary-600 */
   --primary-foreground: #ffffff;
 
@@ -103,7 +103,7 @@
   --secondary-foreground: #334155; /* slate-700 */
   --muted: #f1f5f9;
   --muted-foreground: #64748b; /* slate-500 */
-  --accent: #e3e9f2; /* primary-50 (stop oficial) */
+  --accent: #e3e9f2; /* primary-50 (official color stop) */
   --accent-foreground: #155dc6; /* primary-700 */
 
   --destructive: #ef4444; /* danger-500 */
@@ -112,7 +112,7 @@
   --input: #e2e8f0;
   --ring: #1f72ea; /* primary */
 
-  /* Gráficos (paleta C2S) */
+  /* Charts (C2S palette) */
   --chart-1: #1f72ea; /* primary */
   --chart-2: #22c55e; /* success */
   --chart-3: #f59e0b; /* warning */
@@ -132,7 +132,7 @@
 }
 
 .dark {
-  /* Neutros invertidos (slate dark do DS C2S) */
+  /* Inverted neutrals (C2S design system dark slate) */
   --background: #0b1220;
   --foreground: #f8fafc;
   --card: #111827;
@@ -147,7 +147,7 @@
   --secondary-foreground: #e2e8f0;
   --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  --accent: #0a2547; /* azul profundo p/ superfície de destaque */
+  --accent: #0a2547; /* deep blue for the accent surface */
   --accent-foreground: #7ba7e5; /* primary-300 */
 
   --destructive: #ef4444;

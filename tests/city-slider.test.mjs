@@ -65,7 +65,7 @@ function setup(t) {
   return { city, panel, slider, animations };
 }
 
-test("avançar e voltar deslocam cenas em sentidos opostos e liberam o mapa ao terminar", async (t) => {
+test("next and previous move scenes in opposite directions and unlock the map on completion", async (t) => {
   const { city, panel, slider, animations } = setup(t);
   for (const direction of [1, -1]) {
     animations.length = 0;
@@ -92,7 +92,7 @@ test("avançar e voltar deslocam cenas em sentidos opostos e liberam o mapa ao t
   }
 });
 
-test("cancelar durante filtros remove a cena antiga sem encerrar uma transição posterior", async (t) => {
+test("canceling during filtering removes the old scene without ending a subsequent transition", async (t) => {
   const { city, panel, slider, animations } = setup(t);
   slider.capture();
   const first = slider.play(1);
@@ -110,7 +110,7 @@ test("cancelar durante filtros remove a cena antiga sem encerrar uma transição
   assert.equal(panel.children.length, 0);
 });
 
-test("movimento reduzido troca a cidade sem snapshot ou bloqueio dos controles", async (t) => {
+test("reduced motion switches the city without a snapshot or locking controls", async (t) => {
   const { city, panel, slider, animations } = setup(t);
   city.reduceMotion = true;
   slider.capture();
@@ -120,7 +120,7 @@ test("movimento reduzido troca a cidade sem snapshot ou bloqueio dos controles",
   assert.equal(city.controls.enabled, true);
 });
 
-test("snapshot preserva posições CSS das etiquetas sem alterar a cidade recebida", (t) => {
+test("snapshots preserve label CSS positions without changing the incoming city", (t) => {
   const { panel, slider } = setup(t);
   const rule = {
     cssText:

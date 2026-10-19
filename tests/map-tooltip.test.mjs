@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { mapTooltipAnchor } from "../src/lib/map-tooltip.js";
 
-test("a âncora mantém a projeção do telhado dentro do mapa", () => {
+test("the anchor keeps the roof projection inside the map", () => {
   assert.deepEqual(mapTooltipAnchor({ x: 0.5, y: -0.5 }, 800, 600), {
     x: 600,
     y: 450,
   });
 });
 
-test("telhados fora do enquadramento mantêm uma âncora visível nas bordas", () => {
+test("roofs outside the view retain a visible anchor at the edges", () => {
   for (const point of [
     { x: 0, y: 2 },
     { x: 0, y: -2 },
@@ -23,7 +23,7 @@ test("telhados fora do enquadramento mantêm uma âncora visível nas bordas", (
   }
 });
 
-test("dimensões transitórias não produzem âncoras inválidas", () => {
+test("transient dimensions do not produce invalid anchors", () => {
   assert.equal(mapTooltipAnchor({ x: 0, y: 0 }, 0, 600), null);
   assert.equal(mapTooltipAnchor({ x: NaN, y: 0 }, 800, 600), null);
   assert.deepEqual(mapTooltipAnchor({ x: 2, y: 2 }, 20, 10), { x: 10, y: 5 });

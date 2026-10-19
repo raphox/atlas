@@ -18,7 +18,7 @@ async function ready(page) {
 }
 const summary = (page) => page.evaluate(() => window.atlas.summary);
 
-test("mapa, tabela, filtros e paginação compartilham o estado React", async ({
+test("map, table, filters and pagination share React state", async ({
   page,
 }) => {
   const errors = [];
@@ -69,7 +69,7 @@ test("mapa, tabela, filtros e paginação compartilham o estado React", async ({
   expect(errors).toEqual([]);
 });
 
-test("busca, detalhes, controles, ajuda e estado vazio funcionam", async ({
+test("search, details, controls, help and the empty state work", async ({
   page,
 }) => {
   const errors = [];
@@ -132,7 +132,7 @@ test("busca, detalhes, controles, ajuda e estado vazio funcionam", async ({
   expect(errors).toEqual([]);
 });
 
-test("importação valida o JSON antes de substituir as empresas e permite baixar o exemplo", async ({
+test("import validates JSON before replacing companies and allows the sample to be downloaded", async ({
   page,
 }) => {
   await ready(page);
@@ -212,7 +212,7 @@ test("importação valida o JSON antes de substituir as empresas e permite baixa
   expect((await download).suggestedFilename()).toBe("empresas-exemplo.json");
 });
 
-test("layouts móvel e tablet mantêm os controles, sem rolagem horizontal", async ({
+test("mobile and tablet layouts retain controls without horizontal scrolling", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -245,7 +245,7 @@ test("layouts móvel e tablet mantêm os controles, sem rolagem horizontal", asy
   });
 });
 
-test("a tabela permanece abaixo do mapa em janelas baixas e durante a rolagem", async ({
+test("the table stays below the map in short windows and during scrolling", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -283,9 +283,7 @@ test("a tabela permanece abaixo do mapa em janelas baixas e durante a rolagem", 
   await page.screenshot({ path: "test-results/atlas-map-table-layout.png" });
 });
 
-test("falha da fonte é exibida e oferece tentar novamente", async ({
-  page,
-}) => {
+test("source failures are displayed with a retry option", async ({ page }) => {
   await page.route("**/config.json", (route) =>
     route.fulfill({ status: 503, body: "Unavailable" }),
   );
@@ -298,7 +296,7 @@ test("falha da fonte é exibida e oferece tentar novamente", async ({
   ).toBeVisible();
 });
 
-test("tooltips ficam ancorados no prédio e mantêm uma seta triangular visível", async ({
+test("tooltips stay anchored to buildings and retain a visible triangular arrow", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -417,7 +415,7 @@ test("tooltips ficam ancorados no prédio e mantêm uma seta triangular visível
   await page.screenshot({ path: "test-results/atlas-tooltip-arrow.png" });
 });
 
-test("tooltip aparece ao passar pela fachada mesmo com o telhado fora do mapa", async ({
+test("the tooltip appears when hovering over the facade even with the roof outside the map", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -501,7 +499,7 @@ test("tooltip aparece ao passar pela fachada mesmo com o telhado fora do mapa", 
   await expect(tooltip).toHaveCount(0);
 });
 
-test("tela cheia mantém controles e restaura o mapa e a tabela ao sair", async ({
+test("fullscreen retains controls and restores the map and table on exit", async ({
   page,
 }) => {
   const errors = [];
@@ -559,7 +557,7 @@ test("tela cheia mantém controles e restaura o mapa e a tabela ao sair", async 
   expect(errors).toEqual([]);
 });
 
-test("bússola acompanha a rotação e restaura a visão isométrica inicial por clique e teclado", async ({
+test("the compass follows rotation and restores the initial isometric view by click and keyboard", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });

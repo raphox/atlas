@@ -7,7 +7,7 @@ import {
   getBrowserMapLocale,
 } from "../src/charts/city/i18n.js";
 
-test("mapa aceita as duas localidades e usa inglês para idiomas indisponíveis", () => {
+test("the map accepts both locales and uses English for unsupported languages", () => {
   assert.equal(resolveMapLocale("pt-BR"), "pt-BR");
   assert.equal(resolveMapLocale("PT-br"), "pt-BR");
   assert.equal(resolveMapLocale("en-US"), "en-US");
@@ -30,7 +30,7 @@ test("mapa aceita as duas localidades e usa inglês para idiomas indisponíveis"
   );
 });
 
-test("catálogos completos preservam parâmetros e formatam números na localidade", () => {
+test("complete catalogs preserve parameters and format numbers in the locale", () => {
   assert.deepEqual(
     Object.keys(mapMessages["pt-BR"]).sort(),
     Object.keys(mapMessages["en-US"]).sort(),

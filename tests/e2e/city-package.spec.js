@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 for (const theme of ["package", "package-tailwind"]) {
-  test(`pacote independente, tema ${theme}, controles e isolamento`, async ({
+  test(`standalone package, ${theme} theme, controls and isolation`, async ({
     page,
   }) => {
     const errors = [];

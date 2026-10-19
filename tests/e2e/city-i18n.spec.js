@@ -44,7 +44,7 @@ for (const c of cases) {
   test.describe(`map locale ${c.locale}`, () => {
     test.use({ locale: c.locale, reducedMotion: "reduce" });
 
-    test("pacote traduz controles e detalhes sem alterar os dados", async ({
+    test("the package translates controls and details without changing data", async ({
       page,
     }) => {
       const errors = [];
@@ -70,7 +70,7 @@ for (const c of cases) {
       expect(errors).toEqual([]);
     });
 
-    test("mapa da aplicação traduz controles e estado do clima", async ({
+    test("the application map translates controls and weather status", async ({
       page,
     }) => {
       await page.addInitScript(() => {
@@ -94,7 +94,7 @@ for (const c of cases) {
   });
 }
 
-test("troca de idioma preserva canvas, seleção e estado dos controles", async ({
+test("language changes preserve the canvas, selection and control state", async ({
   page,
 }) => {
   await page.goto("/tests/e2e/fixtures/package.html");

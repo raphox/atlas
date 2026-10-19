@@ -35,7 +35,7 @@ const sceneFor = (definition, size = { width: 800, height: 450 }) => {
   return runtime.render(definition, size);
 };
 
-test("cityMark compõe uma definição TanStack e preserva datum, índices, chaves e cores", () => {
+test("cityMark composes a TanStack definition and preserves datum, indices, keys and colors", () => {
   const definition = defineChart({
     marks: [cityMark(data)],
     scales: { x: { scale: scaleLinear }, y: { scale: scaleLinear } },
@@ -58,7 +58,7 @@ test("cityMark compõe uma definição TanStack e preserva datum, índices, chav
   assert.equal(data[0].height, undefined);
 });
 
-test("a definição é determinística, responsiva e aceita uma base vazia", () => {
+test("the definition is deterministic, responsive and accepts an empty dataset", () => {
   const definition = defineCityChart(data);
   const first = sceneFor(definition);
   const wide = sceneFor(definition, { width: 1200, height: 450 });
@@ -77,7 +77,7 @@ test("a definição é determinística, responsiva e aceita uma base vazia", () 
   assert.equal(sceneFor(defineCityChart([])).points.length, 0);
 });
 
-test("o foco usa a superfície de cada montagem sem misturar duas cidades", () => {
+test("focus uses each mount surface without mixing two cities", () => {
   const one = sceneFor(defineCityChart(data)).points;
   const two = sceneFor(defineCityChart(data)).points;
   bindCityPoints(one, () => [one[0]]);
@@ -87,7 +87,7 @@ test("o foco usa a superfície de cada montagem sem misturar duas cidades", () =
   assert.deepEqual(cityFocus.resolve([], { x: 0, y: 0 }), []);
 });
 
-test("o renderer gera shell SSR sem WebGL nem DOM e escapa o nome acessível", () => {
+test("the renderer generates an SSR shell without WebGL or a DOM and escapes the accessible name", () => {
   const renderer = createCityRenderer();
   const markup = renderer.prerender(sceneFor(defineCityChart(data)), {
     ariaLabel: 'Saúde <empresas> "A" & B',
@@ -97,7 +97,7 @@ test("o renderer gera shell SSR sem WebGL nem DOM e escapa o nome acessível", (
   assert.doesNotMatch(markup, /<canvas/);
 });
 
-test("a marca rejeita entradas inválidas antes de tentar distribuir os lotes", () => {
+test("the mark rejects invalid inputs before attempting lot allocation", () => {
   for (const invalid of [
     null,
     [{}],
@@ -110,7 +110,7 @@ test("a marca rejeita entradas inválidas antes de tentar distribuir os lotes", 
   }
 });
 
-test("o layout acompanha a cena TanStack inclusive vazia, sem recalcular posições", () => {
+test("the layout follows the TanStack scene, including empty scenes, without recalculating positions", () => {
   for (const rows of [data, []]) {
     const layout = layoutCity(rows);
     if (rows.length) layout.companies[0].x += 0.4;
@@ -121,7 +121,7 @@ test("o layout acompanha a cena TanStack inclusive vazia, sem recalcular posiç�
   }
 });
 
-test("a marca recebe o contrato genérico sem mask e mantém o datum original", () => {
+test("the mark accepts the generic contract without a mask and retains the original datum", () => {
   const rows = [
     {
       id: "generic",
@@ -140,7 +140,7 @@ test("a marca recebe o contrato genérico sem mask e mantém o datum original", 
   assert.equal(rows[0].mask, undefined);
 });
 
-test("a marca mantém IDs numéricos no contrato genérico e valida categorias normalizadas", () => {
+test("the mark retains numeric IDs in the generic contract and validates normalized categories", () => {
   const row = {
     id: 101,
     name: "Aurora",

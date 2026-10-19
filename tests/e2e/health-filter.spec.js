@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("saúde permite combinar e remover estados e sincroniza mapa, tabela, contagens e paginação", async ({
+test("health allows combining and removing statuses and synchronizes the map, table, counts and pagination", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });

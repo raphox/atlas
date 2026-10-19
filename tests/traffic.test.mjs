@@ -37,7 +37,7 @@ function carsOverlap(a, b) {
       radius(a, axis) + radius(b, axis) - 1e-5,
   );
 }
-test("o asfalto do cruzamento conecta integralmente as quatro ruas", () => {
+test("intersection pavement fully connects all four streets", () => {
   const parts = roadTileParts(0, 0);
   const covered = (x, z) =>
     parts.some(
@@ -53,7 +53,7 @@ test("o asfalto do cruzamento conecta integralmente as quatro ruas", () => {
   }
   assert.equal(roadTileParts(1, 1).length, 0);
 });
-test("semáforos alternam e reservam um intervalo exclusivo de pedestres", () => {
+test("traffic lights alternate and reserve an exclusive pedestrian interval", () => {
   for (let t = 0; t < 84; t += 0.1) {
     const p = signalState(t);
     assert.ok(!(p.x === "green" && p.z === "green"));
@@ -63,7 +63,7 @@ test("semáforos alternam e reservam um intervalo exclusivo de pedestres", () =>
     }
   }
 });
-test("o trânsito mantém separação e respeita pedestres durante vários ciclos", () => {
+test("traffic maintains separation and respects pedestrians over multiple cycles", () => {
   for (const bounds of [
     { x1: -4, x2: 4, z1: -4, z2: 4 },
     { x1: -12, x2: 12, z1: -8, z2: 8 },

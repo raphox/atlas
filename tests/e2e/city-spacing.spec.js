@@ -8,7 +8,7 @@ const gap = (above, below) => below.y - above.y - above.height;
 const right = (rect) => rect.x + rect.width;
 const aligned = (a, b) => expect(Math.abs(a - b)).toBeLessThan(1);
 
-test("Atlas alinha grupos e preserva espaço com zoom e detalhes", async ({
+test("Atlas aligns groups and preserves spacing with zoom and details", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -84,7 +84,7 @@ test("Atlas alinha grupos e preserva espaço com zoom e detalhes", async ({
 });
 
 for (const theme of ["package", "package-tailwind"]) {
-  test(`pacote ${theme} mantém espaçamento e alinhamento com títulos longos`, async ({
+  test(`the ${theme} package preserves spacing and alignment with long titles`, async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });

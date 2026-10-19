@@ -12,7 +12,7 @@ async function ready(page, path = "/") {
   await expect(page.locator("canvas").first()).toBeVisible();
 }
 
-test("rotação automática inicia desmarcada, funciona com a cena parada e permanece ativa após paginação", async ({
+test("auto-rotation starts unchecked, works with a static scene and stays active after pagination", async ({
   page,
 }) => {
   await ready(page);
@@ -53,7 +53,7 @@ test("rotação automática inicia desmarcada, funciona com a cena parada e perm
 });
 
 for (const path of ["/", "/tests/e2e/fixtures/package.html"]) {
-  test(`tela cheia solicita e libera bloqueio de repouso: ${path}`, async ({
+  test(`fullscreen requests and releases a wake lock: ${path}`, async ({
     page,
   }) => {
     await page.addInitScript(() => {
@@ -96,7 +96,7 @@ for (const path of ["/", "/tests/e2e/fixtures/package.html"]) {
   });
 }
 
-test("tela cheia continua disponível quando o navegador recusa o bloqueio de repouso", async ({
+test("fullscreen remains available when the browser denies the wake lock", async ({
   page,
 }) => {
   await page.addInitScript(() => {

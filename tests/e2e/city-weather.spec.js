@@ -12,7 +12,7 @@ const response = (code) => ({
 });
 const weather = (page) => page.evaluate(() => window.atlas?.summary.weather);
 
-test("Cidade viva requests location, shows rain and snow, caches and stops when disabled", async ({
+test("City life requests location, shows rain and snow, caches and stops when disabled", async ({
   page,
   context,
 }) => {
@@ -139,7 +139,7 @@ test("refresh waits for cache expiry, pauses in background and stops after permi
   expect(requests).toBe(3);
 });
 
-test("a pending API response cannot restore weather after Cidade viva is turned off", async ({
+test("a pending API response cannot restore weather after City life is turned off", async ({
   page,
   context,
 }) => {
@@ -214,7 +214,7 @@ test("failed weather request does not block the map; reduced motion suppresses p
   );
 });
 
-test("late location is ignored after Cidade viva is disabled", async ({
+test("late location is ignored after City life is disabled", async ({
   page,
 }) => {
   let requests = 0;

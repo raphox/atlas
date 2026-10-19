@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("a extensão funciona no host TanStack sem Atlas, com eventos, tooltip e duas montagens", async ({
+test("the extension works in the TanStack host without Atlas, with events, tooltips and two mounts", async ({
   page,
 }) => {
   const errors = [];
@@ -170,7 +170,7 @@ test("a extensão funciona no host TanStack sem Atlas, com eventos, tooltip e du
   expect(errors).toEqual([]);
 });
 
-test("layout compartilhado, atualizações incrementais e repouso preservam o gráfico", async ({
+test("shared layout, incremental updates and idle rendering preserve the chart", async ({
   page,
 }) => {
   const errors = [];

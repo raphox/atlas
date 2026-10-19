@@ -18,7 +18,7 @@ import {
   ROAD_EVERY,
   PAGE_SIZES,
 } from "../src/model.js";
-test("as sete regiões correspondem exatamente aos sistemas presentes", () => {
+test("the seven regions exactly match the systems present", () => {
   const cases = [
     [0, -10, 1],
     [-25, 10, 2],
@@ -31,7 +31,7 @@ test("as sete regiões correspondem exatamente aos sistemas presentes", () => {
   ];
   for (const [x, z, mask] of cases) assert.equal(membership(x, z), mask);
 });
-test("mais de mil empresas ocupam lotes únicos sem ruas e sem duplicação", () => {
+test("more than a thousand companies occupy unique lots without streets or duplicates", () => {
   const companies = demoCompanies();
   assert.equal(companies.length, 1400);
   const ids = new Set(),
@@ -51,7 +51,7 @@ test("mais de mil empresas ocupam lotes únicos sem ruas e sem duplicação", ()
   for (const r of REGIONS) assert.ok(companies.some((c) => c.mask === r.mask));
   assert.deepEqual(companies, demoCompanies());
 });
-test("filtro mantém somente a interseção exata, risco e busca solicitados", () => {
+test("filtering keeps only the requested exact intersection, risk and search matches", () => {
   const companies = demoCompanies();
   const selected = filteredCompanies(companies, {
     region: "3",
@@ -71,7 +71,7 @@ test("filtro mantém somente a interseção exata, risco e busca solicitados", (
     0,
   );
 });
-test("dados importados preservam membros, usuários e risco, com validação antes de trocar a cidade", () => {
+test("imported data preserves memberships, users and risk with validation before replacing the city", () => {
   const valid = [
     {
       id: "a",
@@ -98,12 +98,12 @@ test("dados importados preservam membros, usuários e risco, com validação ant
   assert.throws(() => placeCompanies([valid[0], valid[0]]));
   assert.throws(() => placeCompanies([]));
 });
-test("porte cresce com usuários, independente do estado de saúde", () => {
+test("size grows with user count regardless of health status", () => {
   assert.equal(sizeForUsers(30).house, true);
   assert.equal(sizeForUsers(500).house, false);
   assert.ok(sizeForUsers(3000).height > sizeForUsers(500).height);
 });
-test("paginação padrão de 100 não perde nem repete empresas entre cidades", () => {
+test("default pagination of 100 neither loses nor repeats companies between cities", () => {
   const companies = demoCompanies();
   const ids = [];
   for (let page = 1; page <= 14; page++) {
@@ -117,7 +117,7 @@ test("paginação padrão de 100 não perde nem repete empresas entre cidades", 
     companies.map((c) => c.id),
   );
 });
-test("os filtros são aplicados antes da paginação e todas as opções de tamanho funcionam", () => {
+test("filters apply before pagination and all page-size options work", () => {
   const companies = demoCompanies();
   const filters = { status: "warning" };
   const matching = filteredCompanies(companies, filters);
@@ -141,7 +141,7 @@ test("os filtros são aplicados antes da paginação e todas as opções de tama
   );
   assert.throws(() => paginateCompanies(companies, {}, 1, 99));
 });
-test("cada cidade cresce por lotes próximos ao centro, mantendo a pertinência exata e reservando ruas e parques", () => {
+test("each city grows through lots near the center, preserving exact membership and reserving streets and parks", () => {
   const datasets = [
     paginateCompanies(demoCompanies()).companies,
     demoCompanies(),
@@ -177,7 +177,7 @@ test("cada cidade cresce por lotes próximos ao centro, mantendo a pertinência 
   assert.deepEqual(layoutCity(page), layoutCity(page));
   assert.equal(layoutCity([]).companies.length, 0);
 });
-test("importação admite mais de mil empresas numa mesma interseção para posterior paginação", () => {
+test("imports accept more than a thousand companies in one intersection for subsequent pagination", () => {
   const data = Array.from({ length: 1401 }, (_, i) => ({
     id: String(i),
     name: `Empresa ${i}`,
@@ -192,7 +192,7 @@ test("importação admite mais de mil empresas numa mesma interseção para post
   );
 });
 
-test("métricas e categorias genéricas preservam valores decimais e identidades", () => {
+test("generic metrics and categories preserve decimal values and identities", () => {
   const source = [
     {
       id: "b",
@@ -233,7 +233,7 @@ test("métricas e categorias genéricas preservam valores decimais e identidades
   assert.equal(layoutCity(page.companies).companies[0].metric.value, 1350.75);
 });
 
-test("o contrato genérico rejeita valores e categorias inconsistentes antes da importação", () => {
+test("the generic contract rejects inconsistent values and categories before import", () => {
   const row = {
     name: "Empresa",
     metric: { label: "Receita", value: 10.5 },
@@ -283,7 +283,7 @@ test("o contrato genérico rejeita valores e categorias inconsistentes antes da 
   );
 });
 
-test("nomes das categorias e da métrica acompanham filtros e paginação", () => {
+test("category and metric names follow filters and pagination", () => {
   const data = placeCompanies([
     {
       id: "1",
@@ -327,7 +327,7 @@ test("nomes das categorias e da métrica acompanham filtros e paginação", () =
   );
 });
 
-test("saúde aceita múltiplos estados e combina a união com categoria e busca antes de paginar", () => {
+test("health accepts multiple statuses and combines their union with category and search before pagination", () => {
   const companies = demoCompanies();
   const statuses = ["warning", "critical"];
   const expected = companies.filter((company) =>

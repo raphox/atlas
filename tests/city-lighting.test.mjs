@@ -18,7 +18,7 @@ const settleLighting = (city, date) => {
   advanceLighting(city, LIGHTING_TRANSITION_MS);
 };
 
-test("os três níveis seguem o horário local, incluindo as viradas de período", () => {
+test("the three levels follow local time, including period boundaries", () => {
   for (const [hour, minute, expected] of [
     [0, 0, "night"],
     [5, 59, "night"],
@@ -36,7 +36,7 @@ test("os três níveis seguem o horário local, incluindo as viradas de período
   }
 });
 
-test("janelas acompanham a luz e reconstruções, preservando efeitos de risco independentes", () => {
+test("windows follow lighting and rebuilds while preserving independent risk effects", () => {
   const city = {
     scene: new THREE.Scene(),
     buildings: new THREE.Group(),
@@ -107,7 +107,7 @@ test("janelas acompanham a luz e reconstruções, preservando efeitos de risco i
   disposeSceneGroups([city.scene]);
 });
 
-test("luz e janelas interpolam sem saltos ao trocar de destino durante a transição", () => {
+test("lighting and windows interpolate without jumps when the target changes during a transition", () => {
   const city = {
     scene: new THREE.Scene(),
     life: true,

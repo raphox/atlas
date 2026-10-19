@@ -5,7 +5,7 @@ import { WindowPlumes } from "../src/plume-renderer.js";
 import { facadeWindows, windowEmitters } from "../src/plumes.js";
 import { sizeForUsers } from "../src/model.js";
 
-test("os volumes Three.js permanecem válidos, respeitam a seleção e podem ser ocultados", () => {
+test("Three.js volumes remain valid, respect selection and can be hidden", () => {
   const c = {
       id: "company",
       x: 3,

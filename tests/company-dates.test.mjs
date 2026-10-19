@@ -16,7 +16,7 @@ const row = {
   categories: [{ label: "Varejo", value: "retail" }],
 };
 
-test("datas são preservadas em HTTP, importação e layout, com normalização do fuso", () => {
+test("timestamps are preserved through HTTP, imports and layout with time zone normalization", () => {
   const input = {
     ...row,
     updatedAt: "2026-10-19T12:00:00-03:00",
@@ -34,7 +34,7 @@ test("datas são preservadas em HTTP, importação e layout, com normalização 
   assert.equal(placeCompanies([row])[0].updatedAt, undefined);
 });
 
-test("datas inválidas, sem fuso e mudança posterior à atualização são rejeitadas", () => {
+test("invalid timestamps, missing time zones and status changes after the update are rejected", () => {
   for (const value of [
     "ontem",
     "2026-10-19",
@@ -68,7 +68,7 @@ test("datas inválidas, sem fuso e mudança posterior à atualização são reje
   );
 });
 
-test("ranking usa a entrada no estado atual, ignora atualizações comuns e empresas recuperadas", () => {
+test("ranking uses entry into the current status and ignores ordinary updates and recovered companies", () => {
   const companies = Array.from({ length: 7 }, (_, i) => ({
     ...row,
     id: String(i),

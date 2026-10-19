@@ -18,7 +18,7 @@ function sources(status = "critical") {
     emitters: windowEmitters(c, facadeWindows(c, size, 1.6, 1.5)),
   };
 }
-test("cada emissão pertence a uma janela real e nasce dentro do edifício", () => {
+test("each emission belongs to a real window and originates inside the building", () => {
   const { windows, emitters } = sources();
   assert.ok(emitters.length > 0);
   for (const e of emitters) {
@@ -33,7 +33,7 @@ test("cada emissão pertence a uma janela real e nasce dentro do edifício", () 
     }
   }
 });
-test("a vazão cabe na abertura e depois se expande com saída normal e subida por empuxo", () => {
+test("flow fits the opening then expands outward along the normal and rises through buoyancy", () => {
   for (const { emitters } of [sources(), sources("warning")])
     for (const e of emitters)
       for (const kind of ["flame", "smoke"]) {
@@ -55,7 +55,7 @@ test("a vazão cabe na abertura e depois se expande com saída normal e subida p
         assert.ok(grown.radius > birth.radius);
       }
 });
-test("risco médio produz apenas fumaça; saudável não possui fonte", () => {
+test("medium risk produces only smoke; healthy buildings have no emitter", () => {
   const warning = sources("warning");
   assert.equal(makeParticles(warning.emitters, "flame").length, 0);
   assert.ok(makeParticles(warning.emitters, "smoke").length > 0);
@@ -68,7 +68,7 @@ test("risco médio produz apenas fumaça; saudável não possui fonte", () => {
   );
 });
 
-test("prédios maiores distribuem fumaça por mais janelas e andares, sem introduzir fogo", () => {
+test("larger buildings spread smoke across more windows and floors without introducing fire", () => {
   let previous = 0;
   for (const users of [30, 300, 1000, 3000]) {
     const size = sizeForUsers(users),

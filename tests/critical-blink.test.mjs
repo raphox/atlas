@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createCriticalBlink } from "../src/critical-blink.js";
 
-test("empresas críticas possuem ritmos distintos e intervalos irregulares sem transições graduais", () => {
+test("critical companies have distinct rhythms and irregular intervals without gradual transitions", () => {
   const patterns = [];
   for (let company = 0; company < 30; company++) {
     const blink = createCriticalBlink(`empresa-${company}`),
@@ -28,7 +28,7 @@ test("empresas críticas possuem ritmos distintos e intervalos irregulares sem t
   assert.equal(new Set(patterns).size, patterns.length);
 });
 
-test("fachada e telhado mantêm o mesmo ritmo após reconstruções e saltos de quadros", () => {
+test("facade and roof keep the same rhythm after rebuilds and frame jumps", () => {
   const body = createCriticalBlink("empresa-crítica"),
     roof = createCriticalBlink("empresa-crítica");
   for (const t of [0, 0.1, 0.8, 12, 85, 10000, 3])

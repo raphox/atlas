@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("optional controls combine every light and weather, resume props and respect Cidade viva", async ({
+test("optional controls combine every light and weather, resume props and respect City life", async ({
   page,
 }) => {
   const errors = [];

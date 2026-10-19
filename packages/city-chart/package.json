@@ -1,7 +1,7 @@
 {
   "name": "atlas-city-chart",
   "version": "0.1.0",
-  "description": "Gráfico de cidade 3D com clima, iluminação e interface personalizável por CSS.",
+  "description": "3D city chart with weather, lighting, and a CSS-customizable interface.",
   "type": "module",
   "license": "UNLICENSED",
   "sideEffects": [

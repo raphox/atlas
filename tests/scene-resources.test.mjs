@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as THREE from "three";
 import { disposeSceneGroups } from "../src/scene-resources.js";
 
-test("cidades removidas liberam recursos compartilhados uma vez e todos os buffers de instâncias", () => {
+test("removed cities release shared resources once and all instance buffers", () => {
   for (let page = 0; page < 20; page++) {
     const terrain = new THREE.Group(),
       buildings = new THREE.Group(),

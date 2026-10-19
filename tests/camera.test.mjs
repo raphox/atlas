@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { City } from "../src/city.js";
 
-test("isometria mantém inclinação fixa ao girar, recentralizar e voltar da vista superior", () => {
+test("isometric view keeps a fixed tilt when rotating, recentering and returning from the top view", () => {
   const camera = new THREE.OrthographicCamera(-100, 100, 100, -100, 0.1, 800);
   camera.position.set(160, 160, 160);
   const controls = new OrbitControls(camera, null),
@@ -37,7 +37,7 @@ test("isometria mantém inclinação fixa ao girar, recentralizar e voltar da vi
   }
 });
 
-test("rotação automática é opt-in, lenta, independente de FPS e pausa quando os controles estão bloqueados", () => {
+test("auto-rotation is opt-in, slow, frame-rate independent and pauses when controls are locked", () => {
   const previousDocument = globalThis.document;
   globalThis.document = { hidden: false };
   try {

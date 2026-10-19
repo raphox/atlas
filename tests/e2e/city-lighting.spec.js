@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.use({ timezoneId: "America/Sao_Paulo", reducedMotion: "reduce" });
 
-test("o seletor aplica os três níveis, retoma o automático e preserva a escolha com Cidade viva desligada", async ({
+test("the selector applies all three levels, resumes automatic mode and preserves the choice with City life off", async ({
   page,
 }) => {
   const errors = [];
@@ -53,7 +53,7 @@ test("o seletor aplica os três níveis, retoma o automático e preserva a escol
   expect(errors).toEqual([]);
 });
 
-test("a iluminação segue o relógio local, atualiza em repouso e depende de Cidade viva", async ({
+test("lighting follows the local clock, updates while idle and depends on City life", async ({
   page,
 }) => {
   const errors = [];

@@ -10,7 +10,7 @@ const records = [
     status: "warning",
   },
 ];
-test("o mesmo contrato JSON é convertido no cliente como lista ou envelope", () => {
+test("the same JSON contract is converted on the client as a list or envelope", () => {
   assert.equal(parseCompanyPayload(records)[0].mask, 5);
   assert.deepEqual(
     parseCompanyPayload({ companies: records }),
@@ -18,7 +18,7 @@ test("o mesmo contrato JSON é convertido no cliente como lista ou envelope", ()
   );
   assert.deepEqual(parseCompanyPayload({ companies: [] }), []);
 });
-test("a SPA lê o endpoint da configuração e carrega empresas sem servidor de renderização", async () => {
+test("the SPA reads the configured endpoint and loads companies without a rendering server", async () => {
   const requests = [];
   const fetcher = async (url, options) => {
     requests.push({ url, options });
@@ -39,7 +39,7 @@ test("a SPA lê o endpoint da configuração e carrega empresas sem servidor de 
   );
   assert.equal(requests[1].options.headers.Accept, "application/json");
 });
-test("falhas da fonte não são disfarçadas por dados demonstrativos", async () => {
+test("source failures are not masked by demo data", async () => {
   await assert.rejects(() =>
     loadCompanyData("/config.json", async () => ({ ok: false })),
   );
@@ -51,7 +51,7 @@ test("falhas da fonte não são disfarçadas por dados demonstrativos", async ()
   );
 });
 
-test("a fonte HTTP aceita a mesma métrica e categorias genéricas da importação", () => {
+test("the HTTP source accepts the same generic metric and categories as imports", () => {
   const rows = [
     {
       name: "Aurora",

@@ -9,7 +9,7 @@ import {
   ROAD_EVERY,
 } from "../src/model.js";
 
-test("toda área sem empresa recebe jardim, sem ocupar ruas, em cada filtro e página", () => {
+test("every area without a company receives a garden without occupying streets for every filter and page", () => {
   const records = demoCompanies();
   for (const size of PAGE_SIZES)
     for (const filter of [
@@ -60,7 +60,7 @@ test("toda área sem empresa recebe jardim, sem ocupar ruas, em cada filtro e p�
     }
 });
 
-test("jardins variam entre clareiras e grupos de árvores, com poucos bancos estáveis", () => {
+test("gardens vary between clearings and tree clusters with a few stable benches", () => {
   const layout = layoutCity(demoCompanies().slice(0, 100));
   const lots = greenLots(layout);
   assert.deepEqual(greenLots(layout), lots);
@@ -82,7 +82,7 @@ test("jardins variam entre clareiras e grupos de árvores, com poucos bancos est
       }
 });
 
-test("um lote liberado vira jardim e volta a receber uma empresa sem vegetação sobreposta", () => {
+test("a freed lot becomes a garden and can receive a company again without overlapping vegetation", () => {
   const layout = layoutCity(demoCompanies().slice(0, 100)),
     removed = layout.companies[0];
   const before = greenLots(layout);

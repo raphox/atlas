@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.use({ timezoneId: "America/Sao_Paulo" });
-test("relógio local e quatro entradas reais em alto risco ficam visíveis com filtros e em tela cheia", async ({
+test("the local clock and four actual high-risk entries stay visible with filters and in fullscreen", async ({
   page,
 }) => {
   await page.clock.setFixedTime(new Date("2026-10-19T15:30:00Z"));

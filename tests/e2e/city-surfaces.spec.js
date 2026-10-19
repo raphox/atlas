@@ -26,7 +26,7 @@ async function translucent(locator, blurred = true) {
   if (blurred) expect(appearance.blur).toBe("blur(10px)");
 }
 
-test("Atlas usa superfícies translúcidas e mantém o destaque das abas", async ({
+test("Atlas uses translucent surfaces and retains tab highlighting", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -91,7 +91,7 @@ test("Atlas usa superfícies translúcidas e mantém o destaque das abas", async
 });
 
 for (const theme of ["package", "package-tailwind"]) {
-  test(`${theme} aplica transparência no tema e aceita CSS customizado`, async ({
+  test(`${theme} applies theme transparency and accepts custom CSS`, async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });

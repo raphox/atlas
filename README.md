@@ -1,99 +1,97 @@
-# Atlas · Saúde das empresas
+# Atlas · Company health
 
-Cidade interativa em Three.js com uma base de 1.400 empresas fictícias, paginada inicialmente em cidades de 100 empresas. Cada empresa aparece uma única vez, na região correspondente à sua combinação exata de categorias.
+An interactive Three.js city with a dataset of 1,400 fictional companies, initially paginated into cities of 100 companies. Each company appears exactly once, in the region matching its exact combination of categories.
 
-## Executar
+## Getting started
 
-Aplicação Vite com React 19, TanStack Charts 1.1.0, Three.js e Tailwind CSS 4. Requer Node.js 22.12 ou superior (ou 24 LTS). Consulte EXECUTAR-LOCAL.md.
+A Vite application with React 19, TanStack Charts 1.1.0, Three.js, and Tailwind CSS 4. Requires Node.js 22.12 or later in the 22.x series, or Node.js 24 or later. See [Running Atlas locally](RUN-LOCALLY.md).
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Abra http://127.0.0.1:4173. O Vite recompila alterações automaticamente. `npm start` também inicia o ambiente de desenvolvimento. Para produção, execute `npm run build` e `npm run preview` para verificar o resultado. A publicação usa somente os arquivos estáticos em `dist/`; Three.js está incluído no bundle, sem dependência de CDN para a cena.
+Open http://127.0.0.1:4173. Vite rebuilds changes automatically. `npm start` also starts the development environment. For production, run `npm run build` and `npm run preview` to inspect the result. Deployment uses only the static files in `dist/`; Three.js is included in the bundle, with no CDN dependency for the scene.
 
-## Estrutura da interface
+## Interface structure
 
-- `src/main.jsx` monta a árvore React; `src/App.jsx` organiza a aplicação.
-- `src/components/` contém cabeçalho, ajuda, filtros, resumo, importação, busca, mapa, controles, detalhes e tabela com paginação. Campos, seletores, busca com sugestões, alternâncias e perspectiva usam HTML nativo (`input`, `select`, `datalist`, checkbox e radio). Cards, botões, diálogo e tooltips mantêm os componentes existentes.
-- `src/hooks/use-atlas.js` concentra os dados e o estado compartilhado entre mapa e tabela. A extensão em `src/charts/city/` usa `createMark`, `defineChart`, `ChartRenderer` e o componente `Chart` oficial do TanStack. Consulte [o guia de desenvolvimento](src/charts/city/README.md) para consumir a cidade em outro projeto, configurar eventos e entender a arquitetura.
-- `src/index.css` configura o Tailwind e os tokens de tema shadcn/ui; o layout e os componentes usam classes utilitárias. O CSS específico restante atende ao canvas e às capturas da animação de cidades.
-- `components.json` configura o shadcn/ui. Para adicionar componentes: `npx shadcn@latest add nome-do-componente`. O utilitário `cn` local fica em `src/lib/utils.js`.
-- `scripts/generate-demo.mjs` gera `public/data/empresas.json` antes de iniciar ou compilar. `public/config.json` continua configurando a fonte de dados.
+- `src/main.jsx` mounts the React tree; `src/App.jsx` organizes the application.
+- `src/components/` contains the header, help, filters, summary, import, search, map, controls, details, and paginated table. Fields, selectors, search suggestions, toggles, and perspective controls use native HTML (`input`, `select`, `datalist`, checkbox, and radio). Cards, buttons, dialogs, and tooltips retain the existing components.
+- `src/hooks/use-atlas.js` manages data and shared state between the map and table. The extension in `src/charts/city/` uses `createMark`, `defineChart`, `ChartRenderer`, and the official TanStack `Chart` component. See the [development guide](src/charts/city/README.md) to use the city in another project, configure events, and understand the architecture.
+- `src/index.css` configures Tailwind and the shadcn/ui theme tokens; the layout and components use utility classes. The remaining custom CSS supports the canvas and snapshots used in city transitions.
+- `components.json` configures shadcn/ui. To add components: `npx shadcn@latest add component-name`. The local `cn` utility is in `src/lib/utils.js`.
+- `scripts/generate-demo.mjs` generates `public/data/empresas.json` before startup or builds. `public/config.json` configures the data source.
 
-`npm test` executa os testes do domínio e do motor 3D. `npm run test:e2e` valida a aplicação no Chromium com Playwright (na primeira utilização, execute `npx playwright install chromium`). Os testes cobrem filtros, busca, paginação, seleção, controles, ajuda, importação, download, falhas da fonte e layout móvel com movimento reduzido.
+`npm test` runs domain and 3D engine tests. `npm run test:e2e` validates the application in Chromium with Playwright (run `npx playwright install chromium` before the first use). Tests cover filters, search, pagination, selection, controls, help, imports, downloads, data source failures, and mobile layouts with reduced motion.
 
+## Map language
 
-## Idioma do mapa
+The map interface uses `navigator.language`: `pt-BR` displays Brazilian Portuguese and `en-US` displays American English. Unsupported languages fall back to `en-US`. Translations are in `src/charts/city/i18n.js` and are shared by the application and reusable package. Controls, search, details, tooltips, weather messages, and numbers follow the selected language; names, categories, and metrics supplied in the data are preserved. Localization is limited to the map interface.
 
-A interface do mapa usa `navigator.language`: `pt-BR` exibe português brasileiro e `en-US` exibe inglês americano. Idiomas não disponíveis usam `en-US`. As traduções estão em `src/charts/city/i18n.js` e são compartilhadas pela aplicação e pelo pacote reutilizável. Controles, busca, detalhes, tooltips, mensagens de clima e números acompanham o idioma; nomes, categorias e métricas recebidos nos dados são preservados. A tradução se limita à interface do mapa.
+## Navigation
 
-## Navegação
+- Drag with the left mouse button to rotate horizontally. The tilt stays locked to the default isometric view; dragging up or down does not tilt the map.
+- Use the mouse wheel, +/− buttons, or a pinch gesture to zoom.
+- Drag with the right mouse button or two fingers to pan.
+- Click a building to select its company. The building receives a white outline with a dark border, and the lot receives a contrasting frame. The highlight is reused across selections and preserves category colors and risk effects.
+- The table below the map shows companies, categories, metric values, and health. It follows the same filters and pagination as the city. The view-on-map action selects, centers, and zooms in on the corresponding building up to the maximum allowed zoom.
+- Use search or filters to find companies. The health filter appears before the summary; category and intersection counts reflect all active filters across the full dataset, before pagination.
+- Choose 100, 250, 500, 1,000, or all companies per city; filters are applied before pagination.
+- When moving to the next page, the current city slides left and the next city enters from the right, already centered. Moving back reverses the direction. The table follows the page; with reduced motion, the switch is immediate.
+- Switch between isometric and top views. Press 0 to restore the overview.
+- The **City life** and **Risk effects** controls toggle their respective animations. The system preference for reduced motion is respected.
 
-- Arraste com o botão esquerdo para girar horizontalmente. A inclinação fica travada na isometria padrão; arrastar para cima ou para baixo não inclina o mapa.
-- Use a roda, os botões +/− ou pinça para zoom.
-- Arraste com o botão direito ou dois dedos para mover.
-- Clique em uma construção para selecionar a empresa. A construção recebe contorno branco com borda escura, e o lote recebe uma moldura contrastante. O destaque é reutilizado entre seleções e mantém as cores das categorias e os efeitos de risco.
-- A tabela abaixo do mapa mostra empresa, categorias, valores da métrica e saúde. Ela acompanha os mesmos filtros e a mesma paginação da cidade. “Ver no mapa” seleciona, centraliza e aproxima a construção correspondente até o zoom máximo permitido.
-- Use a busca ou os filtros para localizar empresas. O filtro de saúde aparece antes do resumo; as contagens em Categorias & interseções refletem todos os filtros ativos sobre a base completa, antes da paginação.
-- Escolha 100, 250, 500, 1.000 ou todas as empresas por cidade; os filtros são aplicados antes da paginação.
-- Ao avançar uma página, a cidade atual desliza para a esquerda e a próxima entra pela direita, já centralizada. Ao voltar, o movimento é invertido. A tabela acompanha a página; com movimento reduzido, a troca é imediata.
-- Alterne entre vista isométrica e superior. A tecla 0 restaura a visão geral.
-- Os controles “Cidade viva” e “Efeitos de risco” permitem ocultar as respectivas animações. A preferência do sistema por movimento reduzido é respeitada.
+## Local weather and lighting
 
-## Clima local e iluminação
+With **City life** enabled (the default), the browser requests location permission to query [Open-Meteo](https://open-meteo.com/) and display rain or snow. Automatic weather follows this control. Geolocation requires HTTPS in production; `localhost` is also supported during development. Denying permission or encountering a location/API error keeps the map available, with a status message and no precipitation.
 
-Com **Cidade viva** ativa (padrão), o navegador solicita permissão de localização para consultar o [Open-Meteo](https://open-meteo.com/) e representar chuva ou neve. O clima automático acompanha esse controle. A geolocalização exige HTTPS em produção; `localhost` também pode ser usado no desenvolvimento. Negar a permissão ou receber um erro de localização/API mantém o mapa disponível, com uma mensagem de estado e sem precipitação.
+Automatic lighting uses only the browser's local clock: sunrise from 6:00 to 8:00 a.m., day from 8:00 a.m. to 5:00 p.m., sunset from 5:00 to 7:00 p.m., and night from 7:00 p.m. to 6:00 a.m. The selector allows these periods to be chosen manually. Weather does not change the time or time zone used for lighting.
 
-A iluminação automática continua usando exclusivamente o relógio local do navegador: nascente das 6h às 8h, dia das 8h às 17h, poente das 17h às 19h e noite das 19h às 6h. O seletor permite escolher esses períodos manualmente. O clima não altera o horário nem o fuso da iluminação.
-
-A propriedade booleana `showEnvironmentControls` de `CityMap` e `CityChart` exibe os dropdowns **Iluminação** e **Clima**. O padrão é `false`; a demonstração em `src/App.jsx` usa `true`. Para ocultá-los, remova a propriedade ou use `showEnvironmentControls={false}`:
+The boolean `showEnvironmentControls` prop on the Atlas `CityMap` wrapper and `CityChart` displays the **Lighting** and **Weather** dropdowns. It defaults to `false` on these components; the demo in `src/App.jsx` sets it to `true`. To hide them, omit the prop or use `showEnvironmentControls={false}`:
 
 ```jsx
 <CityMap atlas={atlas} showEnvironmentControls />
 ```
 
-Os seletores independentes permitem combinar **Dia**, **Nascente/poente** ou **Noite** com **Sem precipitação**, **Chuva** ou **Neve**. **Automático** retoma o relógio local e o clima da API, respectivamente. O estado do mapa identifica o clima manual como simulação. Ambos ficam desabilitados com **Cidade viva** desligada, preservando as escolhas para a reativação. Ocultar os dropdowns devolve a cena aos valores fornecidos pelas propriedades (na aplicação, horário local e clima da API); as consultas automáticas continuam seguindo Cidade viva.
+The independent selectors allow **Day**, **Sunrise/sunset**, or **Night** to be combined with **No precipitation**, **Rain**, or **Snow**. **Automatic** resumes the local clock and API weather, respectively. The map status identifies manual weather as a simulation. Both selectors are disabled when **City life** is off, preserving choices for when it is enabled again. Hiding the dropdowns returns the scene to the values supplied through props (local time and API weather in the application); automatic requests continue to follow City life.
 
+- Requests are made directly by the client, with no account, API key, or backend in the default mode.
+- Atlas requests location without high accuracy and rounds coordinates to two decimal places before sending them. Coordinates and responses remain only in memory during the session; they are not stored in `localStorage`, cookies, or company records. The provider receives the IP address and approximate coordinates, subject to the [Open-Meteo policy](https://open-meteo.com/en/terms).
+- Results are reused for 15 minutes. Periodic requests pause while the tab is hidden and resume as needed when it becomes visible. Each request has a 10-second timeout; failures remove precipitation and are retried after 15 minutes. To request location again, re-enable City life.
+- Disabling **City life** stops pending requests, periodic refreshes, and particles, restoring daylight as in the existing behavior. Re-enabling it uses the browser's permission and may reuse a still-valid result in memory.
+- Three.js particles reuse buffers and do not interfere with company selection. Snow uses small flakes, irregular distribution, and varied speeds; a light, partial layer accumulates on the ground and rooftops over about 24 seconds, without covering all building colors. The layer is removed when leaving snow mode or turning off City life.
+- Rain adjusts its contrast to the lighting: darker blue during the day and lighter blue at night. During rain, each lightning event starts with an immediate flash followed by one or two weaker flashes, separated by irregular dark intervals; the first occurs after 12–24 seconds and subsequent events occur every 18–38 seconds of animation, at randomized intervals. There is no sound. With reduced motion, weather is shown as text, while particles, accumulation, and lightning are hidden.
+- `weather_code`, `rain`, `showers`, and `snowfall` determine the effect; snow takes priority in mixed precipitation. These are regional estimates, not instant detection on the user's street. Incomplete responses or timestamps more than 90 minutes from the current time are rejected.
 
-- As consultas são feitas diretamente pelo cliente, sem cadastro, API key ou backend no modo padrão.
-- O Atlas solicita localização sem alta precisão e arredonda as coordenadas para duas casas decimais antes do envio. Coordenadas e respostas ficam somente em memória durante a sessão; não são gravadas em `localStorage`, cookies ou no cadastro de empresas. O provedor recebe o IP e as coordenadas aproximadas, sujeitos à [política do Open-Meteo](https://open-meteo.com/en/terms).
-- O resultado é reutilizado por 15 minutos. Consultas periódicas ficam suspensas com a aba oculta e retomam quando necessário ao voltar. Cada consulta tem limite de 10 segundos; falhas removem a precipitação e são tentadas novamente após 15 minutos. Para tentar obter a localização novamente, reative Cidade viva.
-- Desativar **Cidade viva** interrompe consultas pendentes, atualização periódica e partículas, restaurando a iluminação diurna conforme o comportamento existente. Reativar usa a permissão do navegador e pode reutilizar um resultado ainda válido em memória.
-- As partículas Three.js reutilizam buffers e não interferem na seleção das empresas. A neve usa flocos pequenos, distribuição irregular e velocidades variadas; acumula uma cobertura leve e parcial no solo e nos telhados em cerca de 24 segundos, sem cobrir toda a cor dos edifícios. A cobertura é removida ao sair da neve ou desligar Cidade viva.
-- A chuva adapta seu contraste à iluminação: azul mais escuro durante o dia e claro à noite. Durante a chuva, cada relâmpago tem um clarão de início imediato seguido de um ou dois flashes mais fracos, com pausas escuras irregulares; o primeiro ocorre após 12–24 segundos e os seguintes a cada 18–38 segundos de animação, em intervalos aleatórios. Não há som. Com movimento reduzido, o clima aparece em texto e partículas, acúmulo e relâmpagos ficam ocultos.
-- `weather_code`, `rain`, `showers` e `snowfall` determinam o efeito; neve tem prioridade na precipitação mista. São estimativas da região, não detecção instantânea na rua do usuário. Respostas incompletas ou com horário distante mais de 90 minutos são rejeitadas.
+### Attribution and commercial use responsibilities
 
-### Créditos e responsabilidade por uso comercial
+Weather data is provided by **[Open-Meteo](https://open-meteo.com/)** under **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**. Atlas interprets this data as visual effects. Attribution and license links appear in the map footer and must be preserved in distributions that use the data.
 
-Dados meteorológicos fornecidos pelo **[Open-Meteo](https://open-meteo.com/)** sob **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**. O Atlas interpreta esses dados como efeitos visuais. Os links de atribuição e licença aparecem no rodapé do mapa e devem ser preservados nas distribuições que utilizarem os dados.
+This project's code license and the service access terms are independent. Making Atlas open source **does not automatically authorize commercial use of Open-Meteo's free endpoint**. Under the [provider's terms](https://open-meteo.com/en/terms), that endpoint is intended for noncommercial use and has request limits.
 
-A licença do código deste projeto e as condições de acesso ao serviço são independentes. Disponibilizar o Atlas como open source **não autoriza automaticamente o uso comercial do endpoint gratuito do Open-Meteo**. Conforme os [termos do provedor](https://open-meteo.com/en/terms), esse endpoint é destinado a uso não comercial e possui limites de requisições.
+**Anyone deploying or operating an instance is responsible for checking and complying with the terms applicable to their use**, including commercial use, attribution, limits, and privacy. For a commercial deployment, the operator must configure a compatible service, such as a commercial subscription through a custom endpoint, a self-hosted instance under its applicable licenses, or another authorized provider. The same rule applies to demos hosted by the maintainer.
 
-**Quem implantar ou operar uma instância é responsável por verificar e cumprir os termos aplicáveis ao seu uso**, incluindo uso comercial, atribuição, limites e privacidade. Para uma implantação comercial, o operador deve configurar um serviço compatível, por exemplo uma assinatura comercial através de um endpoint próprio, uma instância autogerenciada conforme suas licenças ou outro provedor autorizado. A mesma regra vale para demonstrações hospedadas pelo mantenedor.
-
-O endereço da API pode ser substituído no build:
+The API URL can be replaced at build time:
 
 ```sh
-VITE_WEATHER_API_URL=https://clima.seudominio.com/v1/forecast npm run build
+VITE_WEATHER_API_URL=https://weather.example.com/v1/forecast npm run build
 ```
 
-O endpoint deve aceitar os parâmetros e retornar o contrato `current` da [Forecast API](https://open-meteo.com/en/docs), incluindo `time` em segundos Unix, e permitir CORS para a origem da SPA. O cliente envia `credentials: omit`. Variáveis `VITE_*` ficam públicas no bundle: **não inclua chaves comerciais secretas na URL ou no código do cliente**; um endpoint próprio deve acrescentá-las no servidor quando necessário. Consulte os limites atuais do provedor antes de publicar uma instância.
+The endpoint must accept the parameters and return the `current` contract from the [Forecast API](https://open-meteo.com/en/docs), including `time` in Unix seconds, and allow CORS for the SPA's origin. The client sends `credentials: omit`. `VITE_*` variables are public in the bundle: **do not include secret commercial keys in the URL or client code**; a custom endpoint should add them on the server when needed. Check the provider's current limits before publishing an instance.
 
-## Dados
+## Data
 
-O botão de exemplo baixa um JSON no formato aceito:
+The sample download button provides JSON in the accepted format:
 
 ```json
 [
   {
-    "id": "minha-empresa",
-    "name": "Minha empresa",
-    "metric": { "label": "Receita mensal", "value": 1350.75 },
+    "id": "my-company",
+    "name": "My company",
+    "metric": { "label": "Monthly revenue", "value": 1350.75 },
     "categories": [
-      { "label": "Varejo", "value": "retail" },
-      { "label": "Serviços", "value": "services" }
+      { "label": "Retail", "value": "retail" },
+      { "label": "Services", "value": "services" }
     ],
     "status": "warning",
     "updatedAt": "2026-10-19T12:00:00-03:00",
@@ -102,77 +100,76 @@ O botão de exemplo baixa um JSON no formato aceito:
 ]
 ```
 
-`metric.label` é o nome exibido na tabela, nos detalhes e no tooltip; `metric.value` é um número finito não negativo que determina o porte da construção, preservando casas decimais. Pode representar usuários, receita, contratos ou outra medida. Com labels diferentes na mesma base, a tabela usa o cabeçalho “Valor” e identifica a métrica em cada linha.
+`metric.label` is the name displayed in the table, details, and tooltip; `metric.value` is a finite, nonnegative number that determines building size while preserving decimal places. It can represent users, revenue, contracts, or another measure. When labels differ within the same dataset, the table uses a generic value heading and identifies the metric on each row.
 
-`categories` contém um ou mais pares `{ "label": "Nome exibido", "value": "identificador" }`. `value` e `label` são textos não vazios, e um mesmo identificador deve ter o mesmo label em toda a base. O mapa aceita até **três categorias distintas por base**, com até sete combinações. Os bairros, filtros, detalhes e etiquetas usam esses labels. Identificadores são ordenados para atribuir os bits internos; a atribuição acontece antes dos filtros e da paginação. A mesma empresa aparece uma única vez, na interseção exata de suas categorias.
+`categories` contains one or more `{ "label": "Display name", "value": "identifier" }` pairs. Both `value` and `label` must be nonempty strings, and the same identifier must have the same label throughout the dataset. The map supports up to **three distinct categories per dataset**, with up to seven combinations. Districts, filters, details, and labels use these names. Identifiers are sorted to assign internal bits; assignment happens before filtering and pagination. Each company appears exactly once, at the exact intersection of its categories.
 
-`id` identifica a empresa e deve ser único; quando omitido, é gerado na importação. `name` é texto não vazio. `status` aceita `healthy`, `warning` e `critical`. O formato anterior (`users` e `systems: ["A", "B", "C"]`) continua aceito e é convertido para métrica e categorias. Os códigos antigos mantêm seus significados: Leads, Inteligência Artificial e Imobiliárias.
+`id` identifies the company and must be unique; if omitted, it is generated during import. `name` is a nonempty string. `status` accepts `healthy`, `warning`, and `critical`. The previous format (`users` and `systems: ["A", "B", "C"]`) is still accepted and converted to metrics and categories. Legacy codes retain their meanings: Leads, Artificial Intelligence, and Real Estate Agencies.
 
-`updatedAt` informa a última atualização do registro. `statusChangedAt` informa quando o **status atual** começou: ao mudar a saúde, atualize as duas datas; ao atualizar apenas métrica ou nome, preserve `statusChangedAt`. Se uma empresa sair de alto risco e retornar, envie a data dessa nova entrada. As datas usam ISO 8601 com fuso (`Z` ou deslocamento como `-03:00`); datas inválidas ou mudança de saúde posterior à atualização são rejeitadas. Os dois campos são opcionais para compatibilidade com bases antigas.
+`updatedAt` records the last update to the record. `statusChangedAt` records when the **current status** began: when health changes, update both timestamps; when only the metric or name changes, preserve `statusChangedAt`. If a company leaves high risk and returns, send the timestamp of that new entry. Timestamps use ISO 8601 with a time zone (`Z` or an offset such as `-03:00`); invalid dates or a health change later than the update timestamp are rejected. Both fields are optional for compatibility with older datasets.
 
-O painel de acompanhamento mostra um relógio digital no fuso local do navegador e até quatro empresas **atualmente em alto risco**, distribuídas em duas colunas com duas empresas cada, ordenadas por `statusChangedAt` da mais recente para a mais antiga. Ele considera toda a base carregada, sem aplicar filtros ou paginação, e permanece visível ao ocultar os controles e em tela cheia. Empresas sem data de mudança são contabilizadas separadamente, sem atribuir uma entrada fictícia; `updatedAt` sozinho não comprova quando houve a entrada em risco. A coluna **Atualização** e os detalhes exibem as datas disponíveis. O painel reflete o último carregamento/importação; não acrescenta consultas periódicas à fonte.
+The monitoring panel shows a digital clock in the browser's local time zone and up to four companies **currently at high risk**, arranged in two columns of two companies, sorted by `statusChangedAt` from newest to oldest. It uses the entire loaded dataset without filters or pagination and remains visible when controls are hidden and in fullscreen mode. Companies without a status-change timestamp are counted separately, without inventing an entry time; `updatedAt` alone does not establish when a company entered risk. The update column and details show the available timestamps. The panel reflects the last load/import; it does not add periodic data source requests.
 
-A importação aceita uma lista JSON com até 5 MB, acontece no navegador e não persiste após recarregar. Uma importação inválida preserva a cidade anterior.
+Imports accept a JSON list up to 5 MB, run in the browser, and do not persist after a reload. An invalid import preserves the previous city.
 
-Cada página gera uma cidade independente. O território é calculado a partir das quantidades por combinação de categorias, com três retângulos sobrepostos no grid. Os lotes mais próximos do centro são ocupados primeiro dentro de cada região. As regiões representam cada categoria e suas interseções; os nomes vêm dos dados. Todas as ruas se cruzam a 90 graus no plano do terreno. Parques são reservados antes da alocação. As regiões crescem conforme a quantidade de empresas na página. A opção Todas reúne os resultados filtrados em uma única cidade. A configuração inicial é 100 empresas por cidade, com alternativas 250, 500 e 1.000. Não há atualização automática dos dados das empresas nesta versão.
+Each page generates an independent city. The territory is calculated from the number of companies in each category combination, using three overlapping rectangles on the grid. Lots nearest the center are occupied first within each region. Regions represent each category and its intersections; their names come from the data. All streets intersect at 90 degrees on the ground plane. Parks are reserved before allocation. Regions grow according to the number of companies on the page. The all-companies option combines filtered results into a single city. The initial setting is 100 companies per city, with alternatives of 250, 500, and 1,000. This version does not automatically refresh company data.
 
-## SPA e backend futuro
+## SPA and future backend
 
-A aplicação é uma SPA React compilada pelo Vite. O servidor entrega HTML, CSS, JavaScript e JSON; toda a transformação do cadastro em cidade acontece no navegador. Não há SSR nem dependência de backend para gerar geometrias.
+The application is a React SPA built with Vite. The server delivers HTML, CSS, JavaScript, and JSON; all transformation of company records into a city happens in the browser. There is no SSR or backend dependency for generating geometry in the SPA.
 
-A fonte é declarada em `public/config.json` (copiado para `/config.json`):
+The source is declared in `public/config.json` (copied to `/config.json`):
 
 ```json
 {"dataUrl":"/data/empresas.json","mode":"demo"}
 ```
 
-O build gera o JSON demonstrativo com 1.400 registros. Para usar um backend, altere `dataUrl` para seu endpoint e `mode` para `live`. O endpoint deve retornar uma lista no formato documentado acima ou um objeto `{ "companies": [...] }`. Ele não precisa enviar posições, geometrias, quadras ou informações de Three.js. A SPA valida o JSON, filtra a base inteira, pagina, calcula as interseções, distribui os lotes e constrói a cena.
+The build generates demo JSON with 1,400 records. To use a backend, change `dataUrl` to your endpoint and `mode` to `live`. The endpoint must return a list in the format documented above or an object shaped as `{ "companies": [...] }`. It does not need to send positions, geometry, blocks, or Three.js information. The SPA validates the JSON, filters the full dataset, paginates, calculates intersections, allocates lots, and builds the scene.
 
-`src/data-source.js` concentra a leitura HTTP e a conversão do contrato. No mesmo domínio, cookies de sessão usam `credentials: same-origin`. Um endpoint em outro domínio precisa permitir CORS; a autenticação desse backend ainda não foi implementada. Erros de carregamento são exibidos e não são substituídos silenciosamente por dados fictícios. O carregamento ocorre ao abrir a aplicação; atualização automática ainda não foi implementada.
+`src/data-source.js` handles HTTP loading and data contract conversion. On the same domain, session cookies use `credentials: same-origin`. An endpoint on another domain must allow CORS; authentication for that backend has not yet been implemented. Loading errors are displayed and are not silently replaced with fictional data. Data loads when the application opens; automatic refresh has not yet been implemented.
 
-## Renderização
+## Rendering
 
-A cidade usa geometria simplificada: um bloco por construção, janelas/ruas/calçadas em planos, carros sem rodas, pedestres sem pernas, copas/cabeças e volumes de fogo/fumaça de oito faces. O gramado é um plano verde, as calçadas são planos cinza e os lotes dos prédios são planos claros. Não há molduras de janela, telhados extras, fundações ou blocos de grama. Bancos esparsos usam um único bloco baixo e compartilham o instanciamento dos troncos. A geometria base caiu de 96.830 para 26.022 triângulos com 100 empresas e de 804.354 para 198.042 com 1.400; `node scripts/benchmark-city.mjs` reproduz a medição sem efeitos. Os materiais iluminados usam sombreamento plano. A emissão pelas janelas mantém o movimento e a restrição à abertura.
+The city uses simplified geometry: one block per building, planar windows/streets/sidewalks, cars without wheels, pedestrians without legs, and eight-sided tree canopies/heads and fire/smoke volumes. The lawn is a green plane, sidewalks are gray planes, and building lots are light-colored planes. There are no window frames, extra roofs, foundations, or grass blocks. Sparse benches use a single low block and share the tree trunk instance batch. Base geometry dropped from 96,830 to 26,022 triangles with 100 companies and from 804,354 to 198,042 with 1,400; `node scripts/benchmark-city.mjs` reproduces the measurement without effects. Lit materials use flat shading. Window emissions retain their motion and remain constrained to the opening.
 
-Todo lote sem empresa na cidade exibida recebe piso verde, com distribuição entre clareiras e grupos de até três árvores, incluindo os parques reservados e terrenos livres dentro das sete regiões. Cerca de 9% dos lotes recebem um banco, em orientações variadas e com espaço livre ao redor. A vegetação é recalculada após filtros, paginação e importação, sem ocupar ruas ou lotes com empresas. Quantidades, cores, tamanhos e posições variam por coordenada de forma determinística; as copas permanecem dentro dos jardins. As mesmas geometrias são reutilizadas por instanciamento.
+Every unoccupied lot in the displayed city receives green ground, distributed between clearings and groups of up to three trees, including reserved parks and free lots within the seven regions. About 9% of lots receive a bench, in varied orientations and with free space around it. Vegetation is recalculated after filtering, pagination, and imports, without occupying streets or company lots. Counts, colors, sizes, and positions vary deterministically by coordinate; canopies remain within gardens. The same geometries are reused through instancing.
 
-Construções, janelas, vegetação, veículos e pedestres usam `InstancedMesh`. O trânsito é simulado em `src/traffic.js`, com faixas direcionais, curvas de conversão, aceleração, frenagem e distância mínima entre veículos. Os cruzamentos conectam os quatro braços do asfalto e possuem calçadas, faixas de pedestres, linhas de parada e semáforos. Cada cruzamento reserva sua área para um veículo de cada vez e possui uma fase exclusiva de travessia, com liberação somente após a saída de carros e pedestres. A quantidade de veículos e pedestres acompanha as quadras, limitada a 36 carros e 60 pedestres.
+Buildings, windows, vegetation, vehicles, and pedestrians use `InstancedMesh`. Traffic is simulated in `src/traffic.js`, with directional lanes, turn curves, acceleration, braking, and minimum vehicle spacing. Intersections connect all four road approaches and include sidewalks, crosswalks, stop lines, and traffic lights. Each intersection reserves its area for one vehicle at a time and has a dedicated pedestrian crossing phase, releasing it only after cars and pedestrians have cleared it. Vehicle and pedestrian counts scale with city blocks, capped at 36 cars and 60 pedestrians.
 
-As chamas e a fumaça são volumes 3D instanciados, definidos em `src/plumes.js` e renderizados em `src/plume-renderer.js`. Cada emissor corresponde a uma janela real da geometria. As partículas nascem atrás da fachada, cabem na abertura e saem na direção normal à parede; a expansão começa do lado de fora. A vazão depende da área da janela. O movimento aproxima pressão de saída, arrasto, empuxo, turbulência e resfriamento; não é uma simulação CFD. O teste de profundidade oculta as fontes dentro do prédio. O risco médio produz somente fumaça clara e alerta, e o alto risco acrescenta chama e brilho no interior das janelas. A cor da empresa sempre identifica as categorias, nunca o risco.
+Flames and smoke are instanced 3D volumes, defined in `src/plumes.js` and rendered in `src/plume-renderer.js`. Each emitter corresponds to an actual window in the geometry. Particles originate behind the facade, fit within the opening, and move outward along the wall normal; expansion begins outside. Flow depends on window area. Motion approximates exit pressure, drag, buoyancy, turbulence, and cooling; it is not a CFD simulation. Depth testing hides sources inside the building. Medium risk produces only light smoke and a warning, while high risk adds flames and a glow inside windows. Company color always identifies categories, never risk.
 
-O modelo de porte está em `src/model.js` (`sizeForValue`) e usa quatro faixas demonstrativas do valor numérico: abaixo de 90, de 90 a menos de 550, de 550 a menos de 1.800 e a partir de 1.800. A troca do label não altera esses limites; a escala permanece a mesma para qualquer métrica. O diagnóstico inicial é fictício: os efeitos representam o status recebido, sem calcular risco real.
+The size model is in `src/model.js` (`sizeForValue`) and uses four illustrative value ranges: below 90, 90 to below 550, 550 to below 1,800, and 1,800 or above. Changing the label does not change these thresholds; the scale remains the same for any metric. The initial assessment is fictional: effects represent the supplied status without calculating actual risk.
 
-Em risco médio, casas emitem fumaça por uma janela; prédios pequenos, médios e grandes usam respectivamente duas, três e cinco janelas, distribuídas entre andares e fachadas. A fumaça continua clara, sem chamas; o alto risco mantém o fogo e a fumaça escura.
+At medium risk, houses emit smoke through one window; small, medium, and large buildings use two, three, and five windows, respectively, spread across floors and facades. Smoke remains light, without flames; high risk retains fire and dark smoke.
 
-Construções em nível crítico também piscam em vermelho nas construções, alternando de forma instantânea com a cor original das categorias. Cada empresa possui uma sequência própria de intervalos pseudoaleatórios entre 450 e 1.100 ms, com início deslocado, sem transição gradual. Todas as faces do bloco compartilham o mesmo ritmo; a sequência é estável por empresa ao trocar filtros ou páginas. O controle “Efeitos de risco” desativa o piscar e restaura as cores originais. Com movimento reduzido, o destaque vermelho fica estático.
+Critical buildings also flash red, switching instantly between red and their original category color. Each company has its own sequence of pseudorandom intervals between 450 and 1,100 ms, with an offset start and no gradual transition. All faces of the block share the same rhythm; the sequence remains stable per company when filters or pages change. The **Risk effects** control disables flashing and restores the original colors. With reduced motion, the red highlight is static.
 
-## Formatação
+## Formatting
 
-O projeto usa Biome, configurado em `biome.json`, com suporte às diretivas do Tailwind CSS 4. Execute `npm run format` para formatar os arquivos ou `npm run format:check` para conferir sem alterar. Arquivos gerados, dependências e o lockfile ficam fora da formatação.
+The project uses Biome, configured in `biome.json`, with support for Tailwind CSS 4 directives. Run `npm run format` to format files or `npm run format:check` to check without making changes. Generated files, dependencies, and the lockfile are excluded from formatting.
 
-## Verificação
+## Verification
 
-`npm test` verifica pertinência às sete regiões, lotes exclusivos, ausência de ocupação em ruas/parques, filtros antes da paginação, todas as opções de tamanho de página, crescimento por região e validação de importação. Os testes de trânsito simulam vários ciclos em diferentes cidades para verificar colisões entre carros, atropelamentos, separação de fases e continuidade da circulação. Os testes de emissão verificam origem interna, restrição à abertura, expansão externa e integridade dos volumes Three.js. `npm run build` gera o bundle. A cena exige WebGL. Os testes de navegador usam renderização por software; medições de desempenho em hardware real continuam necessárias.
+`npm test` checks membership in the seven regions, unique lots, no occupation of streets/parks, filtering before pagination, all page-size options, growth by region, and import validation. Traffic tests simulate multiple cycles in different cities to check for vehicle collisions, pedestrian collisions, phase separation, and continuous movement. Emission tests verify internal origins, opening constraints, external expansion, and Three.js volume integrity. `npm run build` generates the bundle. The scene requires WebGL. Browser tests use software rendering; performance measurements on real hardware are still necessary.
 
-`window.atlas.summary` expõe contagens de empresas e estatísticas de desenho para auxiliar a integração.
+`window.atlas.summary` exposes company counts and rendering statistics to support integration.
 
-As etiquetas sobre o mapa exibem os labels das categorias, incluindo as combinações nas interseções.
+Map labels display category names, including combinations at intersections.
 
-A navegação mantém somente uma cidade WebGL ativa e, durante o slider, uma captura 2D temporária da cidade anterior. Geometrias, materiais, texturas e buffers de instâncias da cidade antiga são descartados antes da montagem seguinte. Ao terminar ou cancelar a animação, a captura é removida e seu bitmap é zerado. O indicador animado de carregamento é exibido antes da preparação; cliques repetidos são bloqueados e alterações de filtro cancelam pedidos pendentes.
+Navigation keeps only one WebGL city active and, during a slide transition, a temporary 2D snapshot of the previous city. Geometry, materials, textures, and instance buffers from the old city are disposed of before the next mount. When the animation ends or is canceled, the snapshot is removed and its bitmap is cleared. The animated loading indicator appears before preparation; repeated clicks are blocked, and filter changes cancel pending requests.
 
-O alerta de risco médio usa triângulo amarelo vivo, exclamação e contorno escuros e borda externa branca, com tamanho ampliado e cor independente do mapeamento tonal da cena.
+The medium-risk warning uses a bright yellow triangle, a dark exclamation mark and outline, and a white outer border, with an enlarged size and a color independent of scene tone mapping.
 
-A extensão compartilha o layout entre a marca TanStack e o renderer 3D. Mudanças de paleta reaproveitam a geometria; mudanças de valores da métrica ou saúde preservam terreno, trânsito e câmera quando os lotes permanecem iguais. Com animações desligadas e câmera estabilizada, a cena renderiza sob demanda. Os contratos e as regras de atualização estão em `src/charts/city/README.md`.
+The extension shares its layout between the TanStack mark and the 3D renderer. Palette changes reuse geometry; metric or health changes preserve terrain, traffic, and camera when lots remain unchanged. With animations disabled and the camera settled, the scene renders on demand. Contracts and update rules are documented in [src/charts/city/README.md](src/charts/city/README.md).
 
+## Reusable npm package
 
-## Pacote npm reutilizável
-
-O gráfico completo pode ser distribuído como `atlas-city-chart`, separado da SPA:
+The complete chart can be distributed as `atlas-city-chart`, separately from the SPA:
 
 ```sh
 npm run pack:package
 ```
 
-O comando gera `atlas-city-chart-0.1.0.tgz`, instalável em outro projeto com `npm install /caminho/atlas-city-chart-0.1.0.tgz`. Importe `CityMap` de `atlas-city-chart/react` e `atlas-city-chart/styles.css`. O componente inclui mapa, clima, iluminação, busca e botões; recebe `data` diretamente. Há temas em CSS puro (`theme="default"`) e Tailwind 4 (`theme="tailwind"`), com classes públicas e tokens CSS para extensão. A API do motor está na entrada `atlas-city-chart`.
+The command generates `atlas-city-chart-0.1.0.tgz`, which can be installed in another project with `npm install /path/to/atlas-city-chart-0.1.0.tgz`. Import `CityMap` from `atlas-city-chart/react` and `atlas-city-chart/styles.css`. The component includes the map, weather, lighting, search, and buttons; it receives `data` directly. Plain CSS (`theme="default"`) and Tailwind 4 (`theme="tailwind"`) themes provide public classes and CSS tokens for customization. The engine API is available through the `atlas-city-chart` entry point.
 
-Veja [o guia do pacote](packages/city-chart/README.md) para instalação, exemplos, temas, propriedades, testes e publicação. O pacote está preparado para distribuição local; ainda não foi publicado no registry npm.
+See the [package guide](packages/city-chart/README.md) for installation, examples, themes, props, tests, and publishing. The package is prepared for local distribution; it has not yet been published to the npm registry.
