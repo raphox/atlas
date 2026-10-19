@@ -112,6 +112,8 @@ O ponto preserva `datum === data[datumIndex]`. A marca não altera as linhas rec
 | `three/buildings.js` | construções, janelas e emissores de risco |
 | `three/building-material.js` | vermelho de risco independente da iluminação e exposição |
 | `three/lighting.js` | períodos de luz pelo relógio local e iluminação das janelas |
+| `three/weather.js` | partículas, contraste da chuva e clarões de relâmpagos |
+| `three/snow-cover.js` | cobertura parcial de neve no solo e nos telhados |
 | `three/traffic.js` | desenho de carros, pessoas e semáforos |
 | `three/effects.js` | alertas, cores de risco e coordenação das partículas |
 | `../../city.js` | cena, câmera, animação e recursos WebGL |
@@ -141,6 +143,12 @@ O seletor **Iluminação** permite testar **Nascente/poente**, **Dia** e **Noite
 As projeções do TanStack e as etiquetas do Atlas acompanham uma revisão da câmera. Etiquetas também se atualizam quando seus dados ou filtro mudam. O hover e a estratégia de foco compartilham o mesmo resultado de raycasting para a mesma coordenada/câmera; o cache é invalidado quando os dados da cena mudam. Buscas por empresa usam um índice por ID.
 
 Os testes de navegador verificam repouso sem novos frames ou uploads, retomada das animações e da câmera, uma consulta por movimento do ponteiro, layout personalizado e preservação de geometria/zoom nas atualizações de cor. Não há promessa de ganho fixo de FPS: ele depende do dispositivo e da quantidade de efeitos ativos.
+
+## Clima opcional
+
+`CityChart` aceita `weather="none" | "rain" | "snow"` (padrão `none`); integrações diretas usam `city.setWeather(type)`. A cena não consulta APIs nem solicita localização: a aplicação Atlas faz isso em `src/hooks/use-weather.js` e `src/weather.js`, seguindo **Cidade viva**. A extensão continua independente do provedor.
+
+As partículas só aparecem e mantêm o loop ativo com `life=true` e sem movimento reduzido. A camada reutiliza duas geometrias e materiais entre condições e páginas, ajusta seus limites ao layout e libera seus recursos junto com a cena. Os efeitos meteorológicos não alteram a iluminação pelo relógio nem dependem de `effects`, que controla apenas o risco. Créditos, configuração do endpoint e responsabilidade comercial estão no README principal.
 
 ## Geometria simplificada
 
@@ -180,3 +188,41 @@ Reproduza com `node scripts/benchmark-city.mjs`. São contagens de geometria, n�
 A superfície é dedicada a uma cidade: não desenha eixos, grids ou marcas cartesianas arbitrárias sobre o WebGL. Use uma `cityMark` por superfície. SVG e Canvas não se tornam renderers 3D; a geometria semântica da marca permite uma representação plana quando desenhada por SVG, mas a cidade requer `createCityRenderer`. SSR produz um shell acessível determinístico; WebGL só inicia na montagem do navegador. Não há publicação de pacote npm nesta alteração.
 
 Referências de API: [custom marks and renderers](https://tanstack.com/charts/latest/docs/guides/custom-marks-and-renderers), [React renderer entry points](https://tanstack.com/charts/latest/docs/framework/react/reference/chart), [fonte da versão 1.1.0](https://github.com/TanStack/charts/tree/v1.1.0).
+
+
+### Seletores opcionais no componente React
+
+`CityChart` aceita `showEnvironmentControls={true}` para exibir dois dropdowns independentes de iluminação e clima. O padrão é `false`. `CityMap` encaminha a mesma propriedade; a demonstração Atlas a habilita em `src/App.jsx`.
+
+```jsx
+<CityChart
+  definition={definition}
+  life={true}
+  lightingMode="auto"
+  weather={weather.type}
+  showEnvironmentControls
+/>
+```
+
+Iluminação oferece `auto`, `day`, `twilight` e `night`; clima oferece `auto`, `none`, `rain` e `snow`. Todas as combinações são possíveis. As escolhas manuais são locais a cada instância e não alteram as propriedades recebidas. A opção **Automático** volta a seguir `lightingMode` ou `weather` fornecido pelo consumidor. Com `showEnvironmentControls={false}`, os valores das propriedades são aplicados mesmo se havia uma escolha manual. Reexibir os controles recupera as escolhas anteriores.
+
+Os dropdowns ficam desabilitados durante carregamento/erro e com `life={false}`; desligar Cidade viva oculta as partículas e restaura a luz diurna, preservando as seleções. Movimento reduzido continua ocultando as partículas, inclusive na simulação.
+
+Por padrão os seletores são posicionados no rodapé do gráfico. Ao usar `children` como função, o consumidor deve posicionar o elemento `environmentControls` retornado junto de `ready`, `error` e `weatherMode` (`auto`, `none`, `rain` ou `snow`). O Atlas o insere nos controles existentes e usa `weatherMode` para identificar a simulação:
+
+```jsx
+<CityChart definition={definition} showEnvironmentControls>
+  {({ environmentControls }) => (
+    <div className="absolute bottom-4 right-4 z-10 flex flex-wrap gap-2">
+      {environmentControls}
+    </div>
+  )}
+</CityChart>
+```
+
+
+### Aparência e animação do clima
+
+A neve usa pontos de 3 px, com centro branco e borda azul-acinzentada para manter contraste tanto sobre o solo claro quanto à noite, com agrupamentos irregulares e fase, velocidade e oscilação próprias por floco. `SnowCover` desenha manchas suaves com instâncias de um plano compartilhado: a cobertura parcial cresce de 20% até o limite em 24 segundos de animação, preservando áreas descobertas dos telhados. Ao mudar o layout, as instâncias acompanham os novos prédios e alturas; geometria, material e textura são reutilizados. A cobertura desaparece fora do modo neve.
+
+A cor da chuva interpola entre azul escuro e claro usando a luminância atual do fundo, inclusive durante transições de iluminação. Os relâmpagos são uma luz direcional adicional, com direção variável e uma sequência de dois ou três flashes por evento: início imediato, pico de 20 ms, queda rápida e pausas escuras irregulares. Cada flash dura 80–140 ms, com pausas de 60–220 ms; os flashes secundários têm 30–60% da intensidade do primeiro. A sequência é sorteada uma vez por evento, mantendo a animação independente da taxa de quadros. O primeiro aguarda 12–24 segundos; os demais aguardam 18–38 segundos entre inícios. O relógio da animação evita disparar clarões atrasados ao retornar de uma aba suspensa. Partículas, cobertura e relâmpagos seguem Cidade viva e movimento reduzido; nenhum efeito altera as cores base nem os materiais dos prédios.

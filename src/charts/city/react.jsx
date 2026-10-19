@@ -8,6 +8,7 @@ import {
 import { regionsFor, categoryLabel, metricFor, STATUS } from "@/model";
 import { format } from "@/hooks/use-atlas";
 import { useCityChart } from "./use-city-chart.js";
+import { EnvironmentControls } from "./environment-controls.jsx";
 
 function DistrictLabels({ layout, labelsRef, labelNodes, visible }) {
   return (
@@ -98,6 +99,8 @@ export function CityChart({
   view = "iso",
   life = true,
   lightingMode = "auto",
+  weather = "none",
+  showEnvironmentControls = false,
   effects = true,
   showDistrictLabels = false,
   region = "all",
@@ -111,6 +114,9 @@ export function CityChart({
   const labelsRef = useRef(null);
   const labelNodes = useRef(new Map());
   const [tooltip, setTooltip] = useState(null);
+  const [lightingOverride, setLightingOverride] = useState("auto");
+  const [weatherOverride, setWeatherOverride] = useState("auto");
+  const weatherMode = showEnvironmentControls ? weatherOverride : "auto";
   const {
     renderer,
     layout,
@@ -126,7 +132,11 @@ export function CityChart({
     region,
     currentView: view,
     life,
-    lightingMode,
+    lightingMode:
+      showEnvironmentControls && lightingOverride !== "auto"
+        ? lightingOverride
+        : lightingMode,
+    weather: weatherMode === "auto" ? weather : weatherMode,
     effects,
     chartRef,
     panelRef,
@@ -135,6 +145,15 @@ export function CityChart({
     labelNodes,
     onHover: setTooltip,
   });
+  const environmentControls = showEnvironmentControls ? (
+    <EnvironmentControls
+      lighting={lightingOverride}
+      weather={weatherOverride}
+      onLightingChange={setLightingOverride}
+      onWeatherChange={setWeatherOverride}
+      disabled={!life || busy || !ready || Boolean(error)}
+    />
+  ) : null;
   return (
     <div
       ref={panelRef}
@@ -172,7 +191,18 @@ export function CityChart({
         onPointerEnter={onTooltipEnter}
         onPointerLeave={onTooltipLeave}
       />
-      {typeof children === "function" ? children({ ready, error }) : children}
+      {typeof children === "function" ? (
+        children({ ready, error, environmentControls, weatherMode })
+      ) : (
+        <>
+          {children}
+          {environmentControls && (
+            <div className="pointer-events-none absolute right-4 bottom-4 left-4 z-10 flex flex-wrap justify-end gap-2">
+              {environmentControls}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

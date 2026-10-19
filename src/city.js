@@ -7,6 +7,7 @@ import { buildTerrain } from "./charts/city/three/terrain.js";
 import { buildBuildings } from "./charts/city/three/buildings.js";
 import { buildTraffic, updateTraffic } from "./charts/city/three/traffic.js";
 import { buildEffects, updateEffects } from "./charts/city/three/effects.js";
+import { CityWeather } from "./charts/city/three/weather.js";
 import {
   advanceLighting,
   buildLighting,
@@ -25,6 +26,7 @@ export class City {
     this.life = true;
     this.lightingMode = "auto";
     this.effects = true;
+    this.weather = "none";
     this.running = true;
     this.elapsed = 0;
     this.previous = 0;
@@ -147,6 +149,7 @@ export class City {
     this.active = new Set(companies.map((c) => c.id));
     this.companiesById = new Map(companies.map((c) => [c.id, c]));
     buildBuildings(this, companies);
+    this.weatherParticles?.setLayout(layout);
     this.buildEffects();
     this.selectedId = null;
     this.selection.visible = false;
@@ -206,6 +209,7 @@ export class City {
     }
     this.effectsKey = null;
     this.layout = { ...layout, companies: this.companies };
+    this.weatherParticles?.setLayout(this.layout);
     this.companiesById = new Map(this.companies.map((c) => [c.id, c]));
     this.select(this.companiesById.get(this.selectedId));
     this.invalidate();
@@ -353,6 +357,18 @@ export class City {
   refreshLighting() {
     if (updateLighting(this)) this.invalidate();
   }
+  setWeather(type = "none") {
+    if (!["none", "rain", "snow"].includes(type))
+      throw new RangeError(`Unknown weather type: ${type}`);
+    if (this.weather === type) return;
+    this.weather = type;
+    if (type !== "none" && !this.weatherParticles) {
+      this.weatherParticles = new CityWeather();
+      this.scene.add(this.weatherParticles);
+      if (this.layout) this.weatherParticles.setLayout(this.layout);
+    }
+    this.invalidate();
+  }
   setLightingMode(mode = "auto") {
     if (!["auto", "day", "twilight", "night"].includes(mode))
       throw new RangeError(`Unknown lighting mode: ${mode}`);
@@ -396,6 +412,14 @@ export class City {
     const cameraMoved = this.controls.update();
     const lightingChanged = advanceLighting(this, now);
     const trafficAnimated = !this.reduceMotion && this.life && this.simulation;
+    const weatherAnimated =
+      !this.reduceMotion && this.life && this.weather !== "none";
+    this.weatherParticles?.update(
+      this.elapsed,
+      this.weather,
+      weatherAnimated,
+      this.scene.background,
+    );
     const effectsAnimated =
       !this.reduceMotion &&
       this.effects &&
@@ -413,6 +437,7 @@ export class City {
       this.lightingTransition ||
       cameraMoved ||
       trafficAnimated ||
+      weatherAnimated ||
       effectsAnimated
     )
       this.invalidate();

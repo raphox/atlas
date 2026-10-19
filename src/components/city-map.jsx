@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { defineCityChart } from "@/charts/city";
 import { format } from "@/hooks/use-atlas";
+import { useWeather } from "@/hooks/use-weather";
 import { CompanySearch } from "./company-search";
 import { CompanyDetails } from "./company-details";
 import { CityChart } from "@/charts/city/react";
@@ -53,8 +54,9 @@ function MapLoading({ error, loading, busy, nextPage }) {
     </div>
   );
 }
-export function CityMap({ atlas }) {
+export function CityMap({ atlas, showEnvironmentControls = false }) {
   const fullscreenRef = useRef(null);
+  const weather = useWeather(atlas.life);
   const definition = useMemo(
     () => defineCityChart(atlas.layout.companies, { layout: atlas.layout }),
     [atlas.layout],
@@ -107,13 +109,15 @@ export function CityMap({ atlas }) {
         view={atlas.currentView}
         life={atlas.life}
         lightingMode={atlas.lightingMode}
+        weather={weather.type}
+        showEnvironmentControls={showEnvironmentControls}
         effects={atlas.effects}
         showDistrictLabels={atlas.showDistrictLabels}
         region={atlas.filters.region}
         busy={atlas.busy || atlas.loading}
         selected={atlas.selected}
       >
-        {({ ready, error }) => {
+        {({ ready, error, environmentControls, weatherMode }) => {
           const disabled =
             atlas.loading || !ready || Boolean(error || atlas.error);
           return (
@@ -130,6 +134,19 @@ export function CityMap({ atlas }) {
                         ? "Todas as empresas"
                         : `Até ${format(atlas.pageSize)} empresas`}{" "}
                       · cidade {atlas.pagination.page}
+                    </p>
+                    <p
+                      role="status"
+                      data-testid="weather-status"
+                      className="mt-1 max-w-64 text-[10px] text-muted-foreground"
+                    >
+                      {!atlas.life || weatherMode === "auto"
+                        ? weather.message
+                        : {
+                            none: "Simulação: sem precipitação",
+                            rain: "Simulação: chuva",
+                            snow: "Simulação: neve",
+                          }[weatherMode]}
                     </p>
                   </div>
                 </div>
@@ -151,7 +168,11 @@ export function CityMap({ atlas }) {
                 disabled={disabled || atlas.busy}
                 fullscreenRef={fullscreenRef}
               />
-              <SceneControls atlas={atlas} disabled={disabled} />
+              <SceneControls
+                atlas={atlas}
+                disabled={disabled}
+                environmentControls={environmentControls}
+              />
               <div
                 className="pointer-events-none absolute bottom-28 left-6 text-center text-muted-foreground"
                 aria-hidden="true"
@@ -159,8 +180,27 @@ export function CityMap({ atlas }) {
                 <span className="text-[9px]">N</span>
                 <div className="text-3xl leading-6">↑</div>
               </div>
-              <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex h-8 items-center justify-between gap-2 border-t border-border/60 px-5 text-[9px] text-muted-foreground">
-                <span className="tracking-[.15em]">ATLAS / CITY VIEW</span>
+              <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border/60 bg-card/80 px-5 py-1 text-[9px] text-muted-foreground">
+                <span>
+                  Clima:{" "}
+                  <a
+                    className="pointer-events-auto underline underline-offset-2"
+                    href="https://open-meteo.com/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open-Meteo
+                  </a>
+                  {" · "}
+                  <a
+                    className="pointer-events-auto underline underline-offset-2"
+                    href="https://creativecommons.org/licenses/by/4.0/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    CC BY 4.0
+                  </a>
+                </span>
                 <span>
                   {atlas.pagination.start}–{atlas.pagination.end} de{" "}
                   {format(atlas.pagination.total)} empresas

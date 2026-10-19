@@ -38,6 +38,45 @@ Abra http://127.0.0.1:4173. O Vite recompila alterações automaticamente. `npm 
 - Alterne entre vista isométrica e superior. A tecla 0 restaura a visão geral.
 - Os controles “Cidade viva” e “Efeitos de risco” permitem ocultar as respectivas animações. A preferência do sistema por movimento reduzido é respeitada.
 
+## Clima local e iluminação
+
+Com **Cidade viva** ativa (padrão), o navegador solicita permissão de localização para consultar o [Open-Meteo](https://open-meteo.com/) e representar chuva ou neve. O clima automático acompanha esse controle. A geolocalização exige HTTPS em produção; `localhost` também pode ser usado no desenvolvimento. Negar a permissão ou receber um erro de localização/API mantém o mapa disponível, com uma mensagem de estado e sem precipitação.
+
+A iluminação automática continua usando exclusivamente o relógio local do navegador: nascente das 6h às 8h, dia das 8h às 17h, poente das 17h às 19h e noite das 19h às 6h. O seletor permite escolher esses períodos manualmente. O clima não altera o horário nem o fuso da iluminação.
+
+A propriedade booleana `showEnvironmentControls` de `CityMap` e `CityChart` exibe os dropdowns **Iluminação** e **Clima**. O padrão é `false`; a demonstração em `src/App.jsx` usa `true`. Para ocultá-los, remova a propriedade ou use `showEnvironmentControls={false}`:
+
+```jsx
+<CityMap atlas={atlas} showEnvironmentControls />
+```
+
+Os seletores independentes permitem combinar **Dia**, **Nascente/poente** ou **Noite** com **Sem precipitação**, **Chuva** ou **Neve**. **Automático** retoma o relógio local e o clima da API, respectivamente. O estado do mapa identifica o clima manual como simulação. Ambos ficam desabilitados com **Cidade viva** desligada, preservando as escolhas para a reativação. Ocultar os dropdowns devolve a cena aos valores fornecidos pelas propriedades (na aplicação, horário local e clima da API); as consultas automáticas continuam seguindo Cidade viva.
+
+
+- As consultas são feitas diretamente pelo cliente, sem cadastro, API key ou backend no modo padrão.
+- O Atlas solicita localização sem alta precisão e arredonda as coordenadas para duas casas decimais antes do envio. Coordenadas e respostas ficam somente em memória durante a sessão; não são gravadas em `localStorage`, cookies ou no cadastro de empresas. O provedor recebe o IP e as coordenadas aproximadas, sujeitos à [política do Open-Meteo](https://open-meteo.com/en/terms).
+- O resultado é reutilizado por 15 minutos. Consultas periódicas ficam suspensas com a aba oculta e retomam quando necessário ao voltar. Cada consulta tem limite de 10 segundos; falhas removem a precipitação e são tentadas novamente após 15 minutos. Para tentar obter a localização novamente, reative Cidade viva.
+- Desativar **Cidade viva** interrompe consultas pendentes, atualização periódica e partículas, restaurando a iluminação diurna conforme o comportamento existente. Reativar usa a permissão do navegador e pode reutilizar um resultado ainda válido em memória.
+- As partículas Three.js reutilizam buffers e não interferem na seleção das empresas. A neve usa flocos pequenos, distribuição irregular e velocidades variadas; acumula uma cobertura leve e parcial no solo e nos telhados em cerca de 24 segundos, sem cobrir toda a cor dos edifícios. A cobertura é removida ao sair da neve ou desligar Cidade viva.
+- A chuva adapta seu contraste à iluminação: azul mais escuro durante o dia e claro à noite. Durante a chuva, cada relâmpago tem um clarão de início imediato seguido de um ou dois flashes mais fracos, com pausas escuras irregulares; o primeiro ocorre após 12–24 segundos e os seguintes a cada 18–38 segundos de animação, em intervalos aleatórios. Não há som. Com movimento reduzido, o clima aparece em texto e partículas, acúmulo e relâmpagos ficam ocultos.
+- `weather_code`, `rain`, `showers` e `snowfall` determinam o efeito; neve tem prioridade na precipitação mista. São estimativas da região, não detecção instantânea na rua do usuário. Respostas incompletas ou com horário distante mais de 90 minutos são rejeitadas.
+
+### Créditos e responsabilidade por uso comercial
+
+Dados meteorológicos fornecidos pelo **[Open-Meteo](https://open-meteo.com/)** sob **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**. O Atlas interpreta esses dados como efeitos visuais. Os links de atribuição e licença aparecem no rodapé do mapa e devem ser preservados nas distribuições que utilizarem os dados.
+
+A licença do código deste projeto e as condições de acesso ao serviço são independentes. Disponibilizar o Atlas como open source **não autoriza automaticamente o uso comercial do endpoint gratuito do Open-Meteo**. Conforme os [termos do provedor](https://open-meteo.com/en/terms), esse endpoint é destinado a uso não comercial e possui limites de requisições.
+
+**Quem implantar ou operar uma instância é responsável por verificar e cumprir os termos aplicáveis ao seu uso**, incluindo uso comercial, atribuição, limites e privacidade. Para uma implantação comercial, o operador deve configurar um serviço compatível, por exemplo uma assinatura comercial através de um endpoint próprio, uma instância autogerenciada conforme suas licenças ou outro provedor autorizado. A mesma regra vale para demonstrações hospedadas pelo mantenedor.
+
+O endereço da API pode ser substituído no build:
+
+```sh
+VITE_WEATHER_API_URL=https://clima.seudominio.com/v1/forecast npm run build
+```
+
+O endpoint deve aceitar os parâmetros e retornar o contrato `current` da [Forecast API](https://open-meteo.com/en/docs), incluindo `time` em segundos Unix, e permitir CORS para a origem da SPA. O cliente envia `credentials: omit`. Variáveis `VITE_*` ficam públicas no bundle: **não inclua chaves comerciais secretas na URL ou no código do cliente**; um endpoint próprio deve acrescentá-las no servidor quando necessário. Consulte os limites atuais do provedor antes de publicar uma instância.
+
 ## Dados
 
 O botão de exemplo baixa um JSON no formato aceito:
@@ -65,7 +104,7 @@ O botão de exemplo baixa um JSON no formato aceito:
 
 A importação aceita uma lista JSON com até 5 MB, acontece no navegador e não persiste após recarregar. Uma importação inválida preserva a cidade anterior.
 
-Cada página gera uma cidade independente. O território é calculado a partir das quantidades por combinação de categorias, com três retângulos sobrepostos no grid. Os lotes mais próximos do centro são ocupados primeiro dentro de cada região. As regiões representam cada categoria e suas interseções; os nomes vêm dos dados. Todas as ruas se cruzam a 90 graus no plano do terreno. Parques são reservados antes da alocação. As regiões crescem conforme a quantidade de empresas na página. A opção Todas reúne os resultados filtrados em uma única cidade. A configuração inicial é 100 empresas por cidade, com alternativas 250, 500 e 1.000. Não há conexão automática com dados em tempo real nesta versão.
+Cada página gera uma cidade independente. O território é calculado a partir das quantidades por combinação de categorias, com três retângulos sobrepostos no grid. Os lotes mais próximos do centro são ocupados primeiro dentro de cada região. As regiões representam cada categoria e suas interseções; os nomes vêm dos dados. Todas as ruas se cruzam a 90 graus no plano do terreno. Parques são reservados antes da alocação. As regiões crescem conforme a quantidade de empresas na página. A opção Todas reúne os resultados filtrados em uma única cidade. A configuração inicial é 100 empresas por cidade, com alternativas 250, 500 e 1.000. Não há atualização automática dos dados das empresas nesta versão.
 
 ## SPA e backend futuro
 

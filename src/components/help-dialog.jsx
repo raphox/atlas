@@ -70,6 +70,15 @@ export function HelpDialog() {
             isométrica e Esc fecha os detalhes.
           </p>
           <p className="text-xs">
+            Com “Cidade viva” ativa, permita a localização para ver chuva ou
+            neve conforme o clima da região. A localização aproximada é enviada
+            ao Open-Meteo; o Atlas guarda esses dados apenas na memória desta
+            sessão. Desativar “Cidade viva” pausa as consultas e os efeitos. A
+            iluminação automática segue o horário do navegador, mesmo sem
+            localização. Com movimento reduzido, a condição do tempo aparece em
+            texto, sem partículas.
+          </p>
+          <p className="text-xs">
             A base inicial é fictícia. Você pode importar um JSON com seus
             próprios dados pelo menu lateral.
           </p>

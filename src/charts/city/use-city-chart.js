@@ -21,6 +21,7 @@ export function useCityChart({
   currentView,
   life,
   lightingMode,
+  weather,
   effects,
   chartRef,
   panelRef,
@@ -208,6 +209,10 @@ export function useCityChart({
   }, [lightingMode, layout]);
 
   useLayoutEffect(() => {
+    cityRef.current?.setWeather(weather);
+  }, [weather, layout]);
+
+  useLayoutEffect(() => {
     cityRef.current?.view(currentView);
   }, [currentView]);
 
@@ -270,6 +275,8 @@ export function useCityChart({
           chartPoints: sceneRef.current?.points.length ?? 0,
           lightingMode: cityRef.current?.lightingMode,
           lightingPeriod: cityRef.current?.lightingPeriod,
+          weather: cityRef.current?.weather,
+          weatherVisible: cityRef.current?.weatherParticles?.visible ?? false,
         };
       },
     }),

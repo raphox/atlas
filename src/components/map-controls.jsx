@@ -38,7 +38,7 @@ export function PerspectiveTabs({ view, onChange, disabled }) {
   return (
     <fieldset
       disabled={disabled}
-      className="absolute top-28 left-4 z-10 flex rounded-lg border bg-card/95 p-1 shadow-sm sm:top-24 sm:left-6"
+      className="absolute top-36 left-4 z-10 flex rounded-lg border bg-card/95 p-1 shadow-sm sm:top-24 sm:left-6"
     >
       <legend className="sr-only">Perspectiva</legend>
       {[
@@ -140,7 +140,7 @@ export function ZoomControls({ atlas, disabled, fullscreenRef }) {
     </div>
   );
 }
-export function SceneControls({ atlas, disabled }) {
+export function SceneControls({ atlas, disabled, environmentControls }) {
   return (
     <div className="pointer-events-none absolute right-4 bottom-11 left-4 z-10 flex items-center justify-between gap-3 sm:right-6 sm:left-6">
       <p className="hidden items-center gap-2 text-[9px] text-muted-foreground xl:flex">
@@ -148,28 +148,7 @@ export function SceneControls({ atlas, disabled }) {
         Arraste para girar · Scroll para zoom · Botão direito para mover
       </p>
       <div className="ml-auto flex flex-wrap justify-end gap-2">
-        <label
-          className="pointer-events-auto flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs has-disabled:opacity-50"
-          title={
-            !atlas.life
-              ? "Ative Cidade viva para alterar a iluminação"
-              : undefined
-          }
-        >
-          <span>Iluminação</span>
-          <select
-            aria-label="Iluminação da cidade"
-            value={atlas.lightingMode}
-            onChange={(event) => atlas.setLightingMode(event.target.value)}
-            disabled={disabled || !atlas.life}
-            className="min-w-0 cursor-pointer rounded-sm bg-card text-xs outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed"
-          >
-            <option value="auto">Automático</option>
-            <option value="twilight">Nascente/poente</option>
-            <option value="day">Dia</option>
-            <option value="night">Noite</option>
-          </select>
-        </label>
+        {environmentControls}
         {[
           {
             id: "life",
