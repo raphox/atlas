@@ -191,7 +191,7 @@ API references: [custom marks and renderers](https://tanstack.com/charts/latest/
 
 ### Optional selectors in the React component
 
-`CityChart` and `CityMap` accept `showEnvironmentControls` (equivalent to `showEnvironmentControls={true}`) to display two independent lighting and weather dropdowns. The prop defaults to `false` on both components, including the reusable package's `CityMap`. The Atlas demo enables it in `src/App.jsx`.
+`CityChart` and `CityMap` accept `showEnvironmentControls` (equivalent to `showEnvironmentControls={true}`) to display two independent lighting and weather dropdowns. The prop defaults to `false` on both components, including the reusable package's `CityMap`. The Atlas demo omits it in `src/App.jsx`, keeping these selectors hidden.
 
 ```jsx
 <CityChart

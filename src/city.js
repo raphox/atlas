@@ -410,7 +410,13 @@ export class City {
     const flying = Boolean(this.fly);
     if (this.fly) {
       const f = this.fly;
-      let t = Math.min(1, (now - f.start) / (this.reduceMotion ? 1 : 850));
+      // A RAF timestamp can precede a transition created later in that frame.
+      // Negative progress overshoots the easing curve, especially at 1 ms.
+      let t = THREE.MathUtils.clamp(
+        (now - f.start) / (this.reduceMotion ? 1 : 850),
+        0,
+        1,
+      );
       t = t * t * (3 - 2 * t);
       this.camera.position.lerpVectors(f.fromPosition, f.toPosition, t);
       this.controls.target.lerpVectors(f.fromTarget, f.toTarget, t);

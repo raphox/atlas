@@ -106,7 +106,6 @@ for (const theme of ["package", "package-tailwind"]) {
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await first.screenshot({ path: `test-results/${theme}-mobile.png` });
     await page.evaluate(() => window.renderPackage([]));
     await expect.poll(() => stats(0)).toMatchObject({ chartPoints: 0 });
     await expect(

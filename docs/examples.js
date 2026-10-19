@@ -40,7 +40,6 @@ function Example() {
       data={companies}
       title="My city"
       lightingMode="day"
-      showEnvironmentControls
     />
   );
 }
@@ -83,7 +82,7 @@ render(<Example />);`,
         data={companies}
         title="Explore and select"
         lightingMode="day"
-      showEnvironmentControls
+        showEnvironmentControls
         onSelect={setSelected}
       />
       <p className="selection-output" role="status">

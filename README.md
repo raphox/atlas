@@ -34,7 +34,7 @@ npm run test:docs    # build + production browser tests
 
 Content lives in `docs/content/*.mdx`, compiled with `@mdx-js/rollup`. The React Live playground uses the actual shared `CityMap` source, with editable JSX and JSON, explicit execution, reset, copy, and error reporting. It runs locally in the browser and uses simulated weather; it does not request location or call a weather API. Examples live in `docs/examples.js`. Arbitrary imports are not supported; `React`, `CityMap`, and `companies` are supplied in scope. Finish a playground snippet with `render(<Example />)`.
 
-The `Documentation → GitHub Pages` workflow builds, tests, and deploys only `dist/docs` on pushes to `main` or manual dispatch. Enable **Settings → Pages → Source → GitHub Actions**. The workflow obtains `DOCS_BASE_PATH` from Pages metadata; local builds default to `/atlas/`. Set `DOCS_BASE_PATH=/` for a root/custom-domain deployment. Query-string screens and fragment links work on static hosting without SPA rewrites. The Atlas SPA keeps its existing build and development commands.
+The `Documentation → GitHub Pages` workflow runs on pushes to `main` or manual dispatch. Deployment of `dist/docs` requires both the complete project test suite (unit tests and two browser-test shards) and the documentation build/browser tests to pass for the same commit. A failed, cancelled, or skipped prerequisite prevents deployment and leaves the published site unchanged. The reusable `Tests` workflow can also be run manually without deploying. Browser-test logs include individual durations, and result reports and failure traces are retained as workflow artifacts for seven days. Enable **Settings → Pages → Source → GitHub Actions**. The workflow obtains `DOCS_BASE_PATH` from Pages metadata; local builds default to `/atlas/`. Set `DOCS_BASE_PATH=/` for a root/custom-domain deployment. Query-string screens and fragment links work on static hosting without SPA rewrites. The Atlas SPA keeps its existing build and development commands.
 
 ## Interface structure
 
@@ -45,7 +45,11 @@ The `Documentation → GitHub Pages` workflow builds, tests, and deploys only `d
 - `components.json` configures shadcn/ui. To add components: `npx shadcn@latest add component-name`. The local `cn` utility is in `src/lib/utils.js`.
 - `scripts/generate-demo.mjs` generates `public/data/empresas.json` before startup or builds. `public/config.json` configures the data source.
 
-`npm test` runs domain and 3D engine tests. `npm run test:e2e` validates the application in Chromium with Playwright (run `npx playwright install chromium` before the first use). Tests cover filters, search, pagination, selection, controls, help, imports, downloads, data source failures, and mobile layouts with reduced motion.
+`npm test` covers data validation, filters, pagination, layout, camera math, localization, weather parsing, particles, lighting, traffic, and resource disposal without launching a browser.
+
+The browser suite is deliberately limited to **eight scenarios**: six application/package checks (`npm run test:e2e`) and two documentation checks (`npm run test:docs`). They cover React/map/table integration, native file upload/download, mobile layout/fullscreen, the two distributed CSS themes with independent map instances, the browser geolocation/weather lifecycle, and the editable documentation with mobile navigation. Run `npx playwright install chromium` before the first use. The application tests use a dedicated server on port 4176, prebundle their fixtures, and disable hot reload to prevent a development reload from resetting a test.
+
+Keep new domain rules and animation calculations in unit tests. Add a browser scenario only when the behavior requires browser rendering, DOM integration, or a native browser API; extend an existing scenario when possible. Tests use small deterministic datasets and mocked network responses. Each browser action has a 15-second timeout instead of waiting for the entire test budget.
 
 ## Map language
 
@@ -70,7 +74,7 @@ With **City life** enabled (the default), the browser requests location permissi
 
 Automatic lighting uses only the browser's local clock: sunrise from 6:00 to 8:00 a.m., day from 8:00 a.m. to 5:00 p.m., sunset from 5:00 to 7:00 p.m., and night from 7:00 p.m. to 6:00 a.m. The selector allows these periods to be chosen manually. Weather does not change the time or time zone used for lighting.
 
-The boolean `showEnvironmentControls` prop defaults to `false` on `CityMap` and `CityChart`, including the reusable package. Add `showEnvironmentControls` without a value to display the **Lighting** and **Weather** dropdowns, as the demo in `src/App.jsx` does. Omit the prop or use `showEnvironmentControls={false}` to hide them:
+The boolean `showEnvironmentControls` prop defaults to `false` on `CityMap` and `CityChart`, including the reusable package. Add `showEnvironmentControls` without a value to display the **Lighting** and **Weather** dropdowns. The demo in `src/App.jsx` omits it, keeping them hidden. Omit the prop or use `showEnvironmentControls={false}` to hide them:
 
 ```jsx
 <CityMap atlas={atlas} showEnvironmentControls />

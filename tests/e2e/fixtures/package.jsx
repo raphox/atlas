@@ -39,6 +39,7 @@ window.renderPackage = (next = data, { title } = {}) =>
           className={index === 0 ? "custom-city" : "other-city"}
           lightingMode="day"
           weather="rain"
+          showEnvironmentControls
           onSelect={(datum) =>
             window.packageSelections.push({
               index,

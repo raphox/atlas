@@ -16,6 +16,9 @@ test("production documentation executes edits, handles errors and restores examp
   await expect(page.locator(".map-preview canvas")).toBeVisible();
   const editor = page.getByRole("textbox", { name: "Example code" });
   await expect(editor).toBeVisible();
+  await expect(editor).not.toHaveValue(/showEnvironmentControls/);
+  await expect(page.getByLabel("City weather")).toHaveCount(0);
+  await expect(page.getByLabel("City lighting")).toHaveCount(0);
   await editor.fill(
     'render(<CityMap data={companies} title="Edited city" lightingMode="day" />);',
   );
@@ -40,22 +43,6 @@ test("production documentation executes edits, handles errors and restores examp
   await page.getByRole("button", { name: "Run" }).click();
   await expect(page.getByLabel("City weather")).toHaveCount(0);
   await expect(page.getByLabel("City lighting")).toHaveCount(0);
-  await editor.fill(
-    "render(<CityMap data={companies} showEnvironmentControls={true} />);",
-  );
-  await page.getByRole("button", { name: "Run" }).click();
-  await expect(page.getByLabel("City weather")).toBeVisible();
-  await expect(page.getByLabel("City lighting")).toBeVisible();
-  await editor.fill(
-    "render(<CityMap data={companies} showEnvironmentControls={false} />);",
-  );
-  await page.getByRole("button", { name: "Run" }).click();
-  await expect(page.getByLabel("City weather")).toHaveCount(0);
-  await expect(page.getByLabel("City lighting")).toHaveCount(0);
-  await expect(
-    page.locator(".map-preview").getByRole("searchbox"),
-  ).toBeVisible();
-
   await editor.fill("render(<CityMap");
   await editor.press("Control+Enter");
   await expect(page.getByRole("alert")).toBeVisible();
@@ -125,10 +112,6 @@ test("production documentation executes edits, handles errors and restores examp
   await page.getByRole("button", { name: "Preview", exact: true }).click();
   await expect(page.locator(".editor-panel")).toBeHidden();
   await page.getByRole("button", { name: "Split", exact: true }).click();
-  await page.screenshot({
-    path: "test-results/docs-desktop.png",
-    fullPage: false,
-  });
   expect(errors).toEqual([]);
   expect(
     requests.filter((url) =>
@@ -160,10 +143,6 @@ test("Features, weather documentation and mobile navigation survive direct reloa
   await expect(
     page.getByRole("button", { name: "Open navigation" }),
   ).toHaveAttribute("aria-expanded", "false");
-  await page.screenshot({
-    path: "test-results/features-mobile.png",
-    fullPage: false,
-  });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -187,8 +166,4 @@ test("Features, weather documentation and mobile navigation survive direct reloa
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.screenshot({
-    path: "test-results/docs-mobile.png",
-    fullPage: false,
-  });
 });

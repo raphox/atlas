@@ -37,6 +37,41 @@ test("isometric view keeps a fixed tilt when rotating, recentering and returning
   }
 });
 
+test("a frame older than a reduced-motion transition cannot overshoot the camera target", () => {
+  const previousDocument = globalThis.document;
+  globalThis.document = { hidden: false };
+  try {
+    const camera = new THREE.OrthographicCamera(-100, 100, 100, -100, 0.1, 800);
+    camera.position.set(160, 160, 160);
+    const controls = new OrbitControls(camera, null);
+    const city = {
+      camera,
+      controls,
+      layout: { center: [14, -8] },
+      running: true,
+      reduceMotion: true,
+      elapsed: 0,
+      callbacks: {},
+      renderer: { render() {} },
+      invalidate() {},
+      updateEffects() {},
+    };
+    City.prototype.view.call(city, "iso", true);
+    City.prototype.view.call(city, "top");
+    const start = city.fly.start;
+    City.prototype.animate.call(city, start - 1);
+    assert.ok(city.fly, "an earlier RAF must not complete the transition");
+    City.prototype.animate.call(city, start + 2);
+    assert.equal(city.fly, null);
+    assert.ok(Math.abs(controls.getAzimuthalAngle()) < 1e-9);
+    assert.ok(controls.getPolarAngle() < 0.00001);
+    assert.deepEqual(controls.target.toArray(), [14, 0, -8]);
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
+});
+
 test("auto-rotation is opt-in, slow, frame-rate independent and pauses when controls are locked", () => {
   const previousDocument = globalThis.document;
   globalThis.document = { hidden: false };

@@ -13,6 +13,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -39,7 +42,7 @@ jobs:
           path: dist/docs
 
   deploy:
-    needs: build
+    needs: [tests, build]
     runs-on: ubuntu-latest
     permissions:
       pages: write

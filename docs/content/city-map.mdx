@@ -150,7 +150,7 @@ npm run build:docs    # Builds dist/docs
 npm run preview:docs # http://127.0.0.1:4174/atlas/
 ```
 
-The **Documentation → GitHub Pages** workflow publishes `dist/docs` on each push to `main`, after testing the documentation. Set the repository's **Settings → Pages → Source** to **GitHub Actions**. `DOCS_BASE_PATH` sets the base path; the workflow reads it from Pages metadata. Local production builds default to `/atlas/`.
+The **Documentation → GitHub Pages** workflow publishes `dist/docs` on each push to `main` only after the unit tests, both browser-test shards, and the documentation build/browser tests pass for that same commit. Manual deployments use the same checks. If a prerequisite fails, is cancelled, or is skipped, deployment is skipped and the current site stays published. Set the repository's **Settings → Pages → Source** to **GitHub Actions**. `DOCS_BASE_PATH` sets the base path; the workflow reads it from Pages metadata. Local production builds default to `/atlas/`.
 
 Screens use query parameters and fragment links, so direct links and reloads work on static hosting without rewrite rules. Edit `docs/content/` to maintain the MDX content, and `docs/examples.js` to add examples.
 
