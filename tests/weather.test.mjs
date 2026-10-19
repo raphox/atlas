@@ -169,6 +169,47 @@ test("rain density follows city area without reallocating or duplicating weather
   disposeSceneGroups([weather]);
 });
 
+test("rain has irregular spacing, varied trails and independent falling speeds", () => {
+  const weather = new CityWeather();
+  weather.setLayout({
+    roadBounds: { x1: -8, x2: 8, z1: -8, z2: 8 },
+    companies: [{ roofTop: 20 }],
+  });
+  weather.update(0, "rain", true);
+  const buffer = weather.rain.geometry.attributes.position.array;
+  const before = buffer.slice(0, weather.rainCount * 6);
+  const lengths = new Set();
+  // Constant modular offsets between successive drops create visible bands.
+  for (const [axis, span] of [
+    [0, weather.bounds.width],
+    [1, weather.height],
+    [2, weather.bounds.depth],
+  ]) {
+    const gaps = new Set();
+    for (let i = 6; i < before.length; i += 6) {
+      const gap = (before[i + axis] - before[i + axis - 6]) / span;
+      gaps.add(Math.floor((gap - Math.floor(gap)) * 10));
+    }
+    assert.ok(gaps.size >= 8, `axis ${axis} must not repeat a regular offset`);
+  }
+  weather.update(0.01, "rain", true);
+  const speeds = new Set();
+  for (let i = 0; i < before.length; i += 6) {
+    lengths.add(Math.round((before[i + 4] - before[i + 1]) * 10));
+    const fall = before[i + 1] - buffer[i + 1];
+    if (fall > 0) speeds.add(Math.round(fall / 0.01));
+  }
+  assert.ok(
+    lengths.size >= 8,
+    "rain trails should have visibly varied lengths",
+  );
+  assert.ok(speeds.size >= 8, "drops must not descend as one rigid sheet");
+  // Re-evaluating the same time is stable, rather than jittering every frame.
+  weather.update(0, "rain", true);
+  assert.deepEqual(buffer.slice(0, before.length), before);
+  disposeSceneGroups([weather]);
+});
+
 test("snow accumulates modestly inside rooftops, rebuilds with the city and clears outside snow", () => {
   const weather = new CityWeather();
   const company = { x: 0, z: 0, roofTop: 8, width: 1.6, depth: 1.5 };

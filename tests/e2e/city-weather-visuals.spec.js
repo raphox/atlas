@@ -67,6 +67,15 @@ test("snow cover follows rooftops and daylight rain and lightning render without
     )
     .toBe(false);
   await page.screenshot({ path: "test-results/rain-contrast-day.png" });
+  await page.evaluate(() => window.weatherCity.setLightingMode("night"));
+  await expect
+    .poll(() => page.evaluate(() => !window.weatherCity.lightingTransition))
+    .toBe(true);
+  await page.screenshot({ path: "test-results/rain-contrast-night.png" });
+  await page.evaluate(() => window.weatherCity.setLightingMode("day"));
+  await expect
+    .poll(() => page.evaluate(() => !window.weatherCity.lightingTransition))
+    .toBe(true);
   // Freeze a frame before/at the pulse peak to inspect illumination, independent of wall time.
   const flash = await page.evaluate(() => {
     const city = window.weatherCity;

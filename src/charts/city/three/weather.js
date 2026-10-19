@@ -63,6 +63,18 @@ export class CityWeather extends THREE.Group {
         angle: rng() * Math.PI * 2,
       };
     });
+    // Independent seeds break the diagonal bands produced by index-based
+    // sequences. Keep them stable between frames without allocating particles.
+    const rainRandom = random(61547);
+    this.drops = Array.from({ length: COUNT }, () => ({
+      x: rainRandom(),
+      z: rainRandom(),
+      phase: rainRandom(),
+      speed: 18 + rainRandom() * 12,
+      length: 0.65 + rainRandom() * 1.25,
+      windX: 1.8 + rainRandom() * 1.4,
+      windZ: 0.4 + rainRandom() * 0.8,
+    }));
     const rainGeometry = new THREE.BufferGeometry();
     rainGeometry.setAttribute(
       "position",
@@ -206,24 +218,18 @@ export class CityWeather extends THREE.Group {
       .position;
     const positions = attribute.array;
     const { x, z, width, depth } = this.bounds;
-    const speed = rain ? 22 : 3;
     for (let i = 0; i < (rain ? this.rainCount : COUNT); i++) {
-      const flake = this.flakes[i];
-      const phase = rain ? fraction(i * 0.61803398875) : flake.phase;
+      const flake = rain ? this.drops[i] : this.flakes[i];
       const px =
         x +
-        fraction(
-          (rain ? i * 0.754877666 : flake.x) +
-            (time * (rain ? 0.8 : 0.3)) / width,
-        ) *
-          width;
+        fraction(flake.x + (time * (rain ? flake.windX : 0.3)) / width) * width;
       const pz =
         z +
-        fraction((rain ? i * 0.569840296 : flake.z) + (time * 0.15) / depth) *
+        fraction(flake.z + (time * (rain ? flake.windZ : 0.15)) / depth) *
           depth;
       const py =
         0.25 +
-        fraction(phase - (time * (rain ? speed : flake.speed)) / this.height) *
+        fraction(flake.phase - (time * flake.speed) / this.height) *
           this.height;
       const offset = i * (rain ? 6 : 3);
       positions[offset] =
@@ -238,9 +244,10 @@ export class CityWeather extends THREE.Group {
           ? 0
           : Math.cos(time * flake.frequency * 0.7 + flake.angle) * flake.sway);
       if (rain) {
-        positions[offset + 3] = px - 0.18;
-        positions[offset + 4] = py + 1.55;
-        positions[offset + 5] = pz - 0.08;
+        const trailTime = flake.length / flake.speed;
+        positions[offset + 3] = px - flake.windX * trailTime;
+        positions[offset + 4] = py + flake.length;
+        positions[offset + 5] = pz - flake.windZ * trailTime;
       }
     }
     attribute.needsUpdate = true;

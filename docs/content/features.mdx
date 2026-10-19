@@ -71,7 +71,7 @@ The adapter reads `current.time` in Unix seconds, `weather_code`, `rain`, `showe
 | Positive rain + showers or a rain code | `rain`. |
 | Neither condition applies | `none`. |
 
-Effects represent a regional estimate. Rain includes particles and simulated lightning; flashes do not indicate actual lightning detection. Rain particle counts scale with city area, capped at 800, so smaller examples do not receive the same number of drops in less space. Snow gradually adds a partial layer to the ground and rooftops while the simulation is active.
+Effects represent a regional estimate. Rain includes particles and simulated lightning; flashes do not indicate actual lightning detection. Drops have independently randomized positions, fall speeds, lengths, and wind drift to avoid regular bands. Rain particle counts scale with city area, capped at 800, so smaller examples do not receive the same number of drops in less space. Snow gradually adds a partial layer to the ground and rooftops while the simulation is active.
 
 ### 3. Cache, refreshes, and failures
 
