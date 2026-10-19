@@ -267,7 +267,8 @@
 }
 .atlas-city-zoom {
   position: absolute;
-  top: 40%;
+  top: 50%;
+  transform: translateY(-50%);
   right: 16px;
   z-index: 10;
   display: grid;
