@@ -49,6 +49,8 @@ export interface CityMapProps<T extends CityDatum = CityDatum> {
   onLifeChange?: (enabled: boolean) => void;
   effects?: boolean;
   onEffectsChange?: (enabled: boolean) => void;
+  autoRotate?: boolean;
+  onAutoRotateChange?: (enabled: boolean) => void;
   showDistrictLabels?: boolean;
   onDistrictLabelsChange?: (enabled: boolean) => void;
   lightingMode?: CityLighting;
@@ -71,6 +73,7 @@ export interface CityChartState {
   weatherMode: "auto" | CityWeather;
 }
 export interface CityChartProps<T extends CityDatum = CityDatum> {
+  autoRotate?: boolean;
   definition: ChartDefinition<T, number, number>;
   chartRef?: Ref<CityChartHandle<T>>;
   id?: string;

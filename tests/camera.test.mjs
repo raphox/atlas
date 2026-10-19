@@ -36,3 +36,63 @@ test("isometria mantém inclinação fixa ao girar, recentralizar e voltar da vi
     assert.ok(Math.abs(controls.getPolarAngle() - angle) < 1e-10);
   }
 });
+
+test("rotação automática é opt-in, lenta, independente de FPS e pausa quando os controles estão bloqueados", () => {
+  const previousDocument = globalThis.document;
+  globalThis.document = { hidden: false };
+  try {
+    const results = [];
+    for (const fps of [5, 30, 60, 120]) {
+      const camera = new THREE.OrthographicCamera(
+        -100,
+        100,
+        100,
+        -100,
+        0.1,
+        800,
+      );
+      camera.position.set(160, 160, 160);
+      const controls = new OrbitControls(camera, null);
+      controls.autoRotateSpeed = -0.3;
+      controls.update();
+      const city = {
+        camera,
+        controls,
+        running: true,
+        life: false,
+        effects: false,
+        reduceMotion: true,
+        elapsed: 0,
+        callbacks: {},
+        renderer: { render() {} },
+        invalidate() {},
+        updateEffects() {},
+      };
+      const angle = controls.getAzimuthalAngle();
+      City.prototype.animate.call(city, 1000);
+      City.prototype.animate.call(city, 2000);
+      assert.equal(controls.getAzimuthalAngle(), angle);
+      City.prototype.setAutoRotate.call(city, true);
+      City.prototype.animate.call(city, 3000);
+      for (let frame = 1; frame <= fps * 10; frame++) {
+        City.prototype.animate.call(city, 3000 + (frame * 1000) / fps);
+      }
+      const delta = controls.getAzimuthalAngle() - angle;
+      assert.ok(Math.abs(delta - Math.PI / 10) < 1e-9);
+      results.push(delta);
+      controls.enabled = false;
+      const paused = controls.getAzimuthalAngle();
+      City.prototype.animate.call(city, 13100);
+      assert.ok(Math.abs(controls.getAzimuthalAngle() - paused) < 1e-9);
+      controls.enabled = true;
+      City.prototype.setAutoRotate.call(city, false);
+      City.prototype.animate.call(city, 14000);
+      City.prototype.animate.call(city, 14050);
+      assert.ok(Math.abs(controls.getAzimuthalAngle() - paused) < 1e-9);
+    }
+    assert.ok(Math.max(...results) - Math.min(...results) < 1e-9);
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
+});

@@ -1,10 +1,15 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { demoCompanies, REGIONS } from "../src/model.js";
-const records = demoCompanies().map((company) => ({
+const now = Date.now();
+const records = demoCompanies().map((company, index) => ({
   id: company.id,
   name: company.name,
   metric: { label: "Usuários", value: company.users },
   status: company.status,
+  updatedAt: new Date(now - (index % 30) * 60_000).toISOString(),
+  statusChangedAt: new Date(
+    now - (30 + ((index * 37) % 1440)) * 60_000,
+  ).toISOString(),
   categories: ["A", "B", "C"].flatMap((value, index) =>
     company.mask & (1 << index)
       ? [

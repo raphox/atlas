@@ -326,3 +326,43 @@ test("nomes das categorias e da métrica acompanham filtros e paginação", () =
       sizeForValue(data[0].metric.value).height,
   );
 });
+
+test("saúde aceita múltiplos estados e combina a união com categoria e busca antes de paginar", () => {
+  const companies = demoCompanies();
+  const statuses = ["warning", "critical"];
+  const expected = companies.filter((company) =>
+    statuses.includes(company.status),
+  );
+  assert.deepEqual(
+    filteredCompanies(companies, { status: statuses }),
+    expected,
+  );
+  assert.deepEqual(filteredCompanies(companies, { status: [] }), companies);
+  assert.deepEqual(
+    filteredCompanies(companies, { status: ["healthy", ...statuses] }),
+    companies,
+  );
+  assert.deepEqual(
+    filteredCompanies(companies, { status: ["critical"] }),
+    filteredCompanies(companies, { status: "critical" }),
+  );
+  assert.deepEqual(
+    filteredCompanies(companies, {
+      status: statuses,
+      region: "3",
+      query: "Aurora",
+    }),
+    expected.filter(
+      (company) => company.mask === 3 && company.name.includes("Aurora"),
+    ),
+  );
+  const pages = [1, 2].map((page) =>
+    paginateCompanies(companies, { status: statuses }, page, 100),
+  );
+  assert.ok(expected.length > 100);
+  assert.deepEqual(
+    pages.flatMap((page) => page.companies),
+    expected,
+  );
+  assert.ok(pages.every((page) => page.total === expected.length));
+});

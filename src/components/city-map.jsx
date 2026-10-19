@@ -7,6 +7,7 @@ import { defineCityChart } from "@/charts/city";
 import { useWeather } from "@/hooks/use-weather";
 import { CompanySearch } from "./company-search";
 import { CompanyDetails } from "./company-details";
+import { CompanyMonitor } from "./company-monitor";
 import { CityChart } from "@/charts/city/react";
 import { PerspectiveTabs, SceneControls, ZoomControls } from "./map-controls";
 
@@ -114,6 +115,7 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
         weather={weather.type}
         showEnvironmentControls={showEnvironmentControls}
         effects={atlas.effects}
+        autoRotate={atlas.autoRotate}
         showDistrictLabels={atlas.showDistrictLabels}
         region={atlas.filters.region}
         busy={atlas.busy || atlas.loading}
@@ -126,7 +128,7 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
             <>
               <div className="atlas-map-layout pointer-events-none relative z-10 flex flex-1 flex-col gap-6 p-4 pb-11 sm:p-6 sm:pb-11">
                 <div
-                  className={`atlas-map-top-controls flex flex-col gap-3${controlsVisible ? "" : " invisible"}`}
+                  className={`atlas-map-top-controls flex-col gap-3 ${controlsVisible ? "flex" : "hidden"}`}
                   aria-hidden={!controlsVisible}
                   inert={!controlsVisible}
                 >
@@ -177,7 +179,32 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                     disabled={disabled || atlas.busy}
                   />
                 </div>
+                <CompanyMonitor
+                  companies={atlas.companies}
+                  matching={atlas.matching}
+                  pageSize={atlas.pageSize}
+                  loading={atlas.loading}
+                  error={atlas.error}
+                />
                 <div className="atlas-map-bottom-controls mt-auto flex flex-col gap-3">
+                  <button
+                    type="button"
+                    className="atlas-map-compass pointer-events-auto self-start shrink-0 min-h-11 min-w-11 cursor-pointer rounded-md text-center text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-default disabled:opacity-50"
+                    aria-label={t("resetOrientation")}
+                    title={t("resetOrientation")}
+                    disabled={disabled || atlas.busy}
+                    onClick={() => atlas.changeView("iso")}
+                  >
+                    <span aria-hidden="true" className="text-[9px]">
+                      N
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="atlas-map-compass-arrow block text-3xl leading-6"
+                    >
+                      ↑
+                    </span>
+                  </button>
                   <CompanyDetails
                     company={atlas.selected}
                     onClose={atlas.closeSelection}
@@ -207,13 +234,6 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                   setControlsVisible((visible) => !visible)
                 }
               />
-              <div
-                className="atlas-map-compass pointer-events-none absolute bottom-28 left-4 text-center sm:left-6 text-muted-foreground"
-                aria-hidden="true"
-              >
-                <span className="text-[9px]">N</span>
-                <div className="text-3xl leading-6">↑</div>
-              </div>
               <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border/60 bg-card/50 px-4 py-1 text-[9px] text-muted-foreground sm:px-6">
                 <span className="atlas-map-footer-text">
                   {t("weather")}:{" "}

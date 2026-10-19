@@ -26,6 +26,7 @@ const escapeAttribute = (text) =>
 export function createCityRenderer({
   view = "iso",
   life = true,
+  autoRotate = false,
   effects = true,
   onMount,
   onData,
@@ -142,6 +143,7 @@ export function createCityRenderer({
           },
         });
         city.setActivity({ life, effects });
+        city.setAutoRotate(autoRotate);
         onMount?.(city);
       } catch (error) {
         city?.dispose();

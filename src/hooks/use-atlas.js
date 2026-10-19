@@ -11,7 +11,7 @@ import {
 import { loadCompanyData } from "@/data-source";
 
 export const format = (value) => new Intl.NumberFormat("pt-BR").format(value);
-const defaultFilters = { region: "all", status: "all", query: "" };
+const defaultFilters = { region: "all", status: [], query: "" };
 const afterPaint = () =>
   new Promise((resolve) =>
     requestAnimationFrame(() => requestAnimationFrame(resolve)),
@@ -31,6 +31,7 @@ export function useAtlas() {
   const [life, setLife] = useState(true);
   const [lightingMode, setLightingMode] = useState("auto");
   const [effects, setEffects] = useState(true);
+  const [autoRotate, setAutoRotate] = useState(false);
   const [showDistrictLabels, setShowDistrictLabels] = useState(false);
   const mapRef = useRef(null);
   const requestRef = useRef(null);
@@ -221,6 +222,8 @@ export function useAtlas() {
     lightingMode,
     setLightingMode,
     effects,
+    autoRotate,
+    setAutoRotate,
     showDistrictLabels,
     setShowDistrictLabels,
     setLife,
@@ -239,6 +242,8 @@ export function useAtlas() {
 }
 
 export function downloadExample() {
+  const updatedAt = new Date().toISOString();
+  const statusChangedAt = new Date(Date.now() - 15 * 60_000).toISOString();
   const records = [
     {
       id: "exemplo-1",
@@ -250,6 +255,8 @@ export function downloadExample() {
         { label: "Indústria", value: "industry" },
       ],
       status: "critical",
+      updatedAt,
+      statusChangedAt,
     },
     {
       id: "exemplo-2",
@@ -260,6 +267,8 @@ export function downloadExample() {
         { label: "Serviços", value: "services" },
       ],
       status: "warning",
+      updatedAt,
+      statusChangedAt,
     },
     {
       id: "exemplo-3",
@@ -267,6 +276,8 @@ export function downloadExample() {
       metric: { label: "Receita mensal", value: 42 },
       categories: [{ label: "Indústria", value: "industry" }],
       status: "healthy",
+      updatedAt,
+      statusChangedAt,
     },
   ];
   const url = URL.createObjectURL(

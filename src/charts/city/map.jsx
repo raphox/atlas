@@ -9,6 +9,7 @@ import {
 } from "react";
 import { defineCityChart } from "./definition.js";
 import { CityChart } from "./react.jsx";
+import { useFullscreenWakeLock } from "./use-fullscreen-wake-lock.js";
 import { categoryLabel, metricFor } from "../../model.js";
 
 function useSetting(value, initial, onChange) {
@@ -34,6 +35,8 @@ export const CityMap = forwardRef(function CityMap(
     onLifeChange,
     effects: effectsProp,
     onEffectsChange,
+    autoRotate: autoRotateProp,
+    onAutoRotateChange,
     showDistrictLabels: labelsProp,
     onDistrictLabelsChange,
     weather = "none",
@@ -59,6 +62,11 @@ export const CityMap = forwardRef(function CityMap(
   const [view, setView] = useSetting(viewProp, "iso", onViewChange);
   const [life, setLife] = useSetting(lifeProp, true, onLifeChange);
   const [effects, setEffects] = useSetting(effectsProp, true, onEffectsChange);
+  const [autoRotate, setAutoRotate] = useSetting(
+    autoRotateProp,
+    false,
+    onAutoRotateChange,
+  );
   const [labels, setLabels] = useSetting(
     labelsProp,
     false,
@@ -69,6 +77,7 @@ export const CityMap = forwardRef(function CityMap(
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false);
   const [fullscreenError, setFullscreenError] = useState(null);
+  const wakeLockStatus = useFullscreenWakeLock(panelRef);
   const definition = useMemo(() => defineCityChart(data), [data]);
   const selected = data.find((datum) => datum.id === selectedId) ?? null;
   const matches = query.trim()
@@ -156,6 +165,7 @@ export const CityMap = forwardRef(function CityMap(
         view={view}
         life={life}
         effects={effects}
+        autoRotate={autoRotate}
         weather={weather}
         lightingMode={lightingMode}
         showDistrictLabels={labels}
@@ -239,6 +249,11 @@ export const CityMap = forwardRef(function CityMap(
                 {fullscreenError && (
                   <p role="alert" className="atlas-city-message">
                     {t(fullscreenError)}
+                  </p>
+                )}
+                {wakeLockStatus === "unavailable" && (
+                  <p role="status" className="atlas-city-message">
+                    {t("wakeLockUnavailable")}
                   </p>
                 )}
                 {showDetails && selected && (
@@ -327,6 +342,12 @@ export const CityMap = forwardRef(function CityMap(
                     {[
                       ["life", t("life"), life, setLife],
                       ["effects", t("effects"), effects, setEffects],
+                      [
+                        "auto-rotate",
+                        t("autoRotate"),
+                        autoRotate,
+                        setAutoRotate,
+                      ],
                       ["labels", t("districtLabels"), labels, setLabels],
                     ].map(([id, label, checked, change]) => (
                       <label

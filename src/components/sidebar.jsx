@@ -1,77 +1,85 @@
 import { useRef } from "react";
-import { ArrowDownToLine, Upload } from "lucide-react";
+import { ArrowDownToLine, ChevronDown, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { STATUS } from "@/model";
 import { downloadExample, format } from "@/hooks/use-atlas";
 import { cn } from "@/lib/utils";
 
 function HealthFilter({ value, onChange }) {
+  const summary =
+    !value.length || value.length === Object.keys(STATUS).length
+      ? "Todos os níveis de risco"
+      : Object.entries(STATUS)
+          .filter(([key]) => value.includes(key))
+          .map(([, status]) => status.label)
+          .join(" + ");
   return (
     <div className="space-y-3">
-      <label
-        htmlFor="health-filter"
-        id="health-label"
-        className="section-label"
-      >
+      <p id="health-label" className="section-label">
         SAÚDE DA EMPRESA
-      </label>
-      <select
-        id="health-filter"
-        className="native-select w-full text-xs"
-        value={value}
-        aria-labelledby="health-label"
-        onChange={(event) => onChange(event.target.value)}
-      >
-        <option value="all">Todos os níveis de risco</option>
-        {Object.entries(STATUS).map(([key, status]) => (
-          <option key={key} value={key}>
-            {status.label}
-          </option>
-        ))}
-      </select>
+      </p>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            id="health-filter"
+            variant="outline"
+            className="w-full justify-between text-xs font-normal"
+            aria-labelledby="health-label health-filter-value"
+            title={summary}
+          >
+            <span id="health-filter-value" className="truncate">
+              {summary}
+            </span>
+            <ChevronDown className="size-4 shrink-0" aria-hidden="true" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="w-64 p-2"
+          aria-label="Filtrar por saúde da empresa"
+        >
+          <fieldset>
+            <legend className="sr-only">Níveis de saúde</legend>
+            {Object.entries(STATUS).map(([key, status]) => (
+              <label
+                key={key}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-xs hover:bg-accent"
+              >
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary"
+                  checked={value.includes(key)}
+                  onChange={(event) =>
+                    onChange(
+                      event.target.checked
+                        ? [...value, key]
+                        : value.filter((selected) => selected !== key),
+                    )
+                  }
+                />
+                <span>{status.label}</span>
+              </label>
+            ))}
+          </fieldset>
+          <Separator className="my-2" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-xs"
+            onClick={() => onChange([])}
+          >
+            Todos os níveis de risco
+          </Button>
+        </PopoverContent>
+      </Popover>
     </div>
-  );
-}
-function CompanyMetrics({ matching, pageSize, loading }) {
-  return (
-    <section
-      aria-label="Resumo das empresas filtradas"
-      className="space-y-5 py-5"
-    >
-      <div>
-        <p className="text-xs text-muted-foreground">Empresas encontradas</p>
-        <strong className="my-1 block font-display text-5xl font-semibold tracking-tighter">
-          {loading ? "—" : format(matching.length)}
-        </strong>
-        <p className="text-[10px] text-muted-foreground">
-          {pageSize === "all"
-            ? "todas em uma cidade"
-            : `até ${format(pageSize)} empresas por cidade`}
-        </p>
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {Object.entries(STATUS).map(([key, status]) => (
-          <div key={key}>
-            <div className="flex items-center gap-1.5">
-              <span
-                className="size-1.5 rounded-full"
-                style={{ background: status.color }}
-              />
-              <strong className="text-sm font-semibold">
-                {loading
-                  ? "—"
-                  : format(matching.filter((c) => c.status === key).length)}
-              </strong>
-            </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">
-              {key === "healthy" ? "Saudáveis" : status.label}
-            </p>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }
 function CategoryFilters({ matching, regions, region, onChange, onClear }) {
@@ -202,12 +210,6 @@ export function Sidebar({ atlas }) {
         onChange={(status) => atlas.updateFilters({ status })}
       />
       <Separator className="mt-5" />
-      <CompanyMetrics
-        matching={atlas.matching}
-        pageSize={atlas.pageSize}
-        loading={atlas.loading}
-      />
-      <Separator />
       <CategoryFilters
         regions={atlas.regions}
         matching={atlas.matching}

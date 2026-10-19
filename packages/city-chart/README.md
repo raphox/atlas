@@ -118,7 +118,7 @@ Controles, busca, detalhes, estados de saúde, tooltips, mensagens e rótulos ac
 | Perspectiva | `.atlas-city-perspectives`, `.atlas-city-perspective-button` (estado `aria-pressed`) |
 | Câmera | `.atlas-city-zoom`, `.atlas-city-camera-button`, modificadores `--zoom-in`, `--zoom-out`, `--reset`, `--fullscreen` |
 | Ambiente | `.atlas-city-scene-controls`, `.atlas-city-environment-control--lighting`, `.atlas-city-environment-control--weather`, `.atlas-city-select` |
-| Opções | `.atlas-city-control`, `.atlas-city-control-label`, `.atlas-city-toggle`, modificadores `--life`, `--effects`, `--labels` |
+| Opções | `.atlas-city-control`, `.atlas-city-control-label`, `.atlas-city-toggle`, modificadores `--life`, `--effects`, `--auto-rotate`, `--labels` |
 | Etiquetas | `.atlas-city-labels`, `.atlas-city-label`, `.atlas-city-label-dot`, `.atlas-city-label-name`, `.atlas-city-label-count` |
 | Tooltip | `.atlas-city-tooltip`, `.atlas-city-tooltip-name`, `.atlas-city-tooltip-summary`, `.atlas-city-tooltip-arrow` |
 | Detalhes | `.atlas-city-details`, `.atlas-city-details-title`, `.atlas-city-details-categories`, `.atlas-city-details-metric`, `.atlas-city-details-status`, `.atlas-city-details-close`, `.atlas-city-details-focus` |
@@ -139,6 +139,7 @@ Os componentes da interface não geram atributos `style`. As posições dinâmic
 | `theme` | `"default"` | `"default"`, `"tailwind"` ou `null` |
 | `view` | `"iso"` | `"iso"` ou `"top"` |
 | `life` / `effects` | `true` | animação da cidade / efeitos de risco |
+| `autoRotate` | `false` | rotação lenta no sentido horário, uma volta em aproximadamente 200 segundos |
 | `showDistrictLabels` | `false` | categorias e interseções |
 | `weather` | `"none"` | `"none"`, `"rain"` ou `"snow"` |
 | `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"` ou `"night"` |
@@ -150,7 +151,7 @@ Os componentes da interface não geram atributos `style`. As posições dinâmic
 | `className` / `children` | — | personalização CSS / conteúdo adicional |
 | `onSelect` | — | empresa original selecionada ou `null` |
 
-`view`, `life`, `effects` e `showDistrictLabels` podem ser controladas pelo consumidor com `onViewChange`, `onLifeChange`, `onEffectsChange` e `onDistrictLabelsChange`. Sem essas props, os botões gerenciam o estado local. Os seletores de ambiente têm substituições locais por instância; **Automático** segue a prop recebida.
+`view`, `life`, `effects`, `autoRotate` e `showDistrictLabels` podem ser controladas pelo consumidor com `onViewChange`, `onLifeChange`, `onEffectsChange`, `onAutoRotateChange` e `onDistrictLabelsChange`. Sem essas props, os botões gerenciam o estado local. Os seletores de ambiente têm substituições locais por instância; **Automático** segue a prop recebida.
 
 `ref` expõe `zoom(factor)`, `view(mode)`, `select(company, focus?, maxZoom?)`, `deselect()`, `cancel()`, `capture()`, `play(direction)`, `scrollIntoView()` e `stats()`. `onFocusChange` recebe o `ChartPoint` do TanStack.
 
@@ -191,3 +192,11 @@ Para publicar, após escolher nome/escopo, versão e licença e autenticar no np
 Os temas padrão priorizam a cor: etiquetas usam texto escuro e mantêm as cores das categorias nos marcadores; placeholders têm opacidade integral. Títulos e informações sobre o canvas usam `--atlas-city-overlay-text`. A visão geral não recebe fundos adicionais. Ao aproximar ou deslocar a câmera, cabeçalho e instruções recebem pois passam a cobrir partes claras e escuras da geometria. Voltar à visão geral remove essa proteção. Os grupos superiores usam flex e `--atlas-city-overlay-gap` para manter título, busca, perspectivas e detalhes separados mesmo quando o texto ocupa mais de uma linha. No celular, título e busca ficam empilhados e alinhados à esquerda. Todos esses ajustes usam classes e variáveis CSS.
 
 Na raiz, `npm run audit:contrast` verifica dia, nascente/poente e noite em 33 cenários de mapa, detalhes, busca e tooltip, nos temas CSS puro e Tailwind. Os resultados e capturas ficam em `test-results/contrast-audit`; o comando falha se houver texto ativo abaixo do mínimo de 4,5:1 (3:1 para texto grande). São medidas dos estados renderizados, incluindo fundos translúcidos, sem contar pixels suavizados das bordas das letras.
+
+### Acompanhamento contínuo
+
+**Rotação automática** começa desmarcada e funciona independentemente de Cidade viva e Efeitos de risco. A ativação explícita também permite a rotação com preferência por movimento reduzido. O giro pausa durante arrastes, transições da câmera e troca de cidade, retomando em seguida. A prop `autoRotate` também existe em `CityChart` e `createCityRenderer`; no motor, use `setAutoRotate(enabled)`.
+
+Em tela cheia, `CityMap` solicita um [Screen Wake Lock](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) para manter a tela ativa. O bloqueio é liberado ao sair, ocultar a página ou desmontar o mapa e solicitado novamente ao retornar à página visível em tela cheia. Requer contexto seguro (HTTPS ou localhost) e suporte/permissão do navegador e do sistema; não impede suspensão manual. Se indisponível ou recusado, a interface avisa e mantém a tela cheia funcionando.
+
+Os registros também aceitam `updatedAt` (última atualização) e `statusChangedAt` (início do status atual), opcionais e em ISO 8601 com fuso. Uma atualização comum preserva `statusChangedAt`; uma mudança de saúde atualiza os dois campos. Datas fornecidas são validadas, e `statusChangedAt` não pode ser posterior a `updatedAt`. A aplicação Atlas usa essas datas no painel de acompanhamento e na tabela; o mapa reutilizável preserva os campos nos dados.

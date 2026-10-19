@@ -13,6 +13,10 @@ export interface CityDatum {
   metric: { label: string; value: number };
   categories: { label: string; value: string }[];
   status: "healthy" | "warning" | "critical";
+  /** Last record update, ISO 8601 with timezone. */
+  updatedAt?: string;
+  /** When the current status began, ISO 8601 with timezone. */
+  statusChangedAt?: string;
   mask?: 1 | 2 | 3 | 4 | 5 | 6 | 7;
 }
 export type CityView = "iso" | "top";
@@ -45,6 +49,7 @@ export declare function cityMark<T extends CityDatum>(
 export declare const cityFocus: ChartFocusStrategy;
 export interface CityEngine<T extends CityDatum = CityDatum> {
   setActivity(options: { life?: boolean; effects?: boolean }): void;
+  setAutoRotate(enabled: boolean): void;
   setLightingMode(mode: CityLighting): void;
   setWeather(weather: CityWeather): void;
   view(view: CityView, immediate?: boolean): void;
@@ -57,6 +62,7 @@ export interface CityEngine<T extends CityDatum = CityDatum> {
   dispose(): void;
 }
 export interface CityRendererOptions<T extends CityDatum = CityDatum> {
+  autoRotate?: boolean;
   view?: CityView;
   life?: boolean;
   effects?: boolean;

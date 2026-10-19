@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "./status-badge";
 import { categoryLabel, metricFor } from "@/model";
+import { CompanyDate } from "./company-monitor";
 export function CompanyDetails({ company, onClose, onFocus }) {
   const { t, format } = useMapI18n();
   if (!company) return null;
@@ -65,6 +66,20 @@ export function CompanyDetails({ company, onClose, onFocus }) {
         <CardDescription className="text-xs leading-relaxed">
           {t(`description.${company.status}`)}
         </CardDescription>
+        <dl className="space-y-2 text-[10px] text-muted-foreground">
+          <div>
+            <dt>{t("updatedAt")}</dt>
+            <dd>
+              <CompanyDate value={company.updatedAt} />
+            </dd>
+          </div>
+          <div>
+            <dt>{t("statusChangedAt")}</dt>
+            <dd>
+              <CompanyDate value={company.statusChangedAt} />
+            </dd>
+          </div>
+        </dl>
         <Button className="w-full text-xs" onClick={onFocus}>
           {t("zoomCompany")}
           <ArrowUpRight className="size-3.5" />

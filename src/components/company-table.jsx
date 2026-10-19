@@ -13,6 +13,7 @@ import {
 import { categoryLabel, metricFor, PAGE_SIZES } from "@/model";
 import { format } from "@/hooks/use-atlas";
 import { StatusBadge } from "./status-badge";
+import { CompanyDate } from "./company-monitor";
 
 function CompanyPagination({ atlas }) {
   const { pagination, busy, loading } = atlas;
@@ -129,6 +130,7 @@ export function CompanyTable({ atlas }) {
             <TableHead>Categorias</TableHead>
             <TableHead className="text-right">{atlas.valueLabel}</TableHead>
             <TableHead>Saúde</TableHead>
+            <TableHead>Atualização</TableHead>
             <TableHead>
               <span className="sr-only">Localizar empresa</span>
             </TableHead>
@@ -174,6 +176,9 @@ export function CompanyTable({ atlas }) {
                 <TableCell>
                   <StatusBadge status={company.status} />
                 </TableCell>
+                <TableCell className="whitespace-nowrap text-[10px] text-muted-foreground">
+                  <CompanyDate value={company.updatedAt} />
+                </TableCell>
                 <TableCell className="pr-5 text-right">
                   <Button
                     variant="outline"
@@ -192,7 +197,7 @@ export function CompanyTable({ atlas }) {
           {!atlas.loading && !atlas.layout.companies.length && (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={6}
                 className="h-24 text-center text-muted-foreground"
               >
                 Nenhuma empresa encontrada para estes filtros.

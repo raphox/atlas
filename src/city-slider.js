@@ -95,5 +95,6 @@ export class CitySlider {
     state.canvas.height = 0;
     this.panel.classList.remove("city-sliding");
     this.city.controls.enabled = true;
+    this.city.invalidate?.();
   }
 }

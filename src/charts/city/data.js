@@ -1,4 +1,5 @@
 import { REGIONS, STATUS, metricFor, placeCompanies } from "../../model.js";
+import { normalizeCompanyDates } from "../../lib/company-dates.js";
 
 /**
  * @typedef {object} CityDatum
@@ -8,6 +9,8 @@ import { REGIONS, STATUS, metricFor, placeCompanies } from "../../model.js";
  * @property {{label: string, value: string}[]} [categories] Generic district memberships.
  * @property {1|2|3|4|5|6|7} [mask] Normalized category intersection; encodes district/color.
  * @property {"healthy"|"warning"|"critical"} status Health classification.
+ * @property {string} [updatedAt] Last record update, ISO 8601 with timezone.
+ * @property {string} [statusChangedAt] Start of the current health status.
  */
 
 /** Validate at the chart boundary, before layout or GPU allocation. */
@@ -41,6 +44,7 @@ export function validateCityData(data) {
     }
   }
   for (const [index, datum] of rows.entries()) {
+    normalizeCompanyDates(datum, index);
     if (
       typeof datum.name !== "string" ||
       !datum.name.trim() ||

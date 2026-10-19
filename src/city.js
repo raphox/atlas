@@ -26,6 +26,7 @@ export class City {
     this.life = true;
     this.lightingMode = "auto";
     this.effects = true;
+    this.autoRotate = false;
     this.weather = "none";
     this.running = true;
     this.elapsed = 0;
@@ -57,6 +58,7 @@ export class City {
     this.controls.maxZoom = 12;
     this.controls.zoomSpeed = 0.85;
     this.controls.rotateSpeed = 0.5;
+    this.controls.autoRotateSpeed = -0.3; // Clockwise, one revolution in about 200 seconds.
     this.controls.screenSpacePanning = true;
     this.controls.target.set(0, 0, 5);
     this.controls.update();
@@ -271,6 +273,11 @@ export class City {
     this.invalidate?.();
   }
   view(mode = "iso", immediate = false) {
+    // Flush pending drag damping so it cannot offset the restored view.
+    const damping = this.controls.enableDamping;
+    this.controls.enableDamping = false;
+    this.controls.update();
+    this.controls.enableDamping = damping;
     const [x, z] = this.layout?.center ?? [0, 0];
     const target = new THREE.Vector3(x, 0, z),
       pos =
@@ -282,15 +289,10 @@ export class City {
       mode === "top" ? 1e-6 : ISO_POLAR;
     if (immediate) {
       this.fly = null;
-      // Flush OrbitControls damping before setting the next city's exact view.
-      const damping = this.controls.enableDamping;
-      this.controls.enableDamping = false;
-      this.controls.update();
       this.camera.position.copy(pos);
       this.camera.zoom = 1;
       this.controls.target.copy(target);
       this.controls.update();
-      this.controls.enableDamping = damping;
       this.camera.updateProjectionMatrix();
       this.camera.updateMatrixWorld();
       this.cameraRevision = (this.cameraRevision ?? 0) + 1;
@@ -354,6 +356,12 @@ export class City {
     this.previous = 0;
     this.invalidate();
   }
+  setAutoRotate(enabled) {
+    if (this.autoRotate === enabled) return;
+    this.autoRotate = enabled;
+    this.previous = 0;
+    this.invalidate();
+  }
   refreshLighting() {
     if (updateLighting(this)) this.invalidate();
   }
@@ -395,9 +403,11 @@ export class City {
     }
     const dirty = this.dirty;
     this.dirty = false;
-    const dt = Math.min((now - (this.previous || now)) / 1000, 0.05);
+    const elapsedSeconds = (now - (this.previous || now)) / 1000;
+    const dt = Math.min(elapsedSeconds, 0.05);
     this.previous = now;
     if (!this.reduceMotion) this.elapsed += dt;
+    const flying = Boolean(this.fly);
     if (this.fly) {
       const f = this.fly;
       let t = Math.min(1, (now - f.start) / (this.reduceMotion ? 1 : 850));
@@ -409,7 +419,13 @@ export class City {
       this.cameraRevision++;
       if (t >= 1) this.fly = null;
     }
-    const cameraMoved = this.controls.update();
+    // Explicit opt-in also works with reduced motion. OrbitControls pauses
+    // while dragging; camera flights and pagination take precedence as well.
+    this.controls.autoRotate = Boolean(
+      this.autoRotate && !flying && this.controls.enabled,
+    );
+    const cameraMoved = this.controls.update(elapsedSeconds);
+    this.controls.autoRotate = false;
     const lightingChanged = advanceLighting(this, now);
     const trafficAnimated = !this.reduceMotion && this.life && this.simulation;
     const weatherAnimated =
@@ -434,6 +450,7 @@ export class City {
     this.renderer.render(this.scene, this.camera);
     if (
       this.fly ||
+      (this.autoRotate && this.controls.enabled) ||
       this.lightingTransition ||
       cameraMoved ||
       trafficAnimated ||

@@ -95,7 +95,9 @@ O botão de exemplo baixa um JSON no formato aceito:
       { "label": "Varejo", "value": "retail" },
       { "label": "Serviços", "value": "services" }
     ],
-    "status": "warning"
+    "status": "warning",
+    "updatedAt": "2026-10-19T12:00:00-03:00",
+    "statusChangedAt": "2026-10-19T11:45:00-03:00"
   }
 ]
 ```
@@ -105,6 +107,10 @@ O botão de exemplo baixa um JSON no formato aceito:
 `categories` contém um ou mais pares `{ "label": "Nome exibido", "value": "identificador" }`. `value` e `label` são textos não vazios, e um mesmo identificador deve ter o mesmo label em toda a base. O mapa aceita até **três categorias distintas por base**, com até sete combinações. Os bairros, filtros, detalhes e etiquetas usam esses labels. Identificadores são ordenados para atribuir os bits internos; a atribuição acontece antes dos filtros e da paginação. A mesma empresa aparece uma única vez, na interseção exata de suas categorias.
 
 `id` identifica a empresa e deve ser único; quando omitido, é gerado na importação. `name` é texto não vazio. `status` aceita `healthy`, `warning` e `critical`. O formato anterior (`users` e `systems: ["A", "B", "C"]`) continua aceito e é convertido para métrica e categorias. Os códigos antigos mantêm seus significados: Leads, Inteligência Artificial e Imobiliárias.
+
+`updatedAt` informa a última atualização do registro. `statusChangedAt` informa quando o **status atual** começou: ao mudar a saúde, atualize as duas datas; ao atualizar apenas métrica ou nome, preserve `statusChangedAt`. Se uma empresa sair de alto risco e retornar, envie a data dessa nova entrada. As datas usam ISO 8601 com fuso (`Z` ou deslocamento como `-03:00`); datas inválidas ou mudança de saúde posterior à atualização são rejeitadas. Os dois campos são opcionais para compatibilidade com bases antigas.
+
+O painel de acompanhamento mostra um relógio digital no fuso local do navegador e até quatro empresas **atualmente em alto risco**, distribuídas em duas colunas com duas empresas cada, ordenadas por `statusChangedAt` da mais recente para a mais antiga. Ele considera toda a base carregada, sem aplicar filtros ou paginação, e permanece visível ao ocultar os controles e em tela cheia. Empresas sem data de mudança são contabilizadas separadamente, sem atribuir uma entrada fictícia; `updatedAt` sozinho não comprova quando houve a entrada em risco. A coluna **Atualização** e os detalhes exibem as datas disponíveis. O painel reflete o último carregamento/importação; não acrescenta consultas periódicas à fonte.
 
 A importação aceita uma lista JSON com até 5 MB, acontece no navegador e não persiste após recarregar. Uma importação inválida preserva a cidade anterior.
 

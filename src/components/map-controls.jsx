@@ -1,4 +1,5 @@
 import { useMapI18n } from "../charts/city/use-map-i18n.js";
+import { useFullscreenWakeLock } from "../charts/city/use-fullscreen-wake-lock.js";
 import { useEffect, useId, useState } from "react";
 import {
   Eye,
@@ -78,6 +79,7 @@ export function ZoomControls({
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false);
   const [fullscreenError, setFullscreenError] = useState(null);
+  const wakeLockStatus = useFullscreenWakeLock(fullscreenRef);
   useEffect(() => {
     const update = () =>
       setFullscreen(document.fullscreenElement === fullscreenRef.current);
@@ -154,6 +156,14 @@ export function ZoomControls({
           {t(fullscreenError)}
         </p>
       )}
+      {wakeLockStatus === "unavailable" && (
+        <p
+          role="status"
+          className="atlas-map-message absolute right-full top-0 mr-2 w-56 rounded-md border p-3 text-xs text-foreground shadow-md"
+        >
+          {t("wakeLockUnavailable")}
+        </p>
+      )}
     </div>
   );
 }
@@ -179,6 +189,12 @@ export function SceneControls({ atlas, disabled, environmentControls }) {
             label: t("effects"),
             value: atlas.effects,
             onChange: atlas.setEffects,
+          },
+          {
+            id: "auto-rotate",
+            label: t("autoRotate"),
+            value: atlas.autoRotate,
+            onChange: atlas.setAutoRotate,
           },
           {
             id: "district-labels",

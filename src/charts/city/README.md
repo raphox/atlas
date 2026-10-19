@@ -134,7 +134,7 @@ O layout é calculado pela marca (ou fornecido pela aplicação) e acompanha um 
 | Nome | atualizar os dados usados pela interface |
 | Tamanho do contêiner | ajustar a câmera e o canvas, sem reconstruir geometria |
 
-Com cidade viva e efeitos desligados, o loop entra em repouso após a câmera estabilizar. Câmera, seleção, dados, controles e redimensionamento solicitam um novo frame; animações mantêm o loop ativo somente enquanto necessário. Ao integrar diretamente com o motor, use `setActivity({ life, effects })` e `select(company)`/`select(null)` para também invalidar a cena.
+Com cidade viva, efeitos e rotação automática desligados, o loop entra em repouso após a câmera estabilizar. Câmera, seleção, dados, controles e redimensionamento solicitam um novo frame; animações mantêm o loop ativo somente enquanto necessário. Ao integrar diretamente com o motor, use `setActivity({ life, effects })` e `select(company)`/`select(null)` para também invalidar a cena.
 
 Com cidade viva ativa, a iluminação segue o horário local do navegador: sol nascente das 6h às 8h, dia das 8h às 17h, sol poente das 17h às 19h e noite das 19h às 6h. Nascente e poente compartilham o mesmo nível de luz quente. As janelas ficam acesas nesses períodos e à noite, inclusive com efeitos de risco desligados; fogo e alertas preservam sua sinalização. A verificação ocorre a cada minuto e ao retornar à aba, inclusive com movimento reduzido. Desativar cidade viva restaura a iluminação diurna original e interrompe a verificação periódica.
 

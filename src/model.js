@@ -1,3 +1,5 @@
+import { normalizeCompanyDates } from "./lib/company-dates.js";
+
 export const REGIONS = [
   {
     mask: 1,
@@ -145,10 +147,16 @@ export function filteredCompanies(
   { region = "all", status = "all", query = "" } = {},
 ) {
   const q = query.trim().toLocaleLowerCase("pt-BR");
+  // Keep single-status callers compatible; an empty selection means all.
+  const statuses = Array.isArray(status)
+    ? status
+    : status === "all"
+      ? []
+      : [status];
   return companies.filter(
     (c) =>
       (region === "all" || c.mask === Number(region)) &&
-      (status === "all" || c.status === status) &&
+      (!statuses.length || statuses.includes(c.status)) &&
       (!q || c.name.toLocaleLowerCase("pt-BR").includes(q)),
   );
 }
@@ -256,6 +264,7 @@ export function placeCompanies(records) {
       metric: { label: metric.label.trim(), value: metric.value },
       categories: [...unique.values()],
       status: r.status,
+      ...normalizeCompanyDates(r, i),
       ...(r.metric === undefined ? { users: r.users } : {}),
     };
   });

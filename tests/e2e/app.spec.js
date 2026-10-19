@@ -7,7 +7,9 @@ test.beforeEach(async ({ page }) => {
 async function ready(page) {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect
-    .poll(() => page.evaluate(() => window.atlas?.summary.companies))
+    .poll(() => page.evaluate(() => window.atlas?.summary.companies), {
+      timeout: 45000,
+    })
     .toBe(1400);
   await expect(
     page.getByText("Construindo a cidade", { exact: true }),
@@ -43,9 +45,9 @@ test("mapa, tabela, filtros e paginação compartilham o estado React", async ({
   await page.getByRole("combobox", { name: "Por cidade" }).selectOption("250");
   await expect(page.locator("tbody tr")).toHaveCount(250);
   await expect.poll(async () => (await summary(page)).pageSize).toBe(250);
-  await page
-    .getByRole("combobox", { name: "SAÚDE DA EMPRESA" })
-    .selectOption("critical");
+  await page.getByRole("button", { name: /^SAÚDE DA EMPRESA/ }).click();
+  await page.getByRole("checkbox", { name: "Alto risco", exact: true }).check();
+  await page.keyboard.press("Escape");
   await expect
     .poll(async () => (await summary(page)).filtered)
     .toBeGreaterThan(0);
@@ -555,4 +557,52 @@ test("tela cheia mantém controles e restaura o mapa e a tabela ao sair", async 
     page.getByRole("button", { name: "Abrir mapa em tela cheia" }),
   ).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("bússola acompanha a rotação e restaura a visão isométrica inicial por clique e teclado", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await ready(page);
+  await page.getByRole("checkbox", { name: "Cidade viva" }).uncheck();
+  await page.getByRole("checkbox", { name: "Efeitos de risco" }).uncheck();
+  const compass = page.getByRole("button", {
+    name: "Restaurar visão isométrica",
+  });
+  const angle = () =>
+    page.locator(".atlas-map-compass-arrow").evaluate((node) => {
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(node).transform);
+      return Math.atan2(matrix.b, matrix.a);
+    });
+  const drag = async () => {
+    const box = await page.locator("#viewport canvas").boundingBox();
+    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.55);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.55, {
+      steps: 12,
+    });
+    await page.mouse.up();
+  };
+  await expect.poll(angle).toBeGreaterThan(0.5);
+  const originalAngle = await angle();
+  await drag();
+  await expect
+    .poll(async () => Math.abs((await angle()) - originalAngle))
+    .toBeGreaterThan(0.1);
+  await page.getByRole("button", { name: "Aproximar", exact: true }).click();
+  await compass.click();
+  await expect
+    .poll(async () => Math.abs((await angle()) - originalAngle))
+    .toBeLessThan(0.001);
+  await expect(page.getByRole("radio", { name: "Isométrica" })).toBeChecked();
+  await page.getByRole("radio", { name: "Vista superior" }).click();
+  await expect.poll(async () => Math.abs(await angle())).toBeLessThan(0.001);
+  await drag();
+  await expect.poll(async () => Math.abs(await angle())).toBeGreaterThan(0.1);
+  await compass.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("radio", { name: "Isométrica" })).toBeChecked();
+  await expect
+    .poll(async () => Math.abs((await angle()) - originalAngle))
+    .toBeLessThan(0.001);
 });

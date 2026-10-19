@@ -11,6 +11,7 @@ import { createCityRenderer } from "./renderer.js";
 import { layoutCity } from "../../model.js";
 import { CitySlider } from "../../city-slider.js";
 import { mapTooltipAnchor } from "../../lib/map-tooltip.js";
+import { mapNorthAngle } from "../../lib/map-compass.js";
 
 // TanStack owns the renderer lifetime; this hook bridges camera and UI state.
 export function useCityChart({
@@ -23,6 +24,7 @@ export function useCityChart({
   lightingMode,
   weather,
   effects,
+  autoRotate,
   chartRef,
   panelRef,
   viewportRef,
@@ -83,6 +85,8 @@ export function useCityChart({
 
   const renderer = useMemo(() => {
     const labelRules = new Map();
+    let compassRule;
+    let monitorText;
     const updateHover = (scene) => {
       const company = hoveredCompany.current;
       let next = null;
@@ -111,6 +115,20 @@ export function useCityChart({
     };
     const projectOverlays = (scene) => {
       updateHover(scene);
+      const sheet = projectionStyleRef.current?.sheet;
+      if (sheet) {
+        if (!compassRule) {
+          const index = sheet.insertRule(
+            `[data-atlas-city-instance="${instanceId}"] {}`,
+            sheet.cssRules.length,
+          );
+          compassRule = sheet.cssRules[index];
+        }
+        compassRule.style.setProperty(
+          "--atlas-city-north-angle",
+          `${mapNorthAngle(scene.camera)}rad`,
+        );
+      }
       const { region, layout } = latest.current;
       const width = viewportRef.current?.clientWidth || 0;
       const height = viewportRef.current?.clientHeight || 0;
@@ -149,6 +167,17 @@ export function useCityChart({
         if (cityRef.current) updateHover(cityRef.current);
       },
       projection: projectOverlays,
+      frame(scene) {
+        // Three.js colors are linear: choose the higher-contrast text color
+        // against the scene, including during day/night lighting transitions.
+        const { r, g, b } = scene.scene.background;
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const color = luminance > 0.179 ? "#000" : "#fff";
+        if (compassRule && color !== monitorText) {
+          compassRule.style.setProperty("--atlas-city-monitor-text", color);
+          monitorText = color;
+        }
+      },
       onMount(city) {
         cityRef.current = city;
         city.renderer.domElement.addEventListener(
@@ -218,6 +247,10 @@ export function useCityChart({
   }, [life, effects, layout]);
 
   useLayoutEffect(() => {
+    cityRef.current?.setAutoRotate(autoRotate);
+  }, [autoRotate, layout]);
+
+  useLayoutEffect(() => {
     cityRef.current?.setLightingMode(lightingMode);
   }, [lightingMode, layout]);
 
@@ -244,7 +277,10 @@ export function useCityChart({
     () => ({
       cancel() {
         sliderRef.current?.cancel();
-        if (cityRef.current) cityRef.current.controls.enabled = true;
+        if (cityRef.current) {
+          cityRef.current.controls.enabled = true;
+          cityRef.current.invalidate();
+        }
       },
       deselect() {
         cityRef.current?.select(null);
