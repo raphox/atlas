@@ -6,11 +6,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { toast } from "sonner";
 import { createCityRenderer } from "./renderer.js";
-import { layoutCity } from "@/model";
-import { CitySlider } from "@/city-slider";
-import { mapTooltipAnchor } from "@/lib/map-tooltip";
+import { layoutCity } from "../../model.js";
+import { CitySlider } from "../../city-slider.js";
+import { mapTooltipAnchor } from "../../lib/map-tooltip.js";
 
 // TanStack owns the renderer lifetime; this hook bridges camera and UI state.
 export function useCityChart({
@@ -29,6 +28,8 @@ export function useCityChart({
   labelsRef,
   labelNodes,
   onHover,
+  projectionStyleRef,
+  instanceId,
 }) {
   const cityRef = useRef(null);
   const sliderRef = useRef(null);
@@ -79,6 +80,7 @@ export function useCityChart({
   }, [scheduleHoverHide]);
 
   const renderer = useMemo(() => {
+    const labelRules = new Map();
     const updateHover = (scene) => {
       const company = hoveredCompany.current;
       let next = null;
@@ -103,7 +105,7 @@ export function useCityChart({
     };
     const contextLost = (event) => {
       event.preventDefault();
-      toast.error(
+      setError(
         "A conexão gráfica foi interrompida. Recarregue a página para restaurar o mapa.",
       );
     };
@@ -116,12 +118,23 @@ export function useCityChart({
         const anchor = layout.anchors[mask];
         if (!anchor) continue;
         const point = scene.project(...anchor);
-        node.style.left = `${(point.x * 0.5 + 0.5) * width}px`;
-        node.style.top = `${(-point.y * 0.5 + 0.5) * height}px`;
-        node.style.opacity =
-          region === "all" || Number(region) === mask ? "1" : ".2";
-        node.style.display =
-          point.z > 1 || point.z < -1 || scene.camera.zoom > 3.3 ? "none" : "";
+        const sheet = projectionStyleRef.current?.sheet;
+        if (sheet) {
+          if (!labelRules.has(mask)) {
+            const index = sheet.insertRule(
+              `[data-atlas-city-instance="${instanceId}"] .atlas-city-label[data-region="${mask}"] {}`,
+              sheet.cssRules.length,
+            );
+            labelRules.set(mask, sheet.cssRules[index]);
+          }
+          const rule = labelRules.get(mask);
+          rule.style.left = `${(point.x * 0.5 + 0.5) * width}px`;
+          rule.style.top = `${(-point.y * 0.5 + 0.5) * height}px`;
+        }
+        node.dataset.dimmed = String(
+          region !== "all" && Number(region) !== mask,
+        );
+        node.hidden = point.z > 1 || point.z < -1 || scene.camera.zoom > 3.3;
       }
     };
     updateOverlays.current = projectOverlays;
@@ -177,6 +190,8 @@ export function useCityChart({
     labelNodes,
     cancelHoverHide,
     scheduleHoverHide,
+    projectionStyleRef,
+    instanceId,
   ]);
 
   useLayoutEffect(() => () => cancelHoverHide(), [cancelHoverHide]);

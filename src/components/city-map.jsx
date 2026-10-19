@@ -180,7 +180,7 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                 <span className="text-[9px]">N</span>
                 <div className="text-3xl leading-6">↑</div>
               </div>
-              <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border/60 bg-card/80 px-5 py-1 text-[9px] text-muted-foreground">
+              <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border/60 bg-card/40 px-5 py-1 text-[9px] text-muted-foreground">
                 <span>
                   Clima:{" "}
                   <a

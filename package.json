@@ -10,10 +10,14 @@
     "prestart": "node scripts/generate-demo.mjs",
     "build": "node scripts/generate-demo.mjs && vite build",
     "preview": "vite preview",
-    "test": "node --test tests/*.test.mjs",
+    "test": "npm run build:package && node --test tests/*.test.mjs",
     "test:e2e": "playwright test",
     "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "build:package": "node scripts/build-city-package.mjs",
+    "pack:package": "npm pack ./packages/city-chart",
+    "test:package": "npm run build:package && node --test tests/city-package.test.mjs",
+    "pretest:e2e": "npm run build:package"
   },
   "dependencies": {
     "@tanstack/charts": "1.1.0",

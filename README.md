@@ -153,3 +153,16 @@ A navegação mantém somente uma cidade WebGL ativa e, durante o slider, uma ca
 O alerta de risco médio usa triângulo amarelo vivo, exclamação e contorno escuros e borda externa branca, com tamanho ampliado e cor independente do mapeamento tonal da cena.
 
 A extensão compartilha o layout entre a marca TanStack e o renderer 3D. Mudanças de paleta reaproveitam a geometria; mudanças de valores da métrica ou saúde preservam terreno, trânsito e câmera quando os lotes permanecem iguais. Com animações desligadas e câmera estabilizada, a cena renderiza sob demanda. Os contratos e as regras de atualização estão em `src/charts/city/README.md`.
+
+
+## Pacote npm reutilizável
+
+O gráfico completo pode ser distribuído como `atlas-city-chart`, separado da SPA:
+
+```sh
+npm run pack:package
+```
+
+O comando gera `atlas-city-chart-0.1.0.tgz`, instalável em outro projeto com `npm install /caminho/atlas-city-chart-0.1.0.tgz`. Importe `CityMap` de `atlas-city-chart/react` e `atlas-city-chart/styles.css`. O componente inclui mapa, clima, iluminação, busca e botões; recebe `data` diretamente. Há temas em CSS puro (`theme="default"`) e Tailwind 4 (`theme="tailwind"`), com classes públicas e tokens CSS para extensão. A API do motor está na entrada `atlas-city-chart`.
+
+Veja [o guia do pacote](packages/city-chart/README.md) para instalação, exemplos, temas, propriedades, testes e publicação. O pacote está preparado para distribuição local; ainda não foi publicado no registry npm.

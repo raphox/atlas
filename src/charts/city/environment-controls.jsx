@@ -33,18 +33,22 @@ export function EnvironmentControls({
       ].map((control) => (
         <label
           key={control.label}
-          className="pointer-events-auto flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs has-disabled:opacity-50"
+          className={`atlas-city-control atlas-city-environment-control atlas-city-environment-control--${control.label === "Clima" ? "weather" : "lighting"}`}
         >
-          <span>{control.label}</span>
+          <span className="atlas-city-control-label">{control.label}</span>
           <select
             aria-label={`${control.label} da cidade`}
             value={control.value}
             onChange={(event) => control.onChange(event.target.value)}
             disabled={disabled}
-            className="min-w-0 cursor-pointer rounded-sm bg-card text-xs outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed"
+            className="atlas-city-select"
           >
             {control.options.map(([value, label]) => (
-              <option key={value} value={value}>
+              <option
+                className="atlas-city-select-option"
+                key={value}
+                value={value}
+              >
                 {label}
               </option>
             ))}

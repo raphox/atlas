@@ -185,7 +185,7 @@ Reproduza com `node scripts/benchmark-city.mjs`. São contagens de geometria, n�
 - `npm run test:e2e`: consumo direto pelo host TanStack, eventos/teclado/tooltip, duas montagens e os fluxos do Atlas em desktop e mobile.
 - `npm run build` e `npm run format:check`: build de produção e formatação.
 
-A superfície é dedicada a uma cidade: não desenha eixos, grids ou marcas cartesianas arbitrárias sobre o WebGL. Use uma `cityMark` por superfície. SVG e Canvas não se tornam renderers 3D; a geometria semântica da marca permite uma representação plana quando desenhada por SVG, mas a cidade requer `createCityRenderer`. SSR produz um shell acessível determinístico; WebGL só inicia na montagem do navegador. Não há publicação de pacote npm nesta alteração.
+A superfície é dedicada a uma cidade: não desenha eixos, grids ou marcas cartesianas arbitrárias sobre o WebGL. Use uma `cityMark` por superfície. SVG e Canvas não se tornam renderers 3D; a geometria semântica da marca permite uma representação plana quando desenhada por SVG, mas a cidade requer `createCityRenderer`. SSR produz um shell acessível determinístico; WebGL só inicia na montagem do navegador. O pacote npm é gerado em `packages/city-chart`; consulte seu README para distribuição, temas CSS/Tailwind e uso do componente completo.
 
 Referências de API: [custom marks and renderers](https://tanstack.com/charts/latest/docs/guides/custom-marks-and-renderers), [React renderer entry points](https://tanstack.com/charts/latest/docs/framework/react/reference/chart), [fonte da versão 1.1.0](https://github.com/TanStack/charts/tree/v1.1.0).
 

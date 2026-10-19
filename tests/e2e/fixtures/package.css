@@ -1,0 +1,7 @@
+.custom-city {
+  --atlas-city-accent: #7c3aed;
+  --atlas-city-radius: 12px;
+}
+.consumer-text {
+  color: rgb(120, 40, 20);
+}

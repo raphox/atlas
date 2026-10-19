@@ -34,6 +34,21 @@ export class CitySlider {
     labels.removeAttribute("id");
     labels.className = "city-slide-labels";
     overlay.append(canvas, labels);
+    // Freeze the old labels' CSS positions while the live stylesheet moves
+    // to the next layout. The more specific rules leave the live labels alone.
+    const projectionSheet = this.panel.querySelector?.(
+      "style[data-atlas-city-projections]",
+    )?.sheet;
+    if (projectionSheet) {
+      const style = document.createElement("style");
+      style.textContent = Array.from(projectionSheet.cssRules, (rule) =>
+        rule.cssText.replace(
+          " .atlas-city-label[",
+          " .city-slide-labels .atlas-city-label[",
+        ),
+      ).join("\n");
+      overlay.append(style);
+    }
     this.panel.append(overlay);
     this.state = { overlay, canvas, animations: [] };
     this.city.controls.enabled = false;

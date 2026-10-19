@@ -9,6 +9,7 @@ npm-debug.log*
 
 # Pacotes e dados gerados
 *.tar.gz
+*.tgz
 /public/data/empresas.json
 
 # Resultados de testes

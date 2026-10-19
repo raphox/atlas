@@ -1,21 +1,18 @@
-import { useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Chart } from "@tanstack/charts/react/core";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { regionsFor, categoryLabel, metricFor, STATUS } from "@/model";
-import { format } from "@/hooks/use-atlas";
+import { regionsFor, categoryLabel, metricFor, STATUS } from "../../model.js";
 import { useCityChart } from "./use-city-chart.js";
 import { EnvironmentControls } from "./environment-controls.jsx";
+import "./styles.css";
+
+const format = (value) => new Intl.NumberFormat("pt-BR").format(value);
 
 function DistrictLabels({ layout, labelsRef, labelNodes, visible }) {
   return (
     <div
       ref={labelsRef}
       hidden={!visible}
-      className="pointer-events-none absolute inset-0 overflow-hidden"
+      className="atlas-city-labels"
       aria-hidden="true"
     >
       {regionsFor(layout.companies)
@@ -27,15 +24,12 @@ function DistrictLabels({ layout, labelsRef, labelNodes, visible }) {
               if (node) labelNodes.current.set(region.mask, node);
               else labelNodes.current.delete(region.mask);
             }}
-            className="district-label absolute flex -translate-1/2 items-center gap-1.5 rounded-md border border-border/80 bg-card/95 px-2 py-1.5 text-[10px] font-bold whitespace-nowrap shadow-md backdrop-blur"
-            style={{ color: region.color }}
+            className={`district-label atlas-city-label atlas-city-label--${region.mask}`}
+            data-region={region.mask}
           >
-            <span
-              className="size-1.5 shrink-0 rounded-sm"
-              style={{ background: region.color }}
-            />
-            <span>{region.shortLabel}</span>
-            <small className="text-[9px] font-normal text-muted-foreground">
+            <span className="atlas-city-label-dot" />
+            <span className="atlas-city-label-name">{region.shortLabel}</span>
+            <small className="atlas-city-label-count">
               {format(
                 layout.companies.filter(
                   (company) => company.mask === region.mask,
@@ -47,45 +41,87 @@ function DistrictLabels({ layout, labelsRef, labelNodes, visible }) {
     </div>
   );
 }
-function CompanyHover({
-  tooltip,
-  collisionBoundary,
-  onPointerEnter,
-  onPointerLeave,
-}) {
+function CompanyHover({ tooltip, onPointerEnter, onPointerLeave }) {
+  const anchorId = `atlas-city-hover-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const contentRef = useRef(null);
+  const positionRef = useRef(null);
+  const arrowRef = useRef(null);
+  useLayoutEffect(() => {
+    if (!tooltip || !contentRef.current) return;
+    const content = contentRef.current;
+    const update = () => {
+      const width = content.parentElement.clientWidth;
+      const height = content.parentElement.clientHeight;
+      const box = content.getBoundingClientRect();
+      const left = Math.max(
+        12,
+        Math.min(tooltip.x - 16, width - box.width - 12),
+      );
+      const above = tooltip.y - box.height - 5 >= 12;
+      const top = Math.max(
+        12,
+        Math.min(
+          above ? tooltip.y - box.height - 5 : tooltip.y + 5,
+          height - box.height - 12,
+        ),
+      );
+      const rules = positionRef.current.sheet.cssRules;
+      rules[1].style.left = `${left}px`;
+      rules[1].style.top = `${top}px`;
+      rules[2].style.left = `${tooltip.x + 0.5 - left - content.clientLeft - 5}px`;
+      const bottomBorder =
+        parseFloat(getComputedStyle(content).borderBottomWidth) || 0;
+      rules[2].style.top = above
+        ? `calc(100% + ${bottomBorder}px)`
+        : `${-5 - content.clientTop}px`;
+      arrowRef.current.setAttribute(
+        "d",
+        above ? "M 0 -1 L 5 5 L 10 -1" : "M 0 6 L 5 0 L 10 6",
+      );
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [tooltip]);
   if (!tooltip) return null;
   return (
-    <Tooltip open>
-      <TooltipTrigger asChild>
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute size-px"
-          style={{ left: tooltip.x, top: tooltip.y }}
-        />
-      </TooltipTrigger>
-      <TooltipContent
-        side="top"
-        align="start"
-        alignOffset={-16}
-        sideOffset={0}
-        arrowPadding={8}
-        collisionPadding={12}
-        collisionBoundary={collisionBoundary}
-        updatePositionStrategy="always"
+    <>
+      <style
+        ref={positionRef}
+      >{`#${anchorId} { left: ${Number(tooltip.x)}px; top: ${Number(tooltip.y)}px; } #${anchorId}-content {} #${anchorId}-content .atlas-city-tooltip-arrow {}`}</style>
+      <span
+        id={anchorId}
+        className="atlas-city-tooltip-anchor"
+        data-slot="tooltip-trigger"
+        aria-hidden="true"
+      />
+      <div
+        ref={contentRef}
+        id={`${anchorId}-content`}
+        role="tooltip"
+        data-slot="tooltip-content"
         onPointerEnter={onPointerEnter}
         onPointerLeave={onPointerLeave}
-        className="pointer-events-auto max-w-64 animate-none border border-border bg-white px-3 py-2 text-[11px] text-slate-900 shadow-md"
-        arrowClassName="fill-white stroke-border"
-        arrowBordered
+        className="atlas-city-tooltip"
       >
-        <span>{tooltip.company.name}</span>
-        <small className="mt-1 block text-[9px] opacity-80">
+        <span className="atlas-city-tooltip-name">{tooltip.company.name}</span>
+        <small className="atlas-city-tooltip-summary">
           {categoryLabel(tooltip.company)} · {metricFor(tooltip.company).label}:{" "}
           {format(metricFor(tooltip.company).value)} ·{" "}
           {STATUS[tooltip.company.status].label}
         </small>
-      </TooltipContent>
-    </Tooltip>
+        <svg
+          className="atlas-city-tooltip-arrow"
+          width="10"
+          height="5"
+          viewBox="0 0 10 5"
+          aria-hidden="true"
+        >
+          <path ref={arrowRef} strokeWidth="1" strokeLinejoin="round" />
+        </svg>
+      </div>
+    </>
   );
 }
 // Standard TanStack definition and ChartPoint callbacks, with a Three.js surface.
@@ -108,7 +144,11 @@ export function CityChart({
   selected = null,
   children,
   ariaLabel = "Health score das empresas em uma cidade 3D",
+  className = "",
+  theme = "default",
 }) {
+  const instanceId = useId();
+  const projectionStyleRef = useRef(null);
   const panelRef = useRef(null);
   const viewportRef = useRef(null);
   const labelsRef = useRef(null);
@@ -144,6 +184,8 @@ export function CityChart({
     labelsRef,
     labelNodes,
     onHover: setTooltip,
+    projectionStyleRef,
+    instanceId,
   });
   const environmentControls = showEnvironmentControls ? (
     <EnvironmentControls
@@ -158,13 +200,14 @@ export function CityChart({
     <div
       ref={panelRef}
       id={id}
-      className="relative min-h-[520px] flex-1 overflow-hidden bg-[#e9ede4] lg:min-h-[460px]"
+      className={`atlas-city-chart ${theme ? `atlas-city-theme-${theme}` : ""} ${className}`}
+      data-atlas-city-instance={instanceId}
       aria-busy={busy || !ready}
     >
       <div
         ref={viewportRef}
         id={viewportId}
-        className="city-chart-viewport absolute inset-0 touch-none outline-none"
+        className="city-chart-viewport atlas-city-viewport"
         aria-label="Cidade 3D. Arraste para girar, use a roda para zoom, clique em uma empresa para detalhes."
       >
         <Chart
@@ -172,12 +215,13 @@ export function CityChart({
           renderer={renderer}
           ariaLabel={ariaLabel}
           ariaDescription="Cada construção representa uma empresa. Altura indica o valor da métrica, cor indica categorias e efeitos indicam o nível de risco."
-          style={{ height: "100%" }}
+          className="atlas-city-host"
           onSelect={onSelect}
           onFocusChange={onFocusChange}
           onRender={onRender}
         />
       </div>
+      <style ref={projectionStyleRef} data-atlas-city-projections="" />
       <DistrictLabels
         visible={showDistrictLabels}
         layout={layout}
@@ -187,7 +231,6 @@ export function CityChart({
       <CompanyHover
         key={tooltip?.company.id}
         tooltip={tooltip}
-        collisionBoundary={viewportRef.current}
         onPointerEnter={onTooltipEnter}
         onPointerLeave={onTooltipLeave}
       />
@@ -197,9 +240,7 @@ export function CityChart({
         <>
           {children}
           {environmentControls && (
-            <div className="pointer-events-none absolute right-4 bottom-4 left-4 z-10 flex flex-wrap justify-end gap-2">
-              {environmentControls}
-            </div>
+            <div className="atlas-city-environment">{environmentControls}</div>
           )}
         </>
       )}

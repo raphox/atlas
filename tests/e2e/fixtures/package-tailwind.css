@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "../../../packages/city-chart/dist/styles.css";
+@import "../../../packages/city-chart/dist/tailwind.css";
+
+.custom-city {
+  --atlas-city-accent: #7c3aed;
+  --atlas-city-radius: 12px;
+}

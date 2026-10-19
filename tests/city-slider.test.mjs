@@ -119,3 +119,20 @@ test("movimento reduzido troca a cidade sem snapshot ou bloqueio dos controles",
   assert.equal(panel.children.length, 0);
   assert.equal(city.controls.enabled, true);
 });
+
+test("snapshot preserva posições CSS das etiquetas sem alterar a cidade recebida", (t) => {
+  const { panel, slider } = setup(t);
+  const rule = {
+    cssText:
+      '[data-atlas-city-instance="one"] .atlas-city-label[data-region="1"] { left: 10px; top: 20px; }',
+  };
+  panel.querySelector = () => ({ sheet: { cssRules: [rule] } });
+  slider.capture();
+  const style = slider.state.overlay.children.at(-1);
+  assert.match(style.textContent, /\.city-slide-labels \.atlas-city-label/);
+  assert.match(style.textContent, /left: 10px/);
+  rule.cssText = rule.cssText.replace("10px", "100px");
+  assert.match(style.textContent, /left: 10px/);
+  slider.cancel();
+  assert.equal(panel.children.length, 0);
+});

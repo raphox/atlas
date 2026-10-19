@@ -1,0 +1,345 @@
+@import "./theme-default.css";
+
+.atlas-city-chart,
+.atlas-city-map {
+  position: relative;
+  min-width: 0;
+  color: var(--atlas-city-text);
+  font-family: var(--atlas-city-font-family);
+  font-size: var(--atlas-city-font-size);
+  line-height: 1.5;
+  background: var(--atlas-city-background);
+}
+.atlas-city-chart {
+  flex: 1;
+  min-height: 520px;
+  overflow: hidden;
+}
+.atlas-city-map {
+  height: var(--atlas-city-height);
+}
+.atlas-city-map > .atlas-city-chart {
+  height: 100%;
+  min-height: 0;
+}
+.atlas-city-map:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+.atlas-city-viewport,
+.atlas-city-labels {
+  position: absolute;
+  inset: 0;
+}
+.atlas-city-viewport {
+  touch-action: none;
+  outline: none;
+}
+.atlas-city-viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.atlas-city-labels {
+  pointer-events: none;
+  overflow: hidden;
+}
+.atlas-city-labels[hidden] {
+  display: none;
+}
+.atlas-city-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translate(-50%, -50%);
+  padding: 6px 8px;
+  border: 1px solid var(--atlas-city-border);
+  border-radius: var(--atlas-city-radius);
+  background: var(--atlas-city-card);
+  box-shadow: var(--atlas-city-shadow);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.atlas-city-label-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+}
+.atlas-city-label small {
+  color: var(--atlas-city-muted);
+  font-size: 9px;
+  font-weight: 400;
+}
+.atlas-city-tooltip {
+  position: absolute;
+  z-index: 50;
+  max-width: min(256px, calc(100% - 24px));
+  padding: var(--atlas-city-control-padding);
+  border: 1px solid var(--atlas-city-border);
+  border-radius: var(--atlas-city-radius);
+  background: var(--atlas-city-tooltip-background);
+  color: var(--atlas-city-tooltip-text);
+  box-shadow: var(--atlas-city-shadow);
+  font-family: var(--atlas-city-font-family);
+  font-size: 11px;
+  pointer-events: auto;
+}
+.atlas-city-tooltip small {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  opacity: 0.8;
+}
+.atlas-city-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: var(--atlas-city-control-padding);
+  border: 1px solid var(--atlas-city-border);
+  border-radius: var(--atlas-city-radius);
+  background: var(--atlas-city-card);
+  color: var(--atlas-city-text);
+  font-size: var(--atlas-city-font-size);
+  pointer-events: auto;
+}
+.atlas-city-control:has(:disabled) {
+  opacity: 0.5;
+}
+.atlas-city-select {
+  min-width: 0;
+  border: 0;
+  background: var(--atlas-city-card);
+  color: var(--atlas-city-text);
+  font: inherit;
+  cursor: pointer;
+}
+.atlas-city-environment,
+.atlas-city-scene-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+.atlas-city-map button,
+.atlas-city-map input,
+.atlas-city-map fieldset {
+  box-sizing: border-box;
+  margin: 0;
+  font: inherit;
+}
+.atlas-city-map button,
+.atlas-city-search input {
+  padding: var(--atlas-city-control-padding);
+  border: 1px solid var(--atlas-city-border);
+  border-radius: var(--atlas-city-radius);
+  background: var(--atlas-city-card);
+  color: var(--atlas-city-text);
+}
+.atlas-city-map button {
+  cursor: pointer;
+}
+.atlas-city-map button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.atlas-city-map button:focus-visible,
+.atlas-city-map input:focus-visible,
+.atlas-city-select:focus-visible {
+  outline: 2px solid var(--atlas-city-accent);
+  outline-offset: 2px;
+}
+.atlas-city-map button[aria-pressed="true"] {
+  background: var(--atlas-city-accent);
+  color: var(--atlas-city-on-accent);
+}
+.atlas-city-header {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  left: 16px;
+  z-index: 11;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+.atlas-city-search {
+  position: relative;
+  width: min(240px, 55%);
+  pointer-events: auto;
+}
+.atlas-city-search input {
+  width: 100%;
+}
+.atlas-city-results {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  padding: 4px;
+  border: 1px solid var(--atlas-city-border);
+  border-radius: var(--atlas-city-radius);
+  background: var(--atlas-city-card);
+}
+.atlas-city-results button {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+.atlas-city-perspectives {
+  position: absolute;
+  top: 76px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 0;
+}
+.atlas-city-perspectives legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.atlas-city-zoom {
+  position: absolute;
+  top: 40%;
+  right: 16px;
+  z-index: 10;
+  display: grid;
+  gap: 4px;
+}
+.atlas-city-zoom button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 22px;
+}
+.atlas-city-control input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--atlas-city-accent);
+}
+.atlas-city-details,
+.atlas-city-message {
+  position: absolute;
+  top: 132px;
+  left: 16px;
+  z-index: 12;
+  max-width: min(280px, calc(100% - 96px));
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid var(--atlas-city-border);
+  border-radius: var(--atlas-city-panel-radius);
+  background: var(--atlas-city-card);
+}
+.atlas-city-details > button:first-child {
+  float: right;
+  margin-left: 8px;
+}
+.atlas-city-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-content: center;
+  padding: 24px;
+  background: var(--atlas-city-card);
+  text-align: center;
+}
+@media (min-width: 1024px) {
+  .atlas-city-chart {
+    min-height: 460px;
+  }
+}
+@media (max-width: 480px) {
+  .atlas-city-scene-controls {
+    gap: 4px;
+  }
+  .atlas-city-scene-controls .atlas-city-control {
+    gap: 4px;
+    padding: 6px;
+    font-size: 11px;
+  }
+}
+
+.atlas-city-host {
+  /* Override the TanStack host's inline 320px placeholder; fill our viewport. */
+  height: 100% !important;
+}
+.atlas-city-label[hidden] {
+  display: none;
+}
+.atlas-city-label[data-dimmed="true"] {
+  opacity: 0.2;
+}
+.atlas-city-label-dot {
+  background: currentColor;
+}
+.atlas-city-label--1 {
+  color: var(--atlas-city-region-1);
+}
+.atlas-city-label--2 {
+  color: var(--atlas-city-region-2);
+}
+.atlas-city-label--3 {
+  color: var(--atlas-city-region-3);
+}
+.atlas-city-label--4 {
+  color: var(--atlas-city-region-4);
+}
+.atlas-city-label--5 {
+  color: var(--atlas-city-region-5);
+}
+.atlas-city-label--6 {
+  color: var(--atlas-city-region-6);
+}
+.atlas-city-label--7 {
+  color: var(--atlas-city-region-7);
+}
+
+.atlas-city-tooltip-anchor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.atlas-city-tooltip-arrow {
+  position: absolute;
+  overflow: visible;
+  fill: var(--atlas-city-tooltip-background);
+  stroke: var(--atlas-city-border);
+}
+.atlas-city-chart .city-slide-snapshot {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--atlas-city-background);
+  overflow: hidden;
+}
+.atlas-city-chart .city-slide-snapshot > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.atlas-city-chart .city-slide-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.atlas-city-chart.city-sliding .city-chart-viewport {
+  pointer-events: none;
+}
