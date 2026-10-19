@@ -6,10 +6,38 @@
   --atlas-city-card: theme("colors.white");
   --atlas-city-text: theme("colors.slate.900");
   --atlas-city-border: theme("colors.slate.200");
-  --atlas-city-muted: theme("colors.slate.500");
+  --atlas-city-muted: theme("colors.slate.800");
+  --atlas-city-overlay-text: theme("colors.black");
+  --atlas-city-surface-tint: theme("colors.slate.200");
+  --atlas-city-surface-background: color-mix(
+    in srgb,
+    var(--atlas-city-surface-tint) 68%,
+    transparent
+  );
+  --atlas-city-surface-hover-background: color-mix(
+    in srgb,
+    var(--atlas-city-surface-tint) 78%,
+    transparent
+  );
+  --atlas-city-surface-blur: 10px;
+  --atlas-city-selected-background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--atlas-city-accent) 70%, #000) 88%,
+    transparent
+  );
+  --atlas-city-selected-hover-background: color-mix(
+    in srgb,
+    var(--atlas-city-accent-hover) 88%,
+    transparent
+  );
   --atlas-city-accent: theme("colors.blue.600");
+  --atlas-city-accent-hover: color-mix(
+    in srgb,
+    var(--atlas-city-accent) 60%,
+    #000
+  );
   --atlas-city-on-accent: theme("colors.white");
-  --atlas-city-tooltip-background: theme("colors.white");
+  --atlas-city-tooltip-background: var(--atlas-city-surface-background);
   --atlas-city-tooltip-text: theme("colors.slate.900");
   --atlas-city-font-family: theme("fontFamily.sans");
   --atlas-city-font-size: theme("fontSize.xs");
@@ -35,7 +63,7 @@
 
 .atlas-city-theme-tailwind .atlas-city-camera-button:enabled:hover,
 .atlas-city-theme-tailwind .atlas-city-search-result:enabled:hover {
-  @apply bg-slate-100;
+  background: var(--atlas-city-surface-hover-background);
 }
 
 .atlas-city-theme-tailwind .atlas-city-perspective-button:enabled:hover {

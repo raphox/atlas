@@ -15,6 +15,15 @@
   min-height: 520px;
   overflow: hidden;
 }
+.atlas-city-chart:has(> .atlas-map-layout) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-height: min-content;
+}
+.atlas-map-layout {
+  min-height: 520px;
+}
 .atlas-city-map {
   height: var(--atlas-city-height);
 }
@@ -56,7 +65,7 @@
   padding: 6px 8px;
   border: 1px solid var(--atlas-city-border);
   border-radius: var(--atlas-city-radius);
-  background: var(--atlas-city-card);
+  background: var(--atlas-city-surface-background);
   box-shadow: var(--atlas-city-shadow);
   font-size: 10px;
   font-weight: 700;
@@ -71,6 +80,29 @@
   color: var(--atlas-city-muted);
   font-size: 9px;
   font-weight: 400;
+}
+.atlas-city-label-name {
+  color: var(--atlas-city-text);
+}
+.atlas-city-chart .text-muted-foreground,
+.atlas-city-chart .section-label {
+  color: var(--atlas-city-muted);
+}
+.atlas-city-title,
+.atlas-map-heading,
+.atlas-map-heading .text-muted-foreground,
+.atlas-city-chart .atlas-map-instructions,
+.atlas-city-chart .atlas-map-compass,
+.atlas-map-footer-text {
+  color: var(--atlas-city-overlay-text);
+}
+.atlas-city-chart [data-variant="default"] {
+  background: var(--atlas-city-selected-background);
+  color: var(--atlas-city-on-accent);
+}
+.atlas-city-chart [data-variant="default"]:enabled:hover,
+.atlas-city-map button[aria-pressed="true"]:enabled:hover {
+  background: var(--atlas-city-selected-hover-background);
 }
 .atlas-city-tooltip {
   position: absolute;
@@ -90,7 +122,7 @@
   display: block;
   margin-top: 4px;
   font-size: 9px;
-  opacity: 0.8;
+  color: var(--atlas-city-muted);
 }
 .atlas-city-control {
   display: flex;
@@ -99,7 +131,7 @@
   padding: var(--atlas-city-control-padding);
   border: 1px solid var(--atlas-city-border);
   border-radius: var(--atlas-city-radius);
-  background: var(--atlas-city-card);
+  background: var(--atlas-city-surface-background);
   color: var(--atlas-city-text);
   font-size: var(--atlas-city-font-size);
   pointer-events: auto;
@@ -110,7 +142,7 @@
 .atlas-city-select {
   min-width: 0;
   border: 0;
-  background: var(--atlas-city-card);
+  background: transparent;
   color: var(--atlas-city-text);
   font: inherit;
   cursor: pointer;
@@ -140,8 +172,12 @@
   padding: var(--atlas-city-control-padding);
   border: 1px solid var(--atlas-city-border);
   border-radius: var(--atlas-city-radius);
-  background: var(--atlas-city-card);
+  background: var(--atlas-city-surface-background);
   color: var(--atlas-city-text);
+}
+.atlas-city-search-input::placeholder {
+  color: var(--atlas-city-muted);
+  opacity: 1;
 }
 .atlas-city-map button {
   cursor: pointer;
@@ -157,23 +193,35 @@
   outline-offset: 2px;
 }
 .atlas-city-map button[aria-pressed="true"] {
-  background: var(--atlas-city-accent);
+  background: var(--atlas-city-selected-background);
   color: var(--atlas-city-on-accent);
 }
-.atlas-city-header {
+.atlas-city-top-controls {
   position: absolute;
   top: 16px;
   right: 16px;
   left: 16px;
   z-index: 11;
   display: flex;
+  flex-direction: column;
+  gap: var(--atlas-city-overlay-gap, 12px);
+  pointer-events: none;
+}
+.atlas-city-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
   align-items: start;
   justify-content: space-between;
-  gap: 12px;
-  pointer-events: none;
+  gap: var(--atlas-city-overlay-gap, 12px);
+}
+.atlas-city-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .atlas-city-search {
   position: relative;
+  flex-shrink: 0;
   width: min(240px, 55%);
   pointer-events: auto;
 }
@@ -188,7 +236,7 @@
   padding: 4px;
   border: 1px solid var(--atlas-city-border);
   border-radius: var(--atlas-city-radius);
-  background: var(--atlas-city-card);
+  background: var(--atlas-city-surface-background);
 }
 .atlas-city-results button {
   display: block;
@@ -196,14 +244,15 @@
   text-align: left;
 }
 .atlas-city-perspectives {
-  position: absolute;
-  top: 76px;
-  left: 16px;
-  z-index: 10;
+  align-self: flex-start;
   display: flex;
   gap: 4px;
   padding: 4px;
   border: 0;
+  pointer-events: auto;
+  border-radius: var(--atlas-city-radius);
+  background: var(--atlas-city-surface-background);
+  backdrop-filter: blur(var(--atlas-city-surface-blur));
 }
 .atlas-city-perspectives legend {
   position: absolute;
@@ -233,16 +282,17 @@
 }
 .atlas-city-details,
 .atlas-city-message {
-  position: absolute;
-  top: 132px;
-  left: 16px;
-  z-index: 12;
-  max-width: min(280px, calc(100% - 96px));
+  align-self: flex-start;
+  max-width: min(280px, calc(100% - 64px));
   box-sizing: border-box;
   padding: 16px;
   border: 1px solid var(--atlas-city-border);
   border-radius: var(--atlas-city-panel-radius);
-  background: var(--atlas-city-card);
+  background: var(--atlas-city-surface-background);
+  pointer-events: auto;
+}
+.atlas-city-message {
+  margin: 0;
 }
 .atlas-city-details > button:first-child {
   float: right;
@@ -255,15 +305,24 @@
   display: grid;
   place-content: center;
   padding: 24px;
-  background: var(--atlas-city-card);
+  background: var(--atlas-city-surface-background);
   text-align: center;
 }
 @media (min-width: 1024px) {
   .atlas-city-chart {
     min-height: 460px;
   }
+  .atlas-map-layout {
+    min-height: 460px;
+  }
 }
 @media (max-width: 480px) {
+  .atlas-city-header {
+    flex-direction: column;
+  }
+  .atlas-city-search {
+    width: 100%;
+  }
   .atlas-city-scene-controls {
     gap: 4px;
   }
@@ -342,4 +401,66 @@
 }
 .atlas-city-chart.city-sliding .city-chart-viewport {
   pointer-events: none;
+}
+
+.atlas-city-label,
+.atlas-city-tooltip,
+.atlas-city-control,
+.atlas-city-search-input,
+.atlas-city-results,
+.atlas-city-camera-button,
+.atlas-city-details,
+.atlas-city-message,
+.atlas-city-loading {
+  backdrop-filter: blur(var(--atlas-city-surface-blur));
+}
+.atlas-city-map .atlas-city-perspective-button,
+.atlas-city-map .atlas-city-search-result,
+.atlas-city-map .atlas-city-details-close {
+  background: transparent;
+}
+.atlas-city-map button:enabled:hover {
+  background: var(--atlas-city-surface-hover-background);
+}
+.atlas-city-map .atlas-city-perspective-button[aria-pressed="true"] {
+  background: var(--atlas-city-selected-background);
+}
+.atlas-city-map
+  .atlas-city-perspective-button[aria-pressed="true"]:enabled:hover {
+  background: var(--atlas-city-selected-hover-background);
+}
+.atlas-city-select-option {
+  background: var(--atlas-city-card);
+  color: var(--atlas-city-text);
+}
+.atlas-city-chart
+  :is(
+    .atlas-map-search-input,
+    .atlas-map-perspectives,
+    .atlas-map-zoom,
+    .atlas-map-toggle,
+    .atlas-map-details,
+    .atlas-map-message,
+    .atlas-map-loading,
+    .atlas-map-loading-card
+  ) {
+  background: var(--atlas-city-surface-background);
+  backdrop-filter: blur(var(--atlas-city-surface-blur));
+  color: var(--atlas-city-text);
+}
+.atlas-city-chart .atlas-map-search-input::placeholder {
+  color: var(--atlas-city-muted);
+  opacity: 1;
+}
+.atlas-city-chart .atlas-map-perspective-option {
+  color: var(--atlas-city-muted);
+}
+.atlas-city-chart .atlas-map-perspectives input:checked + span {
+  background: var(--atlas-city-selected-background);
+  color: var(--atlas-city-on-accent);
+}
+.atlas-city-chart .atlas-map-camera-button:enabled:hover,
+.atlas-city-chart .atlas-map-details [data-variant="ghost"]:enabled:hover {
+  background: var(--atlas-city-surface-hover-background);
+  color: var(--atlas-city-text);
 }

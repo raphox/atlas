@@ -22,7 +22,7 @@ export function CompanyDetails({ company, onClose, onFocus }) {
   if (!company) return null;
   return (
     <Card
-      className="absolute right-4 bottom-28 z-20 w-[min(310px,calc(100%-2rem))] gap-4 bg-card/95 shadow-xl backdrop-blur"
+      className="atlas-map-details pointer-events-auto mr-14 w-[min(310px,calc(100%-3.5rem))] self-end gap-4 shadow-xl"
       role="region"
       aria-label="Detalhes da empresa"
     >

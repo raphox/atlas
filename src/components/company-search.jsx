@@ -33,14 +33,14 @@ export function CompanySearch({
     <div className="pointer-events-auto relative w-full sm:w-72">
       <Search
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+        className="atlas-map-search-icon pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground"
       />
       <input
         ref={inputRef}
         type="search"
         list={listId}
         value={query}
-        className="native-input w-full pr-9 pl-9 text-xs"
+        className="atlas-map-search-input native-input w-full pr-9 pl-9 text-xs"
         placeholder="Encontrar uma empresa…"
         aria-label="Buscar empresa"
         disabled={disabled}

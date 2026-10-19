@@ -21,7 +21,7 @@ function MapButton({ label, onClick, children, disabled }) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8"
+          className="atlas-map-camera-button size-8"
           aria-label={label}
           onClick={onClick}
           disabled={disabled}
@@ -38,7 +38,7 @@ export function PerspectiveTabs({ view, onChange, disabled }) {
   return (
     <fieldset
       disabled={disabled}
-      className="absolute top-36 left-4 z-10 flex rounded-lg border bg-card/95 p-1 shadow-sm sm:top-24 sm:left-6"
+      className="atlas-map-perspectives pointer-events-auto flex self-start rounded-lg border p-1 shadow-sm"
     >
       <legend className="sr-only">Perspectiva</legend>
       {[
@@ -54,7 +54,7 @@ export function PerspectiveTabs({ view, onChange, disabled }) {
             onChange={() => onChange(item.value)}
             className="peer absolute inset-0 z-10 size-full cursor-pointer opacity-0"
           />
-          <span className="block rounded-md px-3 py-1.5 text-xs text-muted-foreground peer-checked:bg-accent peer-checked:text-accent-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-ring peer-disabled:opacity-50">
+          <span className="atlas-map-perspective-option block rounded-md px-3 py-1.5 text-xs text-muted-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-ring peer-disabled:opacity-50">
             {item.label}
           </span>
         </label>
@@ -92,7 +92,7 @@ export function ZoomControls({ atlas, disabled, fullscreenRef }) {
     }
   };
   return (
-    <div className="absolute top-1/2 right-4 z-10 flex -translate-y-1/2 flex-col rounded-lg border bg-card/90 p-1 shadow-sm backdrop-blur">
+    <div className="atlas-map-zoom absolute top-1/2 right-4 z-10 flex -translate-y-1/2 flex-col rounded-lg border p-1 shadow-sm sm:right-6">
       <MapButton
         label="Aproximar"
         disabled={disabled}
@@ -132,7 +132,7 @@ export function ZoomControls({ atlas, disabled, fullscreenRef }) {
       {fullscreenError && (
         <p
           role="alert"
-          className="absolute right-full bottom-0 mr-2 w-56 rounded-md border bg-card p-3 text-xs text-foreground shadow-md"
+          className="atlas-map-message absolute right-full bottom-0 mr-2 w-56 rounded-md border p-3 text-xs text-foreground shadow-md"
         >
           {fullscreenError}
         </p>
@@ -142,8 +142,8 @@ export function ZoomControls({ atlas, disabled, fullscreenRef }) {
 }
 export function SceneControls({ atlas, disabled, environmentControls }) {
   return (
-    <div className="pointer-events-none absolute right-4 bottom-11 left-4 z-10 flex items-center justify-between gap-3 sm:right-6 sm:left-6">
-      <p className="hidden items-center gap-2 text-[9px] text-muted-foreground xl:flex">
+    <div className="atlas-map-scene-controls flex items-end justify-between gap-3">
+      <p className="atlas-map-instructions hidden shrink-0 items-center gap-2 text-[9px] text-muted-foreground xl:flex">
         <MoveHorizontal className="size-4" />
         Arraste para girar · Scroll para zoom · Botão direito para mover
       </p>
@@ -171,7 +171,7 @@ export function SceneControls({ atlas, disabled, environmentControls }) {
         ].map((item) => (
           <label
             key={item.id}
-            className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs"
+            className="atlas-map-toggle pointer-events-auto flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-xs"
           >
             <input
               type="checkbox"

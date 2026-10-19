@@ -163,48 +163,51 @@ export const CityMap = forwardRef(function CityMap(
           const disabled = busy || !ready || Boolean(error);
           return (
             <>
-              <header className="atlas-city-header">
-                <strong className="atlas-city-title">{title}</strong>
-                {showSearch && (
-                  <div className="atlas-city-search">
-                    <input
-                      className="atlas-city-search-input"
-                      type="search"
-                      aria-label="Buscar empresa no mapa"
-                      placeholder="Buscar empresa…"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      disabled={disabled}
-                    />
-                    {query.trim() && (
-                      <div className="atlas-city-results">
-                        {matches.length ? (
-                          matches.map((datum) => (
-                            <button
-                              key={datum.id}
-                              className="atlas-city-search-result"
-                              type="button"
-                              disabled={disabled}
-                              onClick={() => {
-                                choose(datum, true);
-                                setQuery("");
-                              }}
+              <div className="atlas-city-top-controls">
+                <header className="atlas-city-header">
+                  <strong className="atlas-city-title">{title}</strong>
+                  {showSearch && (
+                    <div className="atlas-city-search">
+                      <input
+                        className="atlas-city-search-input"
+                        type="search"
+                        aria-label="Buscar empresa no mapa"
+                        placeholder="Buscar empresa…"
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        disabled={disabled}
+                      />
+                      {query.trim() && (
+                        <div className="atlas-city-results">
+                          {matches.length ? (
+                            matches.map((datum) => (
+                              <button
+                                key={datum.id}
+                                className="atlas-city-search-result"
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => {
+                                  choose(datum, true);
+                                  setQuery("");
+                                }}
+                              >
+                                {datum.name}
+                              </button>
+                            ))
+                          ) : (
+                            <p
+                              className="atlas-city-search-empty"
+                              role="status"
                             >
-                              {datum.name}
-                            </button>
-                          ))
-                        ) : (
-                          <p className="atlas-city-search-empty" role="status">
-                            Nenhuma empresa encontrada.
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </header>
-              {showControls && (
-                <>
+                              Nenhuma empresa encontrada.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </header>
+                {showControls && (
                   <fieldset
                     className="atlas-city-perspectives"
                     disabled={disabled}
@@ -227,6 +230,61 @@ export const CityMap = forwardRef(function CityMap(
                       </button>
                     ))}
                   </fieldset>
+                )}
+                {fullscreenError && (
+                  <p role="alert" className="atlas-city-message">
+                    {fullscreenError}
+                  </p>
+                )}
+                {showDetails && selected && (
+                  <aside
+                    className="atlas-city-details"
+                    aria-label="Detalhes da empresa"
+                  >
+                    <button
+                      className="atlas-city-details-close"
+                      type="button"
+                      aria-label="Fechar detalhes"
+                      onClick={() => choose(null)}
+                    >
+                      ×
+                    </button>
+                    <strong className="atlas-city-details-title">
+                      {selected.name}
+                    </strong>
+                    <p className="atlas-city-details-categories">
+                      {categoryLabel(selected)}
+                    </p>
+                    <p className="atlas-city-details-metric">
+                      {metricFor(selected).label}:{" "}
+                      {new Intl.NumberFormat("pt-BR").format(
+                        metricFor(selected).value,
+                      )}
+                    </p>
+                    <p
+                      className={`atlas-city-details-status atlas-city-details-status--${selected.status}`}
+                    >
+                      {STATUS[selected.status].label}
+                    </p>
+                    <button
+                      className="atlas-city-details-focus"
+                      type="button"
+                      onClick={() =>
+                        chartRef.current?.select(selected, true, true)
+                      }
+                    >
+                      Focar empresa
+                    </button>
+                  </aside>
+                )}
+                {!disabled && data.length === 0 && (
+                  <p role="status" className="atlas-city-message">
+                    Nenhuma empresa encontrada.
+                  </p>
+                )}
+              </div>
+              {showControls && (
+                <>
                   <div
                     className="atlas-city-zoom"
                     role="group"
@@ -284,57 +342,6 @@ export const CityMap = forwardRef(function CityMap(
                     ))}
                   </div>
                 </>
-              )}
-              {fullscreenError && (
-                <p role="alert" className="atlas-city-message">
-                  {fullscreenError}
-                </p>
-              )}
-              {showDetails && selected && (
-                <aside
-                  className="atlas-city-details"
-                  aria-label="Detalhes da empresa"
-                >
-                  <button
-                    className="atlas-city-details-close"
-                    type="button"
-                    aria-label="Fechar detalhes"
-                    onClick={() => choose(null)}
-                  >
-                    ×
-                  </button>
-                  <strong className="atlas-city-details-title">
-                    {selected.name}
-                  </strong>
-                  <p className="atlas-city-details-categories">
-                    {categoryLabel(selected)}
-                  </p>
-                  <p className="atlas-city-details-metric">
-                    {metricFor(selected).label}:{" "}
-                    {new Intl.NumberFormat("pt-BR").format(
-                      metricFor(selected).value,
-                    )}
-                  </p>
-                  <p
-                    className={`atlas-city-details-status atlas-city-details-status--${selected.status}`}
-                  >
-                    {STATUS[selected.status].label}
-                  </p>
-                  <button
-                    className="atlas-city-details-focus"
-                    type="button"
-                    onClick={() =>
-                      chartRef.current?.select(selected, true, true)
-                    }
-                  >
-                    Focar empresa
-                  </button>
-                </aside>
-              )}
-              {!disabled && data.length === 0 && (
-                <p role="status" className="atlas-city-message">
-                  Nenhuma empresa encontrada.
-                </p>
               )}
               {disabled && (
                 <div

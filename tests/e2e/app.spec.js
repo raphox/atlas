@@ -339,7 +339,8 @@ test("tooltips ficam ancorados no prédio e mantêm uma seta triangular visível
       expect(appearance.transform).toBe("none");
       expect(appearance.background).toBe("rgba(0, 0, 0, 0)");
       expect(appearance.fill).toBe(appearance.contentBackground);
-      expect(appearance.contentBackground).toBe("rgb(255, 255, 255)");
+      expect(appearance.contentBackground).not.toBe("rgb(255, 255, 255)");
+      await expect(tooltip).toHaveCSS("backdrop-filter", "blur(10px)");
       expect(appearance.stroke).toBe(appearance.border);
       await settlePosition();
       await expect

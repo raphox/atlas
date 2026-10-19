@@ -32,6 +32,10 @@ for (const theme of ["package", "package-tailwind"]) {
         weather: "rain",
         lightingPeriod: "day",
       });
+    await expect(first.locator(".atlas-city-title")).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)",
+    );
     await first.getByLabel("Clima da cidade").selectOption("snow");
     await first.getByLabel("Iluminação da cidade").selectOption("night");
     await expect
@@ -53,6 +57,10 @@ for (const theme of ["package", "package-tailwind"]) {
     await first.getByRole("searchbox").fill("Aurora");
     await first.getByRole("button", { name: "Aurora", exact: true }).click();
     await expect(first.getByLabel("Detalhes da empresa")).toBeVisible();
+    await expect(first.locator(".atlas-city-title")).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)",
+    );
     expect(
       await page.evaluate(() => window.packageSelections.at(-1).same),
     ).toBe(true);
@@ -63,6 +71,10 @@ for (const theme of ["package", "package-tailwind"]) {
     await expect(
       first.getByRole("button", { name: "Vista superior", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
+    await expect(first.locator(".atlas-city-title")).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)",
+    );
     const colors = await maps.evaluateAll((nodes) =>
       nodes.map((node) => {
         const button = node.querySelector(".atlas-city-search-input");

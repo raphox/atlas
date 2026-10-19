@@ -14,11 +14,11 @@ function MapLoading({ error, loading, busy, nextPage }) {
   if (!loading && !error && !busy) return null;
   return (
     <div
-      className={`absolute inset-0 z-30 flex items-center justify-center ${busy && !error ? "bg-background/65" : "bg-background"}`}
+      className="atlas-map-loading absolute inset-0 z-30 flex items-center justify-center"
       role={error ? "alert" : "status"}
       aria-live="polite"
     >
-      <Card className="m-5 max-w-sm border-0 bg-card/90 shadow-none">
+      <Card className="atlas-map-loading-card m-5 max-w-sm border-0 shadow-none">
         <CardContent className="flex flex-col items-center gap-4 py-3 text-center">
           {error ? (
             <>
@@ -96,7 +96,7 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
   return (
     <section
       ref={fullscreenRef}
-      className="flex min-h-[520px] flex-1 flex-col lg:min-h-[460px]"
+      className="flex min-h-[520px] grow shrink-0 flex-col lg:min-h-[460px]"
       aria-label="Mapa interativo de empresas"
       data-chart="city-3d"
     >
@@ -122,66 +122,79 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
             atlas.loading || !ready || Boolean(error || atlas.error);
           return (
             <>
-              <div className="pointer-events-none absolute top-4 right-4 left-4 z-10 flex flex-col justify-between gap-3 sm:top-6 sm:right-6 sm:left-6 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-2.5">
-                  <span className="size-1.5 rounded-full bg-emerald-600 ring-4 ring-emerald-800/5" />
-                  <div>
-                    <strong className="text-xs font-medium">
-                      Distrito das empresas
-                    </strong>
-                    <p className="mt-1 text-[10px] text-muted-foreground">
-                      {atlas.pageSize === "all"
-                        ? "Todas as empresas"
-                        : `Até ${format(atlas.pageSize)} empresas`}{" "}
-                      · cidade {atlas.pagination.page}
-                    </p>
-                    <p
-                      role="status"
-                      data-testid="weather-status"
-                      className="mt-1 max-w-64 text-[10px] text-muted-foreground"
-                    >
-                      {!atlas.life || weatherMode === "auto"
-                        ? weather.message
-                        : {
-                            none: "Simulação: sem precipitação",
-                            rain: "Simulação: chuva",
-                            snow: "Simulação: neve",
-                          }[weatherMode]}
-                    </p>
+              <div className="atlas-map-layout pointer-events-none relative z-10 flex flex-1 flex-col gap-6 p-4 pb-11 sm:p-6 sm:pb-11">
+                <div className="atlas-map-top-controls flex flex-col gap-3">
+                  <div className="atlas-map-header flex flex-col items-start justify-between gap-3 sm:flex-row">
+                    <div className="atlas-map-heading flex items-center gap-2.5">
+                      <span className="size-1.5 rounded-full bg-emerald-600 ring-4 ring-emerald-800/5" />
+                      <div>
+                        <strong className="text-xs font-medium">
+                          Distrito das empresas
+                        </strong>
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {atlas.pageSize === "all"
+                            ? "Todas as empresas"
+                            : `Até ${format(atlas.pageSize)} empresas`}{" "}
+                          · cidade {atlas.pagination.page}
+                        </p>
+                        <p
+                          role="status"
+                          data-testid="weather-status"
+                          className="mt-1 max-w-64 text-[10px] text-muted-foreground"
+                        >
+                          {!atlas.life || weatherMode === "auto"
+                            ? weather.message
+                            : {
+                                none: "Simulação: sem precipitação",
+                                rain: "Simulação: chuva",
+                                snow: "Simulação: neve",
+                              }[weatherMode]}
+                        </p>
+                      </div>
+                    </div>
+                    <CompanySearch
+                      query={atlas.filters.query}
+                      companies={atlas.layout.companies}
+                      onQuery={(query) => atlas.updateFilters({ query })}
+                      onSelect={(company) => atlas.selectCompany(company, true)}
+                      disabled={disabled}
+                    />
                   </div>
+                  <PerspectiveTabs
+                    view={atlas.currentView}
+                    onChange={atlas.changeView}
+                    disabled={disabled || atlas.busy}
+                  />
                 </div>
-                <CompanySearch
-                  query={atlas.filters.query}
-                  companies={atlas.layout.companies}
-                  onQuery={(query) => atlas.updateFilters({ query })}
-                  onSelect={(company) => atlas.selectCompany(company, true)}
-                  disabled={disabled}
-                />
+                <div className="atlas-map-bottom-controls mt-auto flex flex-col gap-3">
+                  <CompanyDetails
+                    company={atlas.selected}
+                    onClose={atlas.closeSelection}
+                    onFocus={() =>
+                      atlas.selectCompany(atlas.selected, true, true)
+                    }
+                  />
+                  <SceneControls
+                    atlas={atlas}
+                    disabled={disabled}
+                    environmentControls={environmentControls}
+                  />
+                </div>
               </div>
-              <PerspectiveTabs
-                view={atlas.currentView}
-                onChange={atlas.changeView}
-                disabled={disabled || atlas.busy}
-              />
               <ZoomControls
                 atlas={atlas}
                 disabled={disabled || atlas.busy}
                 fullscreenRef={fullscreenRef}
               />
-              <SceneControls
-                atlas={atlas}
-                disabled={disabled}
-                environmentControls={environmentControls}
-              />
               <div
-                className="pointer-events-none absolute bottom-28 left-6 text-center text-muted-foreground"
+                className="atlas-map-compass pointer-events-none absolute bottom-28 left-4 text-center sm:left-6 text-muted-foreground"
                 aria-hidden="true"
               >
                 <span className="text-[9px]">N</span>
                 <div className="text-3xl leading-6">↑</div>
               </div>
-              <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border/60 bg-card/40 px-5 py-1 text-[9px] text-muted-foreground">
-                <span>
+              <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border/60 bg-card/50 px-4 py-1 text-[9px] text-muted-foreground sm:px-6">
+                <span className="atlas-map-footer-text">
                   Clima:{" "}
                   <a
                     className="pointer-events-auto underline underline-offset-2"
@@ -201,7 +214,7 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                     CC BY 4.0
                   </a>
                 </span>
-                <span>
+                <span className="atlas-map-footer-text">
                   {atlas.pagination.start}–{atlas.pagination.end} de{" "}
                   {format(atlas.pagination.total)} empresas
                 </span>
@@ -209,7 +222,7 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
               {!atlas.loading &&
                 !atlas.layout.companies.length &&
                 !atlas.error && (
-                  <Card className="absolute top-1/2 left-1/2 z-10 w-64 -translate-1/2 gap-4 bg-card/95 text-center">
+                  <Card className="atlas-map-message absolute top-1/2 left-1/2 z-10 w-64 -translate-1/2 gap-4 text-center">
                     <CardContent className="space-y-4">
                       <p className="text-sm">Nenhuma empresa encontrada.</p>
                       <Button size="sm" onClick={atlas.clearFilters}>
@@ -218,11 +231,6 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                     </CardContent>
                   </Card>
                 )}
-              <CompanyDetails
-                company={atlas.selected}
-                onClose={atlas.closeSelection}
-                onFocus={() => atlas.selectCompany(atlas.selected, true, true)}
-              />
               <MapLoading
                 error={atlas.error || error}
                 loading={atlas.loading || !ready}

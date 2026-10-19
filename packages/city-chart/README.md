@@ -107,7 +107,7 @@ O tema Tailwind usa `@reference`, `theme()` e `@apply`; deve ser processado pelo
 | Parte | Classes públicas |
 | --- | --- |
 | Contêiner e gráfico | `.atlas-city-map`, `.atlas-city-chart`, `.atlas-city-viewport`, `.atlas-city-host` |
-| Cabeçalho | `.atlas-city-header`, `.atlas-city-title` |
+| Cabeçalho | `.atlas-city-top-controls`, `.atlas-city-header`, `.atlas-city-title` |
 | Busca | `.atlas-city-search`, `.atlas-city-search-input`, `.atlas-city-results`, `.atlas-city-search-result`, `.atlas-city-search-empty` |
 | Perspectiva | `.atlas-city-perspectives`, `.atlas-city-perspective-button` (estado `aria-pressed`) |
 | Câmera | `.atlas-city-zoom`, `.atlas-city-camera-button`, modificadores `--zoom-in`, `--zoom-out`, `--reset`, `--fullscreen` |
@@ -118,7 +118,9 @@ O tema Tailwind usa `@reference`, `theme()` e `@apply`; deve ser processado pelo
 | Detalhes | `.atlas-city-details`, `.atlas-city-details-title`, `.atlas-city-details-categories`, `.atlas-city-details-metric`, `.atlas-city-details-status`, `.atlas-city-details-close`, `.atlas-city-details-focus` |
 | Estado | `.atlas-city-loading`, `.atlas-city-message` |
 
-Tokens adicionais: `--atlas-city-background`, `--atlas-city-muted`, `--atlas-city-font-size`, `--atlas-city-panel-radius`, `--atlas-city-shadow`, `--atlas-city-tooltip-background`, `--atlas-city-tooltip-text`, `--atlas-city-region-1` até `--atlas-city-region-7`.
+Inputs, abas, controles, etiquetas, tooltips e detalhes usam superfícies translúcidas em cinza (68% de opacidade), com desfoque de 10px e texto sem opacidade reduzida. Os estados selecionados usam a cor de destaque escurecida e translúcida. Personalize pelos tokens `--atlas-city-surface-tint`, `--atlas-city-surface-background`, `--atlas-city-surface-hover-background`, `--atlas-city-surface-blur`, `--atlas-city-selected-background` e `--atlas-city-selected-hover-background`, tanto no tema CSS puro quanto no Tailwind.
+
+Tokens adicionais: `--atlas-city-background`, `--atlas-city-muted`, `--atlas-city-font-size`, `--atlas-city-panel-radius`, `--atlas-city-shadow`, `--atlas-city-tooltip-background`, `--atlas-city-tooltip-text`, `--atlas-city-overlay-text`, `--atlas-city-accent-hover`, `--atlas-city-overlay-gap` (12px por padrão), `--atlas-city-region-1` até `--atlas-city-region-7`.
 
 Os componentes da interface não geram atributos `style`. As posições dinâmicas de etiquetas e tooltips são atualizadas em regras de stylesheet por instância. O host TanStack e o canvas WebGL gerenciam suas próprias dimensões internas. Tokens CSS de categorias personalizam as etiquetas; a paleta da geometria é configurada na definição do gráfico (`defineCityChart`), pois o conteúdo 3D é renderizado no canvas.
 
@@ -176,3 +178,10 @@ npm run pack:package
 O build compila as fontes compartilhadas com o Atlas para `packages/city-chart/dist`, inclui JavaScript ESM, declarações TypeScript, CSS e sourcemaps. React, Three.js e TanStack são dependências externas ao bundle. O tarball contém apenas arquivos de distribuição, README e aviso do Three.js; não inclui a SPA ou seus dados.
 
 Para publicar, após escolher nome/escopo, versão e licença e autenticar no npm, execute `npm publish` dentro de `packages/city-chart`. O `prepack` recompila o pacote a partir deste checkout. Nenhuma publicação é feita pelos comandos de build, teste ou empacotamento.
+
+
+### Contraste dos textos sobre a cidade
+
+Os temas padrão priorizam a cor: etiquetas usam texto escuro e mantêm as cores das categorias nos marcadores; placeholders têm opacidade integral. Títulos e informações sobre o canvas usam `--atlas-city-overlay-text`. A visão geral não recebe fundos adicionais. Ao aproximar ou deslocar a câmera, cabeçalho e instruções recebem pois passam a cobrir partes claras e escuras da geometria. Voltar à visão geral remove essa proteção. Os grupos superiores usam flex e `--atlas-city-overlay-gap` para manter título, busca, perspectivas e detalhes separados mesmo quando o texto ocupa mais de uma linha. No celular, título e busca ficam empilhados e alinhados à esquerda. Todos esses ajustes usam classes e variáveis CSS.
+
+Na raiz, `npm run audit:contrast` verifica dia, nascente/poente e noite em 33 cenários de mapa, detalhes, busca e tooltip, nos temas CSS puro e Tailwind. Os resultados e capturas ficam em `test-results/contrast-audit`; o comando falha se houver texto ativo abaixo do mínimo de 4,5:1 (3:1 para texto grande). São medidas dos estados renderizados, incluindo fundos translúcidos, sem contar pixels suavizados das bordas das letras.

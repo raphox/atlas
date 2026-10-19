@@ -25,7 +25,7 @@ const data = Object.freeze([
 const theme = location.pathname.includes("tailwind") ? "tailwind" : "default";
 window.packageRefs = refs;
 window.packageSelections = [];
-window.renderPackage = (next = data) =>
+window.renderPackage = (next = data, { title } = {}) =>
   root.render(
     <>
       <p className="consumer-text">Estilo do projeto consumidor</p>
@@ -34,6 +34,7 @@ window.renderPackage = (next = data) =>
           key={index}
           ref={ref}
           data={next}
+          title={title}
           theme={theme}
           className={index === 0 ? "custom-city" : "other-city"}
           lightingMode="day"
