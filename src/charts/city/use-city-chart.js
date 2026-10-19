@@ -1,3 +1,4 @@
+import { useMapI18n } from "./use-map-i18n.js";
 import {
   useCallback,
   useImperativeHandle,
@@ -31,6 +32,7 @@ export function useCityChart({
   projectionStyleRef,
   instanceId,
 }) {
+  const { t } = useMapI18n();
   const cityRef = useRef(null);
   const sliderRef = useRef(null);
   const hoveredCompany = useRef(null);
@@ -105,9 +107,7 @@ export function useCityChart({
     };
     const contextLost = (event) => {
       event.preventDefault();
-      setError(
-        "A conexão gráfica foi interrompida. Recarregue a página para restaurar o mapa.",
-      );
+      setError("contextLost");
     };
     const projectOverlays = (scene) => {
       updateHover(scene);
@@ -165,9 +165,7 @@ export function useCityChart({
       },
       onError(error) {
         console.error("Não foi possível preparar a cidade 3D.", error);
-        setError(
-          "Não foi possível abrir a cidade 3D. Use um navegador com WebGL habilitado e aceleração gráfica disponível.",
-        );
+        setError("webglError");
       },
       onDestroy(city) {
         cancelHoverHide();
@@ -301,7 +299,7 @@ export function useCityChart({
     renderer,
     layout,
     ready,
-    error,
+    error: error ? t(error) : null,
     onTooltipEnter,
     onTooltipLeave,
     onRender({ scene }) {

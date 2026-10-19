@@ -25,6 +25,10 @@ Abra http://127.0.0.1:4173. O Vite recompila alterações automaticamente. `npm 
 `npm test` executa os testes do domínio e do motor 3D. `npm run test:e2e` valida a aplicação no Chromium com Playwright (na primeira utilização, execute `npx playwright install chromium`). Os testes cobrem filtros, busca, paginação, seleção, controles, ajuda, importação, download, falhas da fonte e layout móvel com movimento reduzido.
 
 
+## Idioma do mapa
+
+A interface do mapa usa `navigator.language`: `pt-BR` exibe português brasileiro e `en-US` exibe inglês americano. Idiomas não disponíveis usam `en-US`. As traduções estão em `src/charts/city/i18n.js` e são compartilhadas pela aplicação e pelo pacote reutilizável. Controles, busca, detalhes, tooltips, mensagens de clima e números acompanham o idioma; nomes, categorias e métricas recebidos nos dados são preservados. A tradução se limita à interface do mapa.
+
 ## Navegação
 
 - Arraste com o botão esquerdo para girar horizontalmente. A inclinação fica travada na isometria padrão; arrastar para cima ou para baixo não inclina o mapa.

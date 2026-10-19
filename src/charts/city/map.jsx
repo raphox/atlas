@@ -1,3 +1,4 @@
+import { useMapI18n } from "./use-map-i18n.js";
 import {
   forwardRef,
   useEffect,
@@ -8,7 +9,7 @@ import {
 } from "react";
 import { defineCityChart } from "./definition.js";
 import { CityChart } from "./react.jsx";
-import { categoryLabel, metricFor, STATUS } from "../../model.js";
+import { categoryLabel, metricFor } from "../../model.js";
 
 function useSetting(value, initial, onChange) {
   const [local, setLocal] = useState(initial);
@@ -42,14 +43,17 @@ export const CityMap = forwardRef(function CityMap(
     showSearch = true,
     showDetails = true,
     busy = false,
-    title = "Distrito das empresas",
-    ariaLabel = "Mapa interativo de empresas",
+    title: titleProp,
+    ariaLabel: ariaLabelProp,
     className = "",
     theme = "default",
     children,
   },
   ref,
 ) {
+  const { t, format, locale } = useMapI18n();
+  const title = titleProp ?? t("title");
+  const ariaLabel = ariaLabelProp ?? t("mapLabel");
   const panelRef = useRef(null);
   const chartRef = useRef(null);
   const [view, setView] = useSetting(viewProp, "iso", onViewChange);
@@ -118,12 +122,13 @@ export const CityMap = forwardRef(function CityMap(
         await document.exitFullscreen();
       else await panelRef.current.requestFullscreen();
     } catch {
-      setFullscreenError("Não foi possível alterar a tela cheia.");
+      setFullscreenError("fullscreenError");
     }
   };
 
   return (
     <section
+      lang={locale}
       ref={panelRef}
       className={`atlas-city-map ${theme ? `atlas-city-theme-${theme}` : ""} ${className}`}
       aria-label={ariaLabel}
@@ -171,8 +176,8 @@ export const CityMap = forwardRef(function CityMap(
                       <input
                         className="atlas-city-search-input"
                         type="search"
-                        aria-label="Buscar empresa no mapa"
-                        placeholder="Buscar empresa…"
+                        aria-label={t("searchMap")}
+                        placeholder={t("searchPlaceholder")}
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
                         disabled={disabled}
@@ -199,7 +204,7 @@ export const CityMap = forwardRef(function CityMap(
                               className="atlas-city-search-empty"
                               role="status"
                             >
-                              Nenhuma empresa encontrada.
+                              {t("empty")}
                             </p>
                           )}
                         </div>
@@ -213,11 +218,11 @@ export const CityMap = forwardRef(function CityMap(
                     disabled={disabled}
                   >
                     <legend className="atlas-city-perspective-legend">
-                      Perspectiva
+                      {t("perspective")}
                     </legend>
                     {[
-                      ["iso", "Isométrica"],
-                      ["top", "Vista superior"],
+                      ["iso", t("iso")],
+                      ["top", t("top")],
                     ].map(([value, label]) => (
                       <button
                         className="atlas-city-perspective-button"
@@ -233,18 +238,18 @@ export const CityMap = forwardRef(function CityMap(
                 )}
                 {fullscreenError && (
                   <p role="alert" className="atlas-city-message">
-                    {fullscreenError}
+                    {t(fullscreenError)}
                   </p>
                 )}
                 {showDetails && selected && (
                   <aside
                     className="atlas-city-details"
-                    aria-label="Detalhes da empresa"
+                    aria-label={t("details")}
                   >
                     <button
                       className="atlas-city-details-close"
                       type="button"
-                      aria-label="Fechar detalhes"
+                      aria-label={t("closeDetails")}
                       onClick={() => choose(null)}
                     >
                       ×
@@ -257,14 +262,12 @@ export const CityMap = forwardRef(function CityMap(
                     </p>
                     <p className="atlas-city-details-metric">
                       {metricFor(selected).label}:{" "}
-                      {new Intl.NumberFormat("pt-BR").format(
-                        metricFor(selected).value,
-                      )}
+                      {format(metricFor(selected).value)}
                     </p>
                     <p
                       className={`atlas-city-details-status atlas-city-details-status--${selected.status}`}
                     >
-                      {STATUS[selected.status].label}
+                      {t(`status.${selected.status}`)}
                     </p>
                     <button
                       className="atlas-city-details-focus"
@@ -273,13 +276,13 @@ export const CityMap = forwardRef(function CityMap(
                         chartRef.current?.select(selected, true, true)
                       }
                     >
-                      Focar empresa
+                      {t("focus")}
                     </button>
                   </aside>
                 )}
                 {!disabled && data.length === 0 && (
                   <p role="status" className="atlas-city-message">
-                    Nenhuma empresa encontrada.
+                    {t("empty")}
                   </p>
                 )}
               </div>
@@ -288,16 +291,18 @@ export const CityMap = forwardRef(function CityMap(
                   <div
                     className="atlas-city-zoom"
                     role="group"
-                    aria-label="Controles da câmera"
+                    aria-label={t("cameraControls")}
                   >
                     {[
-                      ["Aproximar", "+", () => chartRef.current?.zoom(1.3)],
-                      ["Afastar", "−", () => chartRef.current?.zoom(1 / 1.3)],
-                      ["Restaurar visão geral", "⌂", () => changeView(view)],
+                      [t("zoomIn"), "+", () => chartRef.current?.zoom(1.3)],
                       [
-                        fullscreen
-                          ? "Sair da tela cheia"
-                          : "Abrir mapa em tela cheia",
+                        t("zoomOut"),
+                        "−",
+                        () => chartRef.current?.zoom(1 / 1.3),
+                      ],
+                      [t("resetView"), "⌂", () => changeView(view)],
+                      [
+                        fullscreen ? t("exitFullscreen") : t("enterFullscreen"),
                         fullscreen ? "⤡" : "⤢",
                         toggleFullscreen,
                       ],
@@ -320,9 +325,9 @@ export const CityMap = forwardRef(function CityMap(
                   <div className="atlas-city-scene-controls">
                     {environmentControls}
                     {[
-                      ["life", "Cidade viva", life, setLife],
-                      ["effects", "Efeitos de risco", effects, setEffects],
-                      ["labels", "Categorias e interseções", labels, setLabels],
+                      ["life", t("life"), life, setLife],
+                      ["effects", t("effects"), effects, setEffects],
+                      ["labels", t("districtLabels"), labels, setLabels],
                     ].map(([id, label, checked, change]) => (
                       <label
                         key={label}
@@ -348,8 +353,7 @@ export const CityMap = forwardRef(function CityMap(
                   className="atlas-city-loading"
                   role={error ? "alert" : "status"}
                 >
-                  {error ||
-                    (busy ? "Atualizando cidade…" : "Construindo a cidade…")}
+                  {error || (busy ? t("updating") : t("building"))}
                 </div>
               )}
               {children}

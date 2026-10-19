@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useMapI18n } from "../charts/city/use-map-i18n.js";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Layers3, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { defineCityChart } from "@/charts/city";
-import { format } from "@/hooks/use-atlas";
 import { useWeather } from "@/hooks/use-weather";
 import { CompanySearch } from "./company-search";
 import { CompanyDetails } from "./company-details";
@@ -11,6 +11,7 @@ import { CityChart } from "@/charts/city/react";
 import { PerspectiveTabs, SceneControls, ZoomControls } from "./map-controls";
 
 function MapLoading({ error, loading, busy, nextPage }) {
+  const { t, format } = useMapI18n();
   if (!loading && !error && !busy) return null;
   return (
     <div
@@ -22,14 +23,12 @@ function MapLoading({ error, loading, busy, nextPage }) {
         <CardContent className="flex flex-col items-center gap-4 py-3 text-center">
           {error ? (
             <>
-              <strong className="text-sm">
-                Não foi possível carregar a aplicação.
-              </strong>
+              <strong className="text-sm">{t("loadError")}</strong>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 {error}
               </p>
               <Button variant="outline" onClick={() => location.reload()}>
-                Tentar novamente
+                {t("retry")}
               </Button>
             </>
           ) : (
@@ -41,11 +40,11 @@ function MapLoading({ error, loading, busy, nextPage }) {
               )}
               <strong className="text-sm font-medium">
                 {busy
-                  ? `Carregando cidade ${nextPage}…`
-                  : "Construindo a cidade"}
+                  ? t("loadingCity", { page: format(nextPage) })
+                  : t("buildingTitle")}
               </strong>
               <span className="text-xs text-muted-foreground">
-                Preparando empresas e bairros…
+                {t("preparing")}
               </span>
             </>
           )}
@@ -55,7 +54,9 @@ function MapLoading({ error, loading, busy, nextPage }) {
   );
 }
 export function CityMap({ atlas, showEnvironmentControls = false }) {
+  const { t, format, locale } = useMapI18n();
   const fullscreenRef = useRef(null);
+  const [controlsVisible, setControlsVisible] = useState(true);
   const weather = useWeather(atlas.life);
   const definition = useMemo(
     () => defineCityChart(atlas.layout.companies, { layout: atlas.layout }),
@@ -95,9 +96,10 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
   }, [atlas.closeSelection, atlas.changeView, atlas.zoom, disabled]);
   return (
     <section
+      lang={locale}
       ref={fullscreenRef}
       className="flex min-h-[520px] grow shrink-0 flex-col lg:min-h-[460px]"
-      aria-label="Mapa interativo de empresas"
+      aria-label={t("mapLabel")}
       data-chart="city-3d"
     >
       <CityChart
@@ -123,19 +125,28 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
           return (
             <>
               <div className="atlas-map-layout pointer-events-none relative z-10 flex flex-1 flex-col gap-6 p-4 pb-11 sm:p-6 sm:pb-11">
-                <div className="atlas-map-top-controls flex flex-col gap-3">
+                <div
+                  className={`atlas-map-top-controls flex flex-col gap-3${controlsVisible ? "" : " invisible"}`}
+                  aria-hidden={!controlsVisible}
+                  inert={!controlsVisible}
+                >
                   <div className="atlas-map-header flex flex-col items-start justify-between gap-3 sm:flex-row">
                     <div className="atlas-map-heading flex items-center gap-2.5">
                       <span className="size-1.5 rounded-full bg-emerald-600 ring-4 ring-emerald-800/5" />
                       <div>
                         <strong className="text-xs font-medium">
-                          Distrito das empresas
+                          {t("title")}
                         </strong>
                         <p className="mt-1 text-[10px] text-muted-foreground">
                           {atlas.pageSize === "all"
-                            ? "Todas as empresas"
-                            : `Até ${format(atlas.pageSize)} empresas`}{" "}
-                          · cidade {atlas.pagination.page}
+                            ? t("allCompanies")
+                            : t("companyLimit", {
+                                count: format(atlas.pageSize),
+                              })}{" "}
+                          ·{" "}
+                          {t("cityPage", {
+                            page: format(atlas.pagination.page),
+                          })}
                         </p>
                         <p
                           role="status"
@@ -145,9 +156,9 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                           {!atlas.life || weatherMode === "auto"
                             ? weather.message
                             : {
-                                none: "Simulação: sem precipitação",
-                                rain: "Simulação: chuva",
-                                snow: "Simulação: neve",
+                                none: t("simulation.none"),
+                                rain: t("simulation.rain"),
+                                snow: t("simulation.snow"),
                               }[weatherMode]}
                         </p>
                       </div>
@@ -174,17 +185,27 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                       atlas.selectCompany(atlas.selected, true, true)
                     }
                   />
-                  <SceneControls
-                    atlas={atlas}
-                    disabled={disabled}
-                    environmentControls={environmentControls}
-                  />
+                  <div
+                    className={controlsVisible ? undefined : "invisible"}
+                    aria-hidden={!controlsVisible}
+                    inert={!controlsVisible}
+                  >
+                    <SceneControls
+                      atlas={atlas}
+                      disabled={disabled}
+                      environmentControls={environmentControls}
+                    />
+                  </div>
                 </div>
               </div>
               <ZoomControls
                 atlas={atlas}
                 disabled={disabled || atlas.busy}
                 fullscreenRef={fullscreenRef}
+                controlsVisible={controlsVisible}
+                onToggleControls={() =>
+                  setControlsVisible((visible) => !visible)
+                }
               />
               <div
                 className="atlas-map-compass pointer-events-none absolute bottom-28 left-4 text-center sm:left-6 text-muted-foreground"
@@ -195,7 +216,7 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
               </div>
               <footer className="pointer-events-none select-none absolute right-0 bottom-0 left-0 z-10 flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border/60 bg-card/50 px-4 py-1 text-[9px] text-muted-foreground sm:px-6">
                 <span className="atlas-map-footer-text">
-                  Clima:{" "}
+                  {t("weather")}:{" "}
                   <a
                     className="pointer-events-auto underline underline-offset-2"
                     href="https://open-meteo.com/"
@@ -215,8 +236,11 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                   </a>
                 </span>
                 <span className="atlas-map-footer-text">
-                  {atlas.pagination.start}–{atlas.pagination.end} de{" "}
-                  {format(atlas.pagination.total)} empresas
+                  {t("companyRange", {
+                    start: format(atlas.pagination.start),
+                    end: format(atlas.pagination.end),
+                    total: format(atlas.pagination.total),
+                  })}
                 </span>
               </footer>
               {!atlas.loading &&
@@ -224,9 +248,9 @@ export function CityMap({ atlas, showEnvironmentControls = false }) {
                 !atlas.error && (
                   <Card className="atlas-map-message absolute top-1/2 left-1/2 z-10 w-64 -translate-1/2 gap-4 text-center">
                     <CardContent className="space-y-4">
-                      <p className="text-sm">Nenhuma empresa encontrada.</p>
+                      <p className="text-sm">{t("empty")}</p>
                       <Button size="sm" onClick={atlas.clearFilters}>
-                        Limpar filtros
+                        {t("clearFilters")}
                       </Button>
                     </CardContent>
                   </Card>

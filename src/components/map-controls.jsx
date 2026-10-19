@@ -1,5 +1,8 @@
+import { useMapI18n } from "../charts/city/use-map-i18n.js";
 import { useEffect, useId, useState } from "react";
 import {
+  Eye,
+  EyeOff,
   Home,
   Maximize,
   Minimize,
@@ -14,7 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-function MapButton({ label, onClick, children, disabled }) {
+function MapButton({ label, onClick, children, disabled, ...props }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -25,6 +28,7 @@ function MapButton({ label, onClick, children, disabled }) {
           aria-label={label}
           onClick={onClick}
           disabled={disabled}
+          {...props}
         >
           {children}
         </Button>
@@ -34,16 +38,17 @@ function MapButton({ label, onClick, children, disabled }) {
   );
 }
 export function PerspectiveTabs({ view, onChange, disabled }) {
+  const { t } = useMapI18n();
   const name = useId();
   return (
     <fieldset
       disabled={disabled}
       className="atlas-map-perspectives pointer-events-auto flex self-start rounded-lg border p-1 shadow-sm"
     >
-      <legend className="sr-only">Perspectiva</legend>
+      <legend className="sr-only">{t("perspective")}</legend>
       {[
-        { value: "iso", label: "Isométrica" },
-        { value: "top", label: "Vista superior" },
+        { value: "iso", label: t("iso") },
+        { value: "top", label: t("top") },
       ].map((item) => (
         <label key={item.value} className="relative cursor-pointer">
           <input
@@ -62,7 +67,14 @@ export function PerspectiveTabs({ view, onChange, disabled }) {
     </fieldset>
   );
 }
-export function ZoomControls({ atlas, disabled, fullscreenRef }) {
+export function ZoomControls({
+  atlas,
+  disabled,
+  fullscreenRef,
+  controlsVisible,
+  onToggleControls,
+}) {
+  const { t } = useMapI18n();
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false);
   const [fullscreenError, setFullscreenError] = useState(null);
@@ -86,22 +98,20 @@ export function ZoomControls({ atlas, disabled, fullscreenRef }) {
         await document.exitFullscreen();
       else await fullscreenRef.current.requestFullscreen();
     } catch {
-      setFullscreenError(
-        "Não foi possível alterar a tela cheia. Tente novamente.",
-      );
+      setFullscreenError("fullscreenRetry");
     }
   };
   return (
     <div className="atlas-map-zoom absolute top-1/2 right-4 z-10 flex -translate-y-1/2 flex-col rounded-lg border p-1 shadow-sm sm:right-6">
       <MapButton
-        label="Aproximar"
+        label={t("zoomIn")}
         disabled={disabled}
         onClick={() => atlas.zoom(1.3)}
       >
         <Plus />
       </MapButton>
       <MapButton
-        label="Afastar"
+        label={t("zoomOut")}
         disabled={disabled}
         onClick={() => atlas.zoom(1 / 1.3)}
       >
@@ -109,7 +119,7 @@ export function ZoomControls({ atlas, disabled, fullscreenRef }) {
       </MapButton>
       <Separator className="my-1" />
       <MapButton
-        label="Restaurar visão geral"
+        label={t("resetView")}
         disabled={disabled}
         onClick={() => atlas.changeView(atlas.currentView)}
       >
@@ -119,52 +129,60 @@ export function ZoomControls({ atlas, disabled, fullscreenRef }) {
       <MapButton
         label={
           !fullscreenAvailable
-            ? "Tela cheia indisponível neste navegador"
+            ? t("fullscreenUnavailable")
             : fullscreen
-              ? "Sair da tela cheia"
-              : "Abrir mapa em tela cheia"
+              ? t("exitFullscreen")
+              : t("enterFullscreen")
         }
         disabled={disabled || !fullscreenAvailable}
         onClick={toggleFullscreen}
       >
         {fullscreen ? <Minimize /> : <Maximize />}
       </MapButton>
+      <MapButton
+        label={controlsVisible ? t("hideControls") : t("showControls")}
+        aria-pressed={!controlsVisible}
+        onClick={onToggleControls}
+      >
+        {controlsVisible ? <EyeOff /> : <Eye />}
+      </MapButton>
       {fullscreenError && (
         <p
           role="alert"
           className="atlas-map-message absolute right-full bottom-0 mr-2 w-56 rounded-md border p-3 text-xs text-foreground shadow-md"
         >
-          {fullscreenError}
+          {t(fullscreenError)}
         </p>
       )}
     </div>
   );
 }
 export function SceneControls({ atlas, disabled, environmentControls }) {
+  const { t } = useMapI18n();
   return (
     <div className="atlas-map-scene-controls flex items-end justify-between gap-3">
       <p className="atlas-map-instructions hidden shrink-0 items-center gap-2 text-[9px] text-muted-foreground xl:flex">
         <MoveHorizontal className="size-4" />
-        Arraste para girar · Scroll para zoom · Botão direito para mover
+        {t("instructions")}
       </p>
       <div className="ml-auto flex flex-wrap justify-end gap-2">
         {environmentControls}
         {[
           {
             id: "life",
-            label: "Cidade viva",
+            label: t("life"),
             value: atlas.life,
             onChange: atlas.setLife,
           },
           {
             id: "effects",
-            label: "Efeitos de risco",
+            label: t("effects"),
             value: atlas.effects,
             onChange: atlas.setEffects,
           },
           {
             id: "district-labels",
-            label: "Categorias e interseções",
+            label: t("districtLabels"),
             value: atlas.showDistrictLabels,
             onChange: atlas.setShowDistrictLabels,
           },

@@ -1,3 +1,4 @@
+import { useMapI18n } from "./use-map-i18n.js";
 export function EnvironmentControls({
   lighting,
   weather,
@@ -5,39 +6,44 @@ export function EnvironmentControls({
   onWeatherChange,
   disabled,
 }) {
+  const { t } = useMapI18n();
   return (
     <>
       {[
         {
-          label: "Iluminação",
+          id: "lighting",
+          ariaLabel: t("lightingLabel"),
+          label: t("lighting"),
           value: lighting,
           onChange: onLightingChange,
           options: [
-            ["auto", "Automático"],
-            ["twilight", "Nascente/poente"],
-            ["day", "Dia"],
-            ["night", "Noite"],
+            ["auto", t("auto")],
+            ["twilight", t("twilight")],
+            ["day", t("day")],
+            ["night", t("night")],
           ],
         },
         {
-          label: "Clima",
+          id: "weather",
+          ariaLabel: t("weatherLabel"),
+          label: t("weather"),
           value: weather,
           onChange: onWeatherChange,
           options: [
-            ["auto", "Automático"],
-            ["none", "Sem precipitação"],
-            ["rain", "Chuva"],
-            ["snow", "Neve"],
+            ["auto", t("auto")],
+            ["none", t("none")],
+            ["rain", t("rain")],
+            ["snow", t("snow")],
           ],
         },
       ].map((control) => (
         <label
-          key={control.label}
-          className={`atlas-city-control atlas-city-environment-control atlas-city-environment-control--${control.label === "Clima" ? "weather" : "lighting"}`}
+          key={control.id}
+          className={`atlas-city-control atlas-city-environment-control atlas-city-environment-control--${control.id}`}
         >
           <span className="atlas-city-control-label">{control.label}</span>
           <select
-            aria-label={`${control.label} da cidade`}
+            aria-label={control.ariaLabel}
             value={control.value}
             onChange={(event) => control.onChange(event.target.value)}
             disabled={disabled}

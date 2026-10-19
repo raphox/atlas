@@ -6,13 +6,13 @@ const colors = {
   warning: "border-amber-200 bg-amber-50 text-amber-800",
   critical: "border-red-200 bg-red-50 text-red-800",
 };
-export function StatusBadge({ status }) {
+export function StatusBadge({ status, label }) {
   return (
     <Badge
       variant="outline"
       className={cn("whitespace-nowrap text-[10px]", colors[status])}
     >
-      {STATUS[status].label}
+      {label ?? STATUS[status].label}
     </Badge>
   );
 }

@@ -1,3 +1,4 @@
+import { useMapI18n } from "../charts/city/use-map-i18n.js";
 import { ArrowUpRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,35 +11,31 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "./status-badge";
 import { categoryLabel, metricFor } from "@/model";
-import { format } from "@/hooks/use-atlas";
-const descriptions = {
-  healthy: "Operação saudável. A construção mantém sua aparência normal.",
-  warning:
-    "Ponto de atenção: fumaça clara e alerta amarelo sinalizam risco médio.",
-  critical:
-    "Alto risco: construção piscando em vermelho, chamas nas janelas e fumaça escura indicam prioridade de atenção.",
-};
 export function CompanyDetails({ company, onClose, onFocus }) {
+  const { t, format } = useMapI18n();
   if (!company) return null;
   return (
     <Card
       className="atlas-map-details pointer-events-auto mr-14 w-[min(310px,calc(100%-3.5rem))] self-end gap-4 shadow-xl"
       role="region"
-      aria-label="Detalhes da empresa"
+      aria-label={t("details")}
     >
       <CardHeader className="relative gap-3 pr-10">
         <Button
           variant="ghost"
           size="icon"
           className="absolute top-0 right-3 size-7"
-          aria-label="Fechar detalhes"
+          aria-label={t("closeDetails")}
           onClick={onClose}
         >
           <X />
         </Button>
-        <p className="section-label">EMPRESA SELECIONADA</p>
+        <p className="section-label">{t("selectedCompany")}</p>
         <div>
-          <StatusBadge status={company.status} />
+          <StatusBadge
+            status={company.status}
+            label={t(`status.${company.status}`)}
+          />
         </div>
         <CardTitle className="font-display text-xl leading-snug">
           {company.name}
@@ -56,7 +53,9 @@ export function CompanyDetails({ company, onClose, onFocus }) {
             </strong>
           </div>
           <div>
-            <p className="mb-1 text-[10px] text-muted-foreground">Categorias</p>
+            <p className="mb-1 text-[10px] text-muted-foreground">
+              {t("categories")}
+            </p>
             <strong className="block text-xs leading-relaxed">
               {categoryLabel(company)}
             </strong>
@@ -64,10 +63,10 @@ export function CompanyDetails({ company, onClose, onFocus }) {
         </div>
         <Separator />
         <CardDescription className="text-xs leading-relaxed">
-          {descriptions[company.status]}
+          {t(`description.${company.status}`)}
         </CardDescription>
         <Button className="w-full text-xs" onClick={onFocus}>
-          Aproximar empresa
+          {t("zoomCompany")}
           <ArrowUpRight className="size-3.5" />
         </Button>
       </CardContent>

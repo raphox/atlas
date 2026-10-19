@@ -1,3 +1,4 @@
+import { useMapI18n } from "../charts/city/use-map-i18n.js";
 import { useEffect, useRef, useState } from "react";
 import {
   fetchWeather,
@@ -5,15 +6,16 @@ import {
   WEATHER_REFRESH_MS,
 } from "@/weather";
 
-const inactive = { type: "none", status: "idle", message: "Clima pausado" };
+const inactive = { type: "none", status: "idle", message: "weatherPaused" };
 const descriptions = {
-  rain: "Chuva na região",
-  snow: "Neve na região",
-  none: "Sem chuva ou neve na região",
+  rain: "weather.rain",
+  snow: "weather.snow",
+  none: "weather.none",
 };
 
 // Location and cached weather live only in memory for this mounted map.
 export function useWeather(enabled) {
+  const { t } = useMapI18n();
   const [state, setState] = useState(inactive);
   const cache = useRef(null);
   useEffect(() => {
@@ -39,7 +41,7 @@ export function useWeather(enabled) {
       cache.current = null;
       clearTimeout(refreshTimer);
       controller?.abort();
-      fail("Localização não autorizada · clima indisponível");
+      fail("locationDenied");
     };
     const refresh = async () => {
       clearTimeout(refreshTimer);
@@ -75,7 +77,7 @@ export function useWeather(enabled) {
           message: descriptions[weather.type],
         });
       } catch {
-        if (coordinates) fail("Clima indisponível · nova tentativa em 15 min");
+        if (coordinates) fail("weatherUnavailable");
         nextRefresh = Date.now() + WEATHER_REFRESH_MS;
       } finally {
         clearTimeout(timeout);
@@ -94,10 +96,10 @@ export function useWeather(enabled) {
     setState({
       type: "none",
       status: "locating",
-      message: "Permita a localização para mostrar chuva ou neve",
+      message: "locationPrompt",
     });
     if (!window.isSecureContext || !navigator.geolocation) {
-      fail("Localização indisponível neste navegador");
+      fail("locationUnavailable");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -106,22 +108,17 @@ export function useWeather(enabled) {
         try {
           coordinates = weatherCoordinates(position.coords);
         } catch {
-          fail("Não foi possível obter a localização");
+          fail("locationError");
           return;
         }
         setState({
           type: "none",
           status: "loading",
-          message: "Consultando o clima da região…",
+          message: "weatherLoading",
         });
         refresh();
       },
-      (error) =>
-        fail(
-          error.code === 1
-            ? "Localização não autorizada · clima indisponível"
-            : "Não foi possível obter a localização",
-        ),
+      (error) => fail(error.code === 1 ? "locationDenied" : "locationError"),
       {
         enableHighAccuracy: false,
         timeout: 10_000,
@@ -148,5 +145,6 @@ export function useWeather(enabled) {
       document.removeEventListener("visibilitychange", visibility);
     };
   }, [enabled]);
-  return enabled ? state : inactive;
+  const current = enabled ? state : inactive;
+  return { ...current, message: t(current.message) };
 }

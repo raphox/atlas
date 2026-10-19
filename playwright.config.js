@@ -6,6 +6,7 @@ export default defineConfig({
   timeout: 90000,
   expect: { timeout: 15000 },
   use: {
+    locale: "pt-BR",
     baseURL: "http://127.0.0.1:4173",
     trace: "retain-on-failure",
     launchOptions: {

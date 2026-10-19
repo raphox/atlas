@@ -40,7 +40,7 @@ test("pacote compilado preserva dados e gera SSR sem DOM", () => {
   );
   assert.match(markup, /atlas-city-theme-tailwind/);
   assert.match(markup, /custom-city/);
-  assert.match(markup, /Controles da câmera/);
+  assert.match(markup, /Camera controls/);
   assert.doesNotMatch(markup, /<canvas/);
   assert.doesNotMatch(
     markup,

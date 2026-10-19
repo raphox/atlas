@@ -102,6 +102,12 @@ Em um projeto já configurado com Tailwind CSS 4, importe os estilos no CSS proc
 
 O tema Tailwind usa `@reference`, `theme()` e `@apply`; deve ser processado pelo Tailwind 4 do consumidor. O tema CSS puro funciona diretamente em qualquer bundler que importe CSS. A estrutura e os nomes de classes são os mesmos nos dois temas.
 
+## Idioma da interface
+
+Os textos ficam centralizados em `src/charts/city/i18n.js`, com traduções `pt-BR` e `en-US`. O mapa usa o idioma principal do navegador (`navigator.language`), sem diferenciar maiúsculas e minúsculas. Qualquer idioma não disponível, inclusive `pt-PT` ou `pt`, usa `en-US`. Mudanças notificadas pelo evento `languagechange` atualizam os textos sem recriar a cidade.
+
+Controles, busca, detalhes, estados de saúde, tooltips, mensagens e rótulos acessíveis seguem o idioma detectado. Números também usam essa localidade. Nomes de empresas, categorias, labels de métricas e as props personalizadas `title` e `ariaLabel` são preservados. No servidor, o shell usa inglês; após a hidratação, adota o idioma do navegador.
+
 ## Classes da interface
 
 | Parte | Classes públicas |
@@ -140,7 +146,7 @@ Os componentes da interface não geram atributos `style`. As posições dinâmic
 | `showEnvironmentControls` | `true` | seletores de clima e iluminação |
 | `showSearch` / `showDetails` | `true` | busca / painel de seleção |
 | `busy` | `false` | bloqueio temporário e indicador de atualização |
-| `title` / `ariaLabel` | textos em português | título / identificação acessível |
+| `title` / `ariaLabel` | textos no idioma do navegador | título / identificação acessível |
 | `className` / `children` | — | personalização CSS / conteúdo adicional |
 | `onSelect` | — | empresa original selecionada ou `null` |
 

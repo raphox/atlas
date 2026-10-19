@@ -308,6 +308,7 @@ try {
     )
       continue;
     const context = await browser.newContext({
+      locale: "pt-BR",
       viewport: { width: 1440, height: 1100 },
       timezoneId: "America/Sao_Paulo",
       reducedMotion: "reduce",
@@ -362,6 +363,7 @@ try {
 
     for (const theme of ["package", "package-tailwind"]) {
       const context = await browser.newContext({
+        locale: "pt-BR",
         viewport: { width: 1440, height: 1300 },
         timezoneId: "America/Sao_Paulo",
         reducedMotion: "reduce",

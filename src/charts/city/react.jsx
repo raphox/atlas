@@ -1,13 +1,13 @@
+import { useMapI18n } from "./use-map-i18n.js";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Chart } from "@tanstack/charts/react/core";
-import { regionsFor, categoryLabel, metricFor, STATUS } from "../../model.js";
+import { regionsFor, categoryLabel, metricFor } from "../../model.js";
 import { useCityChart } from "./use-city-chart.js";
 import { EnvironmentControls } from "./environment-controls.jsx";
 import "./styles.css";
 
-const format = (value) => new Intl.NumberFormat("pt-BR").format(value);
-
 function DistrictLabels({ layout, labelsRef, labelNodes, visible }) {
+  const { format } = useMapI18n();
   return (
     <div
       ref={labelsRef}
@@ -42,6 +42,7 @@ function DistrictLabels({ layout, labelsRef, labelNodes, visible }) {
   );
 }
 function CompanyHover({ tooltip, onPointerEnter, onPointerLeave }) {
+  const { t, format } = useMapI18n();
   const anchorId = `atlas-city-hover-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const contentRef = useRef(null);
   const positionRef = useRef(null);
@@ -109,7 +110,7 @@ function CompanyHover({ tooltip, onPointerEnter, onPointerLeave }) {
         <small className="atlas-city-tooltip-summary">
           {categoryLabel(tooltip.company)} · {metricFor(tooltip.company).label}:{" "}
           {format(metricFor(tooltip.company).value)} ·{" "}
-          {STATUS[tooltip.company.status].label}
+          {t(`status.${tooltip.company.status}`)}
         </small>
         <svg
           className="atlas-city-tooltip-arrow"
@@ -143,10 +144,12 @@ export function CityChart({
   busy = false,
   selected = null,
   children,
-  ariaLabel = "Health score das empresas em uma cidade 3D",
+  ariaLabel: ariaLabelProp,
   className = "",
   theme = "default",
 }) {
+  const { t, locale } = useMapI18n();
+  const ariaLabel = ariaLabelProp ?? t("chartLabel");
   const instanceId = useId();
   const projectionStyleRef = useRef(null);
   const panelRef = useRef(null);
@@ -198,6 +201,7 @@ export function CityChart({
   ) : null;
   return (
     <div
+      lang={locale}
       ref={panelRef}
       id={id}
       className={`atlas-city-chart ${theme ? `atlas-city-theme-${theme}` : ""} ${className}`}
@@ -208,13 +212,13 @@ export function CityChart({
         ref={viewportRef}
         id={viewportId}
         className="city-chart-viewport atlas-city-viewport"
-        aria-label="Cidade 3D. Arraste para girar, use a roda para zoom, clique em uma empresa para detalhes."
+        aria-label={t("viewportLabel")}
       >
         <Chart
           definition={definition}
           renderer={renderer}
           ariaLabel={ariaLabel}
-          ariaDescription="Cada construção representa uma empresa. Altura indica o valor da métrica, cor indica categorias e efeitos indicam o nível de risco."
+          ariaDescription={t("chartDescription")}
           className="atlas-city-host"
           onSelect={onSelect}
           onFocusChange={onFocusChange}

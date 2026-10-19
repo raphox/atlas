@@ -1,3 +1,4 @@
+import { useMapI18n } from "../charts/city/use-map-i18n.js";
 import { useEffect, useId, useRef } from "react";
 import { Search } from "lucide-react";
 
@@ -8,6 +9,7 @@ export function CompanySearch({
   onSelect,
   disabled,
 }) {
+  const { t } = useMapI18n();
   const listId = useId();
   const inputRef = useRef(null);
   useEffect(() => {
@@ -41,8 +43,8 @@ export function CompanySearch({
         list={listId}
         value={query}
         className="atlas-map-search-input native-input w-full pr-9 pl-9 text-xs"
-        placeholder="Encontrar uma empresa…"
-        aria-label="Buscar empresa"
+        placeholder={t("findPlaceholder")}
+        aria-label={t("search")}
         disabled={disabled}
         onChange={(event) => {
           const value = event.target.value;

@@ -15,7 +15,7 @@ export default function App() {
         <main className="grid min-h-0 flex-1 md:grid-cols-[240px_minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)]">
           <Sidebar atlas={atlas} />
           <div className="flex min-h-0 min-w-0 flex-col md:overflow-y-auto">
-            <CityMap atlas={atlas} showEnvironmentControls />
+            <CityMap atlas={atlas} />
             <CompanyTable atlas={atlas} />
           </div>
         </main>

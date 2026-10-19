@@ -1,3 +1,4 @@
+import { getBrowserMapLocale, getMapI18n } from "./i18n.js";
 import { City } from "../../city.js";
 import { readCityLayout } from "./layout.js";
 import { mapTooltipAnchor } from "../../lib/map-tooltip.js";
@@ -35,7 +36,7 @@ export function createCityRenderer({
   const renderer = {
     id: "atlas-city-3d",
     prerender(_scene, options) {
-      return `<div data-city-surface role="group" aria-roledescription="gráfico 3D" aria-label="${escapeAttribute(options.ariaLabel)}" style="width:100%;height:100%"></div>`;
+      return `<div data-city-surface role="group" aria-roledescription="${getMapI18n("en-US").t("chartRole")}" aria-label="${escapeAttribute(options.ariaLabel)}" style="width:100%;height:100%"></div>`;
     },
     mount(container) {
       const element =
@@ -162,7 +163,10 @@ export function createCityRenderer({
               "CityRenderer aceita uma cityMark por superfície.",
             );
           element.setAttribute("role", "group");
-          element.setAttribute("aria-roledescription", "gráfico 3D");
+          element.setAttribute(
+            "aria-roledescription",
+            getMapI18n(getBrowserMapLocale()).t("chartRole"),
+          );
           element.setAttribute("aria-label", options.ariaLabel);
           element.tabIndex = options.tabIndex ?? 0;
           if (options.ariaDescription)
