@@ -9,6 +9,7 @@ import {
 } from "react";
 import { defineCityChart } from "./definition.js";
 import { CityChart } from "./react.jsx";
+import { CompanyDate, CompanyMonitor } from "./company-monitor.jsx";
 import { useFullscreenWakeLock } from "./use-fullscreen-wake-lock.js";
 import { categoryLabel, metricFor } from "../../model.js";
 
@@ -45,6 +46,9 @@ export const CityMap = forwardRef(function CityMap(
     showEnvironmentControls = false,
     showSearch = true,
     showDetails = true,
+    showMonitor = true,
+    showCompass = true,
+    showInstructions = true,
     busy = false,
     title: titleProp,
     ariaLabel: ariaLabelProp,
@@ -179,132 +183,233 @@ export const CityMap = forwardRef(function CityMap(
           const disabled = busy || !ready || Boolean(error);
           return (
             <>
-              <div
-                className="atlas-city-top-controls"
-                hidden={showControls && !controlsVisible}
-              >
-                <header className="atlas-city-header">
-                  <strong className="atlas-city-title">{title}</strong>
-                  {showSearch && (
-                    <div className="atlas-city-search">
-                      <input
-                        className="atlas-city-search-input"
-                        type="search"
-                        aria-label={t("searchMap")}
-                        placeholder={t("searchPlaceholder")}
-                        value={query}
-                        onChange={(event) => setQuery(event.target.value)}
-                        disabled={disabled}
-                      />
-                      {query.trim() && (
-                        <div className="atlas-city-results">
-                          {matches.length ? (
-                            matches.map((datum) => (
-                              <button
-                                key={datum.id}
-                                className="atlas-city-search-result"
-                                type="button"
-                                disabled={disabled}
-                                onClick={() => {
-                                  choose(datum, true);
-                                  setQuery("");
-                                }}
+              <div className="atlas-city-layout">
+                <div
+                  className="atlas-city-top-controls"
+                  hidden={showControls && !controlsVisible}
+                >
+                  <header className="atlas-city-header">
+                    <strong className="atlas-city-title">{title}</strong>
+                    {showSearch && (
+                      <div className="atlas-city-search">
+                        <input
+                          className="atlas-city-search-input"
+                          type="search"
+                          aria-label={t("searchMap")}
+                          placeholder={t("searchPlaceholder")}
+                          value={query}
+                          onChange={(event) => setQuery(event.target.value)}
+                          disabled={disabled}
+                        />
+                        {query.trim() && (
+                          <div className="atlas-city-results">
+                            {matches.length ? (
+                              matches.map((datum) => (
+                                <button
+                                  key={datum.id}
+                                  className="atlas-city-search-result"
+                                  type="button"
+                                  disabled={disabled}
+                                  onClick={() => {
+                                    choose(datum, true);
+                                    setQuery("");
+                                  }}
+                                >
+                                  {datum.name}
+                                </button>
+                              ))
+                            ) : (
+                              <p
+                                className="atlas-city-search-empty"
+                                role="status"
                               >
-                                {datum.name}
-                              </button>
-                            ))
-                          ) : (
-                            <p
-                              className="atlas-city-search-empty"
-                              role="status"
-                            >
-                              {t("empty")}
-                            </p>
-                          )}
-                        </div>
-                      )}
+                                {t("empty")}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </header>
+                  {showControls && (
+                    <fieldset
+                      className="atlas-city-perspectives"
+                      disabled={disabled}
+                    >
+                      <legend className="atlas-city-perspective-legend">
+                        {t("perspective")}
+                      </legend>
+                      {[
+                        ["iso", t("iso")],
+                        ["top", t("top")],
+                      ].map(([value, label]) => (
+                        <button
+                          className="atlas-city-perspective-button"
+                          key={value}
+                          type="button"
+                          aria-pressed={view === value}
+                          onClick={() => changeView(value)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </fieldset>
+                  )}
+                  {fullscreenError && (
+                    <p role="alert" className="atlas-city-message">
+                      {t(fullscreenError)}
+                    </p>
+                  )}
+                  {wakeLockStatus === "unavailable" && (
+                    <p role="status" className="atlas-city-message">
+                      {t("wakeLockUnavailable")}
+                    </p>
+                  )}
+                </div>
+                <div className="atlas-city-monitor-layout">
+                  {showMonitor && (
+                    <CompanyMonitor
+                      companies={data}
+                      matching={data}
+                      pageSize="all"
+                      loading={false}
+                      error={error}
+                    />
+                  )}
+                </div>
+                <div className="atlas-city-bottom-controls">
+                  {showCompass && (
+                    <button
+                      type="button"
+                      className="atlas-city-compass atlas-map-compass"
+                      aria-label={t("resetOrientation")}
+                      title={t("resetOrientation")}
+                      disabled={disabled}
+                      onClick={() => changeView("iso")}
+                    >
+                      <span aria-hidden="true">N</span>
+                      <span
+                        aria-hidden="true"
+                        className="atlas-map-compass-arrow"
+                      >
+                        ↑
+                      </span>
+                    </button>
+                  )}
+                  <div className="atlas-city-selection">
+                    {showDetails && selected && (
+                      <aside
+                        className="atlas-city-details"
+                        aria-label={t("details")}
+                      >
+                        <button
+                          className="atlas-city-details-close"
+                          type="button"
+                          aria-label={t("closeDetails")}
+                          onClick={() => choose(null)}
+                        >
+                          ×
+                        </button>
+                        <strong className="atlas-city-details-title">
+                          {selected.name}
+                        </strong>
+                        <p className="atlas-city-details-categories">
+                          {categoryLabel(selected)}
+                        </p>
+                        <p className="atlas-city-details-metric">
+                          {metricFor(selected).label}:{" "}
+                          {format(metricFor(selected).value)}
+                        </p>
+                        <p
+                          className={`atlas-city-details-status atlas-city-details-status--${selected.status}`}
+                        >
+                          {t(`status.${selected.status}`)}
+                        </p>
+                        <p className="atlas-city-details-description">
+                          {t(`description.${selected.status}`)}
+                        </p>
+                        <dl className="atlas-city-details-dates">
+                          <div>
+                            <dt>{t("updatedAt")}</dt>
+                            <dd>
+                              <CompanyDate value={selected.updatedAt} />
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>{t("statusChangedAt")}</dt>
+                            <dd>
+                              <CompanyDate value={selected.statusChangedAt} />
+                            </dd>
+                          </div>
+                        </dl>
+                        <button
+                          className="atlas-city-details-focus"
+                          type="button"
+                          onClick={() =>
+                            chartRef.current?.select(selected, true, true)
+                          }
+                        >
+                          {t("focus")}
+                        </button>
+                      </aside>
+                    )}
+                    {!disabled && data.length === 0 && (
+                      <p role="status" className="atlas-city-message">
+                        {t("empty")}
+                      </p>
+                    )}
+                  </div>
+                  {showControls && (
+                    <div
+                      className="atlas-city-scene-controls"
+                      aria-hidden={!controlsVisible}
+                      inert={!controlsVisible}
+                      data-controls-visible={controlsVisible}
+                    >
+                      {environmentControls}
+                      {[
+                        ["life", t("life"), life, setLife],
+                        ["effects", t("effects"), effects, setEffects],
+                        [
+                          "auto-rotate",
+                          t("autoRotate"),
+                          autoRotate,
+                          setAutoRotate,
+                        ],
+                        ["labels", t("districtLabels"), labels, setLabels],
+                      ].map(([id, label, checked, change]) => (
+                        <label
+                          key={label}
+                          className={`atlas-city-control atlas-city-toggle atlas-city-toggle--${id}`}
+                        >
+                          <input
+                            className="atlas-city-toggle-input"
+                            type="checkbox"
+                            checked={checked}
+                            disabled={disabled}
+                            onChange={(event) => change(event.target.checked)}
+                          />
+                          <span className="atlas-city-control-label">
+                            {label}
+                          </span>
+                        </label>
+                      ))}
                     </div>
                   )}
-                </header>
-                {showControls && (
-                  <fieldset
-                    className="atlas-city-perspectives"
-                    disabled={disabled}
-                  >
-                    <legend className="atlas-city-perspective-legend">
-                      {t("perspective")}
-                    </legend>
-                    {[
-                      ["iso", t("iso")],
-                      ["top", t("top")],
-                    ].map(([value, label]) => (
-                      <button
-                        className="atlas-city-perspective-button"
-                        key={value}
-                        type="button"
-                        aria-pressed={view === value}
-                        onClick={() => changeView(value)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </fieldset>
-                )}
-                {fullscreenError && (
-                  <p role="alert" className="atlas-city-message">
-                    {t(fullscreenError)}
-                  </p>
-                )}
-                {wakeLockStatus === "unavailable" && (
-                  <p role="status" className="atlas-city-message">
-                    {t("wakeLockUnavailable")}
-                  </p>
-                )}
-                {showDetails && selected && (
-                  <aside
-                    className="atlas-city-details"
-                    aria-label={t("details")}
-                  >
-                    <button
-                      className="atlas-city-details-close"
-                      type="button"
-                      aria-label={t("closeDetails")}
-                      onClick={() => choose(null)}
-                    >
-                      ×
-                    </button>
-                    <strong className="atlas-city-details-title">
-                      {selected.name}
-                    </strong>
-                    <p className="atlas-city-details-categories">
-                      {categoryLabel(selected)}
-                    </p>
-                    <p className="atlas-city-details-metric">
-                      {metricFor(selected).label}:{" "}
-                      {format(metricFor(selected).value)}
-                    </p>
-                    <p
-                      className={`atlas-city-details-status atlas-city-details-status--${selected.status}`}
-                    >
-                      {t(`status.${selected.status}`)}
-                    </p>
-                    <button
-                      className="atlas-city-details-focus"
-                      type="button"
-                      onClick={() =>
-                        chartRef.current?.select(selected, true, true)
-                      }
-                    >
-                      {t("focus")}
-                    </button>
-                  </aside>
-                )}
-                {!disabled && data.length === 0 && (
-                  <p role="status" className="atlas-city-message">
-                    {t("empty")}
-                  </p>
-                )}
+                </div>
               </div>
+              {showInstructions && (
+                <footer className="atlas-city-footer">
+                  <span>{t("instructions")}</span>
+                  <span>
+                    {t("companyRange", {
+                      start: format(data.length ? 1 : 0),
+                      end: format(data.length),
+                      total: format(data.length),
+                    })}
+                  </span>
+                </footer>
+              )}
               {showControls && (
                 <>
                   <div
@@ -369,39 +474,6 @@ export const CityMap = forwardRef(function CityMap(
                         {controlsVisible && <path d="m3 3 18 18" />}
                       </svg>
                     </button>
-                  </div>
-                  <div
-                    className="atlas-city-scene-controls"
-                    hidden={!controlsVisible}
-                  >
-                    {environmentControls}
-                    {[
-                      ["life", t("life"), life, setLife],
-                      ["effects", t("effects"), effects, setEffects],
-                      [
-                        "auto-rotate",
-                        t("autoRotate"),
-                        autoRotate,
-                        setAutoRotate,
-                      ],
-                      ["labels", t("districtLabels"), labels, setLabels],
-                    ].map(([id, label, checked, change]) => (
-                      <label
-                        key={label}
-                        className={`atlas-city-control atlas-city-toggle atlas-city-toggle--${id}`}
-                      >
-                        <input
-                          className="atlas-city-toggle-input"
-                          type="checkbox"
-                          checked={checked}
-                          disabled={disabled}
-                          onChange={(event) => change(event.target.checked)}
-                        />
-                        <span className="atlas-city-control-label">
-                          {label}
-                        </span>
-                      </label>
-                    ))}
                   </div>
                 </>
               )}

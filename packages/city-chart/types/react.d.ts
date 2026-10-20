@@ -59,6 +59,9 @@ export interface CityMapProps<T extends CityDatum = CityDatum> {
   showEnvironmentControls?: boolean;
   showSearch?: boolean;
   showDetails?: boolean;
+  showMonitor?: boolean;
+  showCompass?: boolean;
+  showInstructions?: boolean;
   onSelect?: (datum: T | null) => void;
   onFocusChange?: (point: ChartPoint<T, number, number> | null) => void;
   children?: ReactNode;

@@ -237,7 +237,7 @@ export function Playground() {
             </div>
             <div className="editor-note">
               {file === "jsx"
-                ? "React, CityMap and companies are in scope. Add showEnvironmentControls to show weather and lighting controls; remove it to hide them."
+                ? "React, CityMap and companies are in scope. The clock and monitoring remain visible when you hide controls. Use showMonitor, showCompass and showInstructions to configure overlays."
                 : "Edit the JSON records. Each company needs a unique id."}
             </div>
           </div>

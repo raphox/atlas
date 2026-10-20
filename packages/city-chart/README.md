@@ -122,6 +122,8 @@ Controls, search, details, health states, tooltips, messages, and accessible lab
 | Labels | `.atlas-city-labels`, `.atlas-city-label`, `.atlas-city-label-dot`, `.atlas-city-label-name`, `.atlas-city-label-count` |
 | Tooltip | `.atlas-city-tooltip`, `.atlas-city-tooltip-name`, `.atlas-city-tooltip-summary`, `.atlas-city-tooltip-arrow` |
 | Details | `.atlas-city-details`, `.atlas-city-details-title`, `.atlas-city-details-categories`, `.atlas-city-details-metric`, `.atlas-city-details-status`, `.atlas-city-details-close`, `.atlas-city-details-focus` |
+| Monitoring | `.atlas-city-layout`, `.atlas-city-monitor-layout`, `.atlas-company-monitor`, `.atlas-monitor-clock`, `.atlas-monitor-metrics`, `.atlas-monitor-alerts` |
+| Compass and footer | `.atlas-city-compass`, `.atlas-map-compass-arrow`, `.atlas-city-footer` |
 | Status | `.atlas-city-loading`, `.atlas-city-message` |
 
 Inputs, tabs, controls, labels, tooltips, and details use translucent gray surfaces (68% opacity), with a 10px blur and full-opacity text. Selected states use a darkened, translucent accent color. Customize them through `--atlas-city-surface-tint`, `--atlas-city-surface-background`, `--atlas-city-surface-hover-background`, `--atlas-city-surface-blur`, `--atlas-city-selected-background`, and `--atlas-city-selected-hover-background` in either the plain CSS or Tailwind theme.
@@ -145,7 +147,9 @@ Interface components do not generate `style` attributes. Dynamic label and toolt
 | `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"`, or `"night"` |
 | `showControls` | `true` | camera, scene, and environment controls, including the visibility toggle below fullscreen |
 | `showEnvironmentControls` | `false` | opt in to weather and lighting selectors with `showEnvironmentControls` |
-| `showSearch` / `showDetails` | `true` | search / selection panel |
+| `showSearch` / `showDetails` | `true` | search / selection panel with timestamps |
+| `showMonitor` | `true` | local clock, totals, health counts, and latest high-risk entries |
+| `showCompass` / `showInstructions` | `true` | north compass / navigation hints and company range |
 | `busy` | `false` | temporary interaction lock and update indicator |
 | `title` / `ariaLabel` | text in the browser's language | title / accessible name |
 | `className` / `children` | — | CSS customization / additional content |
@@ -199,3 +203,5 @@ From the repository root, `npm run audit:contrast` checks day, sunrise/sunset, a
 In fullscreen mode, `CityMap` requests a [Screen Wake Lock](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) to keep the screen awake. The lock is released on exit, when the page is hidden, or when the map unmounts, and requested again when the page becomes visible in fullscreen mode. It requires a secure context (HTTPS or localhost) and browser/system support and permission; it does not prevent manual suspension. If unavailable or denied, the interface displays a notice and keeps fullscreen working.
 
 Records also accept optional `updatedAt` (last update) and `statusChangedAt` (start of the current status) timestamps in ISO 8601 with a time zone. An ordinary update preserves `statusChangedAt`; a health change updates both fields. Supplied dates are validated, and `statusChangedAt` cannot be later than `updatedAt`. The Atlas application uses these dates in the monitoring panel and table; the reusable map preserves the fields in the data.
+
+The eye button preserves the clock, monitoring panel, compass, selected-company details, footer, and camera toolbar while hiding the other UI. Monitoring uses the supplied `data`; no company polling or weather requests are added. Use `showMonitor={false}`, `showCompass={false}`, or `showInstructions={false}` to remove these overlays.

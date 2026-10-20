@@ -45,6 +45,8 @@ export default function Dashboard() {
 }
 ```
 
+The initial playground example includes every map overlay and enables weather and lighting selectors. The monitoring panel uses the example data, including status timestamps. It stays visible when you hide the UI with the eye button.
+
 The playground provides `React`, `CityMap`, and `companies` in scope. Finish an example with `render(<Example />)`. Arbitrary imports are not supported by the editor. In your own application, use the imports above and export your component normally. JavaScript runs in your browser without a remote compilation service.
 
 <h2 id="data">Data format</h2>
@@ -79,7 +81,9 @@ These props belong to `CityMap` from `atlas-city-chart/react`. Internal applicat
 | `lightingMode` | `"auto"` | `"auto"`, `"day"`, `"twilight"`, or `"night"`. |
 | `showControls` | `true` | Camera and scene controls, including the visibility toggle below fullscreen. |
 | `showEnvironmentControls` | `false` | Opt in to weather and lighting selectors. |
-| `showSearch` / `showDetails` | `true` | Search and selection details. |
+| `showSearch` / `showDetails` | `true` | Search and selection details, including update and health timestamps. |
+| `showMonitor` | `true` | Local clock, company totals, health counts, and latest high-risk entries. |
+| `showCompass` / `showInstructions` | `true` | North compass with isometric reset / navigation hints and company range. |
 | `busy` | `false` | Temporary interaction lock during updates. |
 | `title` / `ariaLabel` | Browser language | Map title and accessible name. |
 | `className` / `children` | — | CSS customization and additional content. |
@@ -87,7 +91,7 @@ These props belong to `CityMap` from `atlas-city-chart/react`. Internal applicat
 
 With `life={false}`, weather particles pause and lighting returns to daylight. Environment selectors keep local overrides; **Automatic** resumes following the supplied props. See [all features and the weather integration](?page=features#weather).
 
-The eye button directly below fullscreen hides or restores the map's header, search, perspectives, details, and scene controls. Camera buttons remain available, and hiding controls preserves the current weather, lighting, and other scene settings. Setting `showControls={false}` removes the camera toolbar and scene controls entirely.
+The eye button directly below fullscreen hides or restores the map's header, search, perspectives, and scene controls. The local clock, monitoring panel, compass, selected-company details, footer, and camera buttons remain available, and hiding controls preserves the current weather, lighting, and other scene settings. Setting `showControls={false}` removes the camera toolbar and scene controls entirely.
 
 **Environment controls are opt-in:** `showEnvironmentControls` defaults to `false`. Add the boolean prop without a value (equivalent to `showEnvironmentControls={true}`) to show the lighting and weather selectors:
 

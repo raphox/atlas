@@ -20,6 +20,8 @@ export const initialData = JSON.stringify(
     metric: { label: "Monthly revenue", value: 1200 + ((i * 7919) % 24000) },
     categories: categories.filter((_, bit) => ((i % 7) + 1) & (1 << bit)),
     status: i % 9 === 0 ? "critical" : i % 5 === 0 ? "warning" : "healthy",
+    updatedAt: "2026-10-20T12:00:00Z",
+    statusChangedAt: new Date(Date.UTC(2026, 9, 20, 11, 59 - i)).toISOString(),
   })),
   null,
   2,
@@ -39,7 +41,7 @@ function Example() {
     <CityMap
       data={companies}
       title="My city"
-      lightingMode="day"
+      showEnvironmentControls
     />
   );
 }

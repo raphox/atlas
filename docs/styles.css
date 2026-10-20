@@ -448,7 +448,7 @@ body {
   min-height: 560px;
 }
 .map-preview .atlas-city-map {
-  --atlas-city-height: 560px;
+  --atlas-city-height: 720px;
 }
 .map-preview .atlas-city-map:fullscreen {
   --atlas-city-height: 100%;
@@ -863,7 +863,7 @@ body {
   }
   .map-preview,
   .map-preview .atlas-city-map {
-    --atlas-city-height: 640px;
+    --atlas-city-height: 760px;
     min-height: 640px;
   }
   .code-editor {
