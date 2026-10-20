@@ -1,15 +1,36 @@
-<div id="overview" className="page-intro">
-  <div className="eyebrow"><span /> REACT COMPONENT</div>
-  <h1>Your data. <span>A whole new dimension.</span></h1>
-  <p className="lead">Turn company data into an interactive city. Explore the map, experiment with the code, and bring CityMap into your project.</p>
-  <div className="intro-tags"><span>React 18 / 19</span><span>WebGL · Three.js</span><span>Customizable CSS</span></div>
-</div>
+import cityPreview from "../images/city-map-preview.png";
+
+<section id="overview" className="page-intro product-hero" aria-labelledby="hero-title">
+  <div className="hero-content">
+    <div className="eyebrow"><span /> CUSTOMER HEALTH. A NEW PERSPECTIVE.</div>
+    <h1 id="hero-title">Make customer health <span>impossible to ignore.</span></h1>
+    <p className="lead">Give your health scores a city to live in. Atlas turns your customer portfolio into an interactive 3D map that invites your team to explore, spot risk, and look closer at the accounts that need attention.</p>
+    <p className="hero-story">Move beyond static charts with a portfolio you can navigate. Every building is a customer. Segments become districts. Your chosen metric shapes the skyline. Smoke, fire, and alerts make risk visible. Click a building to discover the story behind the score.</p>
+    <div className="hero-actions">
+      <a className="hero-primary" href="#playground">Explore the city <span aria-hidden="true">↗</span></a>
+      <a className="hero-secondary" href="#installation">Bring Atlas to your product <span aria-hidden="true">→</span></a>
+    </div>
+    <p className="hero-footnote">Try it with sample data. Then make the city yours.</p>
+  </div>
+  <figure className="hero-preview">
+    <div className="hero-preview-heading"><span className="hero-live-dot" /> YOUR PORTFOLIO, REIMAGINED <span aria-hidden="true">↗</span></div>
+    <a href="#playground" aria-label="Explore the interactive customer health map">
+      <img src={cityPreview} alt="Customers represented as colorful buildings in a 3D city, with smoke and warning signals marking accounts at risk." width="1130" height="561" fetchPriority="high" />
+    </a>
+    <figcaption><strong>A city worth looking into.</strong><span>Explore customers. Understand risk. Start a conversation.</span></figcaption>
+  </figure>
+  <div className="hero-benefits">
+    <div><span className="hero-benefit-number">01 / SEE THE SIGNALS</span><h2>Find the accounts that need you.</h2><p>Healthy, warning, and critical states give your customer health data a visual presence.</p></div>
+    <div><span className="hero-benefit-number">02 / FOLLOW YOUR CURIOSITY</span><h2>Go from the portfolio to one customer.</h2><p>Navigate districts, search for an account, and zoom into its metrics and health details.</p></div>
+    <div><span className="hero-benefit-number">03 / BUILD YOUR OWN CITY</span><h2>Your data. Inside your product.</h2><p>Bring the React component into your app with your customer records, segments, metrics, and theme.</p></div>
+  </div>
+</section>
 
 <div id="playground" className="section-heading"><h2>Explore CityMap</h2><span>RUNNABLE EXAMPLES</span></div>
 
 <Playground />
 
-<div className="callout">**Try it:** change `lightingMode="day"` to `"night"` and click **Run**. The `data.json` tab lets you edit companies, metrics, and categories. Changes stay in this session and are discarded when you reload the page or switch examples.</div>
+<div className="callout">**Try it:** choose **Night** in the lighting selector, or add `lightingMode="night"` to the code and click **Run**. The `data.json` tab lets you edit companies, metrics, and categories. Changes stay in this session and are discarded when you reload the page or switch examples.</div>
 
 <div className="prose">
 

@@ -11,7 +11,7 @@ test("production documentation executes edits, handles errors and restores examp
   await page.goto("./");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Your data.",
+    "Make customer health",
   );
   await expect(page.locator(".map-preview canvas")).toBeVisible();
   const editor = page.getByRole("textbox", { name: "Example code" });

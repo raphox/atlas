@@ -896,3 +896,184 @@ body {
     transform: rotate(90deg);
   }
 }
+
+/* Product introduction: the city is the invitation into the documentation. */
+.product-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 32px;
+  max-width: none;
+  padding: 52px 0 40px;
+}
+.product-hero h1 {
+  max-width: 680px;
+  font-size: clamp(38px, 4vw, 64px);
+  line-height: 1.06;
+  letter-spacing: -2.5px;
+  margin: 20px 0;
+}
+.product-hero h1 span {
+  color: var(--docs-blue);
+}
+.product-hero .lead {
+  margin-bottom: 14px;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #425670;
+}
+.hero-story {
+  max-width: 570px;
+  margin: 0;
+  color: #617087;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 26px;
+}
+.hero-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 44px;
+}
+.hero-actions .hero-primary {
+  padding: 12px 18px;
+  background: var(--docs-blue);
+  border: 1px solid var(--docs-blue);
+  border-radius: 6px;
+  color: #fff;
+}
+.hero-primary:hover {
+  background: #124994;
+}
+.hero-actions .hero-secondary {
+  color: var(--docs-blue);
+}
+.hero-secondary:hover {
+  text-decoration: underline;
+}
+.hero-footnote {
+  font-size: 11px;
+  color: #617087;
+  margin: 12px 0 0;
+}
+.hero-preview {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #dce3ec;
+  border-radius: 12px;
+  background: #f5f7f2;
+  box-shadow: 0 20px 60px #213c6310;
+}
+.hero-preview-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 16px;
+  background: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  color: #52657c;
+}
+.hero-preview-heading > span:last-child {
+  margin-left: auto;
+  font-size: 16px;
+}
+.hero-live-dot {
+  width: 6px;
+  height: 6px;
+  background: #4c9878;
+  border-radius: 50%;
+}
+.hero-preview > a {
+  display: block;
+  overflow: hidden;
+}
+.hero-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.hero-preview figcaption {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border-top: 1px solid #dce3ec;
+  background: #fff;
+}
+.hero-preview figcaption strong {
+  font-size: 15px;
+  letter-spacing: -0.3px;
+}
+.hero-preview figcaption > span {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #617087;
+}
+.hero-benefits {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  border-top: 1px solid var(--docs-border);
+  margin-top: 12px;
+  padding-top: 26px;
+}
+.hero-benefit-number {
+  color: var(--docs-blue);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.hero-benefits h2 {
+  margin: 10px 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.3px;
+}
+.hero-benefits p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #617087;
+}
+@media (max-width: 1150px) {
+  .product-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero-preview {
+    max-width: 760px;
+  }
+}
+@media (max-width: 640px) {
+  .product-hero {
+    padding-top: 32px;
+    gap: 28px;
+  }
+  .product-hero h1 {
+    font-size: 42px;
+    letter-spacing: -1.8px;
+  }
+  .product-hero .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .hero-benefits {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    margin-top: 0;
+  }
+}
