@@ -10,11 +10,25 @@ export default defineConfig(({ command, isPreview }) => ({
     command === "serve" && !isPreview
       ? "/"
       : process.env.DOCS_BASE_PATH || "/atlas/",
-  publicDir: false,
+  publicDir: "public",
   cacheDir: fileURLToPath(
     new URL("./node_modules/.vite-docs", import.meta.url),
   ),
   plugins: [
+    {
+      name: "docs-sharing-metadata",
+      transformIndexHtml(html) {
+        const siteUrl = new URL(
+          process.env.DOCS_SITE_URL || process.env.DOCS_BASE_PATH || "/atlas/",
+          "https://raphox.github.io",
+        );
+        if (!siteUrl.pathname.endsWith("/")) siteUrl.pathname += "/";
+        const escapedUrl = siteUrl.href
+          .replaceAll("&", "&amp;")
+          .replaceAll('"', "&quot;");
+        return html.replaceAll("__DOCS_SITE_URL__", escapedUrl);
+      },
+    },
     { enforce: "pre", ...mdx({ remarkPlugins: [remarkGfm] }) },
     react({ include: /\.(jsx|js|mdx)$/ }),
   ],
