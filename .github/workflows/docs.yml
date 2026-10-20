@@ -1,9 +1,10 @@
 name: Documentation → GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,10 +14,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  tests:
-    uses: ./.github/workflows/tests.yml
-
   build:
+    # Only build the exact commit whose complete test workflow passed.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -24,6 +26,8 @@ jobs:
       pages: read
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: actions/setup-node@v7
         with:
           node-version: "24"
@@ -32,9 +36,8 @@ jobs:
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
-      - run: npx playwright install --with-deps --only-shell chromium
-      - name: Build and test documentation
-        run: npm run test:docs
+      - name: Build documentation
+        run: npm run build:docs
         env:
           DOCS_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
       - uses: actions/upload-pages-artifact@v4
@@ -42,7 +45,7 @@ jobs:
           path: dist/docs
 
   deploy:
-    needs: [tests, build]
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       pages: write
