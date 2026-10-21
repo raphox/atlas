@@ -99,9 +99,12 @@ test("imported data preserves memberships, users and risk with validation before
   assert.throws(() => placeCompanies([]));
 });
 test("size grows with user count regardless of health status", () => {
-  assert.equal(sizeForUsers(30).house, true);
-  assert.equal(sizeForUsers(500).house, false);
-  assert.ok(sizeForUsers(3000).height > sizeForUsers(500).height);
+  const domain = [30, 3000];
+  assert.equal(sizeForUsers(30, domain).house, true);
+  assert.equal(sizeForUsers(500, domain).house, false);
+  assert.ok(
+    sizeForUsers(3000, domain).height > sizeForUsers(500, domain).height,
+  );
 });
 test("default pagination of 100 neither loses nor repeats companies between cities", () => {
   const companies = demoCompanies();

@@ -33,7 +33,7 @@ const exampleDefinitions = [
     title: "Basic map",
     label: "01 · Basic map",
     description:
-      "Each building is a company. Height shows a metric band; districts show category membership. Select a building for exact values.",
+      "Each building is a company. Height scales continuously with the metric; districts show category membership. Select a building for exact values.",
     code: `// Company records live in the data.json tab.
 function Example() {
   return (

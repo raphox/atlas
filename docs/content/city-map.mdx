@@ -54,16 +54,11 @@ Each building is one company. Districts represent exact combinations of up to th
 
 District colors identify category combinations. Health status controls risk effects: `healthy`, `warning`, or `critical`. These effects can be disabled without changing the data.
 
-Building height shows a **metric band**, with fixed thresholds:
+Building height uses a **continuous square-root scale adapted to the dataset**. The smallest metric maps to a one-floor house and the largest to a 14-floor building; intermediate values produce continuous intermediate heights. The scale takes the square root of each value’s normalized position between the dataset minimum and maximum, giving smaller and intermediate companies more visible height when large values dominate. Height is not proportional to the metric: twice the height does not mean twice the value. Equal values always produce equal heights. If every company has the same value (including a single company or all zeros), all buildings use the midpoint height.
 
-| Metric value | Building |
-| --- | --- |
-| Below 90 | One-floor house |
-| 90 to below 550 | Two-floor building |
-| 550 to below 1800 | Four-floor building |
-| 1800 and above | Six-floor building |
+The scale is shared across districts and recalculated when the dataset changes. Search and selection preserve the scale. In the Atlas application, filters and pagination also preserve the full dataset's scale, so the same company keeps its height across pages. Heights express relative values within this dataset; separately supplied datasets can have different scales.
 
-Values inside a band have the same building height. Select a company or use its tooltip to inspect the exact value. The demo uses 40, 250, 1000, and 3000 so each of the seven districts contains one company in each band. These are illustrative monthly-revenue amounts, not calculated health scores.
+Select a company or use its tooltip to inspect the exact value. The demo uses 40, 250, 1000, and 3000 to show four distinct heights in each district. These are illustrative monthly-revenue amounts, not calculated health scores.
 
 </div>
 
@@ -79,7 +74,7 @@ The playground provides `React`, `CityMap`, and `companies` in scope. Finish an 
 
 <h2 id="data">Data format</h2>
 
-Each company occupies one lot in the district matching its exact combination of categories. The metric selects one of the four building-size bands explained above; status controls risk effects. District colors identify category membership.
+Each company occupies one lot in the district matching its exact combination of categories. The metric determines height using the adaptive scale explained above; status controls risk effects. District colors identify category membership.
 
 | Field | Type | Contract |
 | --- | --- | --- |
@@ -95,7 +90,7 @@ Use a consistent label for each category identifier and the same metric label an
 
 <h2 id="updates">Update data and handle an empty portfolio</h2>
 
-Choose **Data updates and empty state** in the playground. **Update metrics** replaces the data array with new records and increases values by 600; a company moves to a taller building when it crosses a band boundary. **Select first company** connects the map selection to an application-owned summary. Updating the selected company's metric also updates that summary.
+Choose **Data updates and empty state** in the playground. **Update metrics** replaces the data array with new records and increases values by 600. The scale is recalculated from the new data; adding the same amount to every value preserves relative heights. **Select first company** connects the map selection to an application-owned summary. Updating the selected company's metric also updates that summary.
 
 **Clear companies** passes an empty array and shows an explicit application-owned message. **Restore companies** restores the original sample records. The example preserves IDs and category membership, so updates change metric values without assigning a new identity to each company.
 

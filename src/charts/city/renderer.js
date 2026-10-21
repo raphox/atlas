@@ -180,6 +180,7 @@ export function createCityRenderer({
             throw new TypeError("CityRenderer requer uma cityMark.");
           const nextKey = JSON.stringify([
             sharedLayout.roadBounds,
+            sharedLayout.metricDomain,
             sharedLayout.anchors,
             sharedLayout.center,
             sourcePoints.map((point, i) => [

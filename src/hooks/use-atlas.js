@@ -7,6 +7,7 @@ import {
   placeCompanies,
   regionsFor,
   metricLabel,
+  metricDomainFor,
 } from "@/model";
 import { loadCompanyData } from "@/data-source";
 
@@ -41,7 +42,11 @@ export function useAtlas() {
   );
   const regions = useMemo(() => regionsFor(companies), [companies]);
   const valueLabel = useMemo(() => metricLabel(companies), [companies]);
-  const layout = useMemo(() => layoutCity(pagination.companies), [pagination]);
+  const metricDomain = useMemo(() => metricDomainFor(companies), [companies]);
+  const layout = useMemo(
+    () => ({ ...layoutCity(pagination.companies), metricDomain }),
+    [pagination, metricDomain],
+  );
   const matching = useMemo(
     () => filteredCompanies(companies, filters),
     [companies, filters],

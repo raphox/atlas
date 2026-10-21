@@ -337,7 +337,7 @@ test("data updates preserve selection and an empty portfolio can be restored", a
 });
 
 for (const width of [1512, 390]) {
-  test(`basic map fits its preview at ${width}px and teaches all height bands`, async ({
+  test(`basic map fits its preview at ${width}px and explains adaptive heights`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 1100 });
@@ -357,7 +357,7 @@ for (const width of [1512, 390]) {
     await expect(page.locator("#reading")).toHaveText("How to read the city");
     await expect(
       page.locator(".prose").filter({ has: page.locator("#reading") }),
-    ).toContainText("Values inside a band have the same building height");
+    ).toContainText("continuous square-root scale adapted to the dataset");
   });
 }
 
