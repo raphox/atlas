@@ -30,12 +30,15 @@ function Playground() {
 
 const sections = [
   ["overview", "Overview"],
-  ["playground", "Playground"],
   ["installation", "Installation"],
+  ["reading", "Read the city"],
+  ["playground", "Playground"],
   ["data", "Data format"],
+  ["updates", "Data updates"],
   ["props", "Props"],
   ["events", "Events and controls"],
   ["themes", "Themes and styling"],
+  ["rendering", "Rendering and errors"],
   ["deployment", "GitHub Pages"],
 ];
 const featureSections = [

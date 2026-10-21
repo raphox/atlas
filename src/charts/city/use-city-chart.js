@@ -190,7 +190,7 @@ export function useCityChart({
         if (resetView) city.view(latest.current.currentView, true);
         latest.current.layout = city.layout;
         setLayout(city.layout);
-        setError(null);
+        setError((current) => (current === "contextLost" ? current : null));
       },
       onError(error) {
         console.error("Não foi possível preparar a cidade 3D.", error);
