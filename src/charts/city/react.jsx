@@ -208,7 +208,7 @@ export function CityChart({
       id={id}
       className={`atlas-city-chart ${theme ? `atlas-city-theme-${theme}` : ""} ${className}`}
       data-atlas-city-instance={instanceId}
-      aria-busy={busy || !ready}
+      aria-busy={busy || (!ready && !error)}
     >
       <div
         ref={viewportRef}

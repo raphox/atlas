@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { CityMap } from "../src/charts/city/map.jsx";
 import { validateCityData } from "../src/charts/city/data.js";
-import { examples, initialData } from "./examples.js";
+import { examples, initialData, exampleModuleSource } from "./examples.js";
 
 // This package publishes a CommonJS default; Vite's dev and build interop differ.
 const Editor = EditorModule.default ?? EditorModule;
@@ -35,7 +35,10 @@ function ExecutionStatus({ dirty, dataError }) {
 }
 
 export function Playground() {
-  const [exampleId, setExampleId] = useState("basic");
+  const [exampleId, setExampleId] = useState(() => {
+    const requested = new URLSearchParams(location.search).get("example");
+    return examples.some((item) => item.id === requested) ? requested : "basic";
+  });
   const example = examples.find((item) => item.id === exampleId);
   const [draft, setDraft] = useState(example.code);
   const [data, setData] = useState(initialData);
@@ -75,6 +78,9 @@ export function Playground() {
   function reset(id = exampleId) {
     const next = examples.find((item) => item.id === id);
     setExampleId(id);
+    const url = new URL(location.href);
+    url.searchParams.set("example", id);
+    history.replaceState(null, "", url);
     setDraft(next.code);
     setData(initialData);
     setFile("jsx");
@@ -83,7 +89,9 @@ export function Playground() {
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(file === "jsx" ? draft : data);
+      await navigator.clipboard.writeText(
+        file === "jsx" ? exampleModuleSource(draft) : data,
+      );
       setCopyMessage("Copied");
     } catch {
       setCopyMessage("Could not copy. Select the text in the editor.");
@@ -237,7 +245,7 @@ export function Playground() {
             </div>
             <div className="editor-note">
               {file === "jsx"
-                ? "React, CityMap and companies are in scope. The clock and monitoring remain visible when you hide controls. Use showMonitor, showCompass and showInstructions to configure overlays."
+                ? "React, CityMap and companies are in scope. Copy file includes package imports for the bundled examples; save data.json beside the copied component."
                 : "Edit the JSON records. Each company needs a unique id."}
             </div>
           </div>

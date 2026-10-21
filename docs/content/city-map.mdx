@@ -1,3 +1,4 @@
+import { ExampleSource } from "../example-source.jsx";
 import cityPreview from "../images/city-map-preview.png";
 
 <section id="overview" className="page-intro product-hero" aria-labelledby="hero-title">
@@ -26,15 +27,9 @@ import cityPreview from "../images/city-map-preview.png";
   </div>
 </section>
 
-<div id="playground" className="section-heading"><h2>Explore CityMap</h2><span>RUNNABLE EXAMPLES</span></div>
-
-<Playground />
-
-<div className="callout">**Try it:** choose **Night** in the lighting selector, or add `lightingMode="night"` to the code and click **Run**. The `data.json` tab lets you edit companies, metrics, and categories. Changes stay in this session and are discarded when you reload the page or switch examples.</div>
-
 <div className="prose">
 
-<h2 id="installation">Installation</h2>
+<h2 id="installation">Installation and first map</h2>
 
 `atlas-city-chart` is this repository's reusable package. It has not been published to the npm registry yet. Build a local package from the repository first.
 
@@ -47,32 +42,44 @@ npm run pack:package
 npm install /path/to/atlas-city-chart-0.1.0.tgz
 ```
 
-Import the component and its stylesheet. The default theme does not require Tailwind or the Atlas application's CSS.
+Start with the same basic component that runs in the playground below. Its package imports and default export are included here. Save the playground's **data.json** beside this component, or replace it with your own records. The default theme does not require Tailwind or the Atlas application's CSS.
 
-```jsx
-import { CityMap } from "atlas-city-chart/react";
-import "atlas-city-chart/styles.css";
+<ExampleSource id="basic" />
 
-const companies = [{
-  id: "aurora",
-  name: "Aurora",
-  metric: { label: "Monthly revenue", value: 2400.5 },
-  categories: [{ label: "Commerce", value: "commerce" }],
-  status: "healthy",
-}];
+The basic example uses fixed daylight and keeps camera, perspective, and selection controls. Search, monitoring, compass, instructions, and environment selectors are hidden to make the first example easier to explore. Choose **Complete map** for all overlays, or **Weather and lighting** for environment controls.
 
-export default function Dashboard() {
-  return <CityMap data={companies} lightingMode="day" />;
-}
-```
+<h2 id="reading">How to read the city</h2>
 
-The initial playground example includes every map overlay and enables weather and lighting selectors. The monitoring panel uses the example data, including status timestamps. It stays visible when you hide the UI with the eye button.
+Each building is one company. Districts represent exact combinations of up to three categories. A company in Commerce and Services appears once, in their shared district. Position expresses category membership rather than geographic coordinates or distance.
 
-The playground provides `React`, `CityMap`, and `companies` in scope. Finish an example with `render(<Example />)`. Arbitrary imports are not supported by the editor. In your own application, use the imports above and export your component normally. JavaScript runs in your browser without a remote compilation service.
+District colors identify category combinations. Health status controls risk effects: `healthy`, `warning`, or `critical`. These effects can be disabled without changing the data.
+
+Building height shows a **metric band**, with fixed thresholds:
+
+| Metric value | Building |
+| --- | --- |
+| Below 90 | One-floor house |
+| 90 to below 550 | Two-floor building |
+| 550 to below 1800 | Four-floor building |
+| 1800 and above | Six-floor building |
+
+Values inside a band have the same building height. Select a company or use its tooltip to inspect the exact value. The demo uses 40, 250, 1000, and 3000 so each of the seven districts contains one company in each band. These are illustrative monthly-revenue amounts, not calculated health scores.
+
+</div>
+
+<div id="playground" className="section-heading"><h2>Explore CityMap</h2><span>RUNNABLE EXAMPLES</span></div>
+
+<Playground />
+
+<div className="callout">**Follow the examples:** start with **Basic map**, then try **Selection and events**, **Data updates and empty state**, **Weather and lighting**, and **Complete map**. In the weather example, choose **Night** or **Snow** in the selectors. The `data.json` tab edits the same records used by the preview. Changes are discarded when you reset, reload, or switch examples.</div>
+
+<div className="prose">
+
+The playground provides `React`, `CityMap`, and `companies` in scope. Finish an editor example with `render(<Example />)`; arbitrary imports are not supported in this editor. **Copy file** on `example.jsx` adds the package imports and converts the bundled example to a normal React module. Copy **data.json** separately and save it beside the component. JavaScript runs locally in your browser.
 
 <h2 id="data">Data format</h2>
 
-Each company occupies one lot in the district matching its exact combination of categories. The metric controls building size; status controls risk effects.
+Each company occupies one lot in the district matching its exact combination of categories. The metric selects one of the four building-size bands explained above; status controls risk effects. District colors identify category membership.
 
 | Field | Type | Contract |
 | --- | --- | --- |
@@ -84,7 +91,17 @@ Each company occupies one lot in the district matching its exact combination of 
 | `updatedAt` | `string?` | Last update, in ISO 8601 with a time zone. |
 | `statusChangedAt` | `string?` | Start of the current status; cannot be later than `updatedAt`. |
 
-Use a consistent label for each category identifier. To update the map, pass a **new array** to `data`; an empty array displays a city with no companies. When health changes, update both timestamps. When only the metric changes, preserve `statusChangedAt`.
+Use a consistent label for each category identifier and the same metric label and unit across the dataset. Keep each company's ID stable when replacing records.
+
+<h2 id="updates">Update data and handle an empty portfolio</h2>
+
+Choose **Data updates and empty state** in the playground. **Update metrics** replaces the data array with new records and increases values by 600; a company moves to a taller building when it crosses a band boundary. **Select first company** connects the map selection to an application-owned summary. Updating the selected company's metric also updates that summary.
+
+**Clear companies** passes an empty array and shows an explicit application-owned message. **Restore companies** restores the original sample records. The example preserves IDs and category membership, so updates change metric values without assigning a new identity to each company.
+
+When health changes, update both timestamps. When only the metric changes, preserve `statusChangedAt`. Set `busy` while your own request is pending, and show request errors and retry actions in your application. The reusable map does not fetch customer records.
+
+[Open the data-update example](?example=updates#playground).
 
 <h2 id="props">Props</h2>
 
@@ -126,7 +143,7 @@ The documentation is in English. The embedded map demonstrates the component's a
 
 <h2 id="events">Events and controls</h2>
 
-Use `onSelect` to connect the map to a detail panel or form. The third playground example demonstrates this flow. `onViewChange`, `onLifeChange`, `onEffectsChange`, `onAutoRotateChange`, and `onDistrictLabelsChange` let your application control those settings.
+Use `onSelect` to connect the map to a detail panel or form. The **Selection and events** playground example demonstrates this flow. `onViewChange`, `onLifeChange`, `onEffectsChange`, `onAutoRotateChange`, and `onDistrictLabelsChange` let your application control those settings.
 
 ```jsx
 const [view, setView] = React.useState("iso");
@@ -149,7 +166,9 @@ The ref also exposes `view`, `deselect`, `cancel`, `capture`, `play`, `scrollInt
 
 <h2 id="themes">Themes and styling</h2>
 
-Pass a class and override CSS tokens for that instance. The component does not accept a `style` prop.
+Pass a class and override CSS tokens for that instance. The component does not accept a `style` prop. The playground uses a map height of 360–560 px on desktop and 400 px on small screens. Examples with monitoring, selected-company details, or many controls grow to fit their content; these heights are not clipping boundaries.
+
+Your application chooses its own size using `--atlas-city-height`. Hide optional monitoring and search UI for compact layouts, as the basic example does. UI theme and scene lighting are independent: choose `lightingMode` explicitly when you need a repeatable daytime scene. Automatic lighting follows the user's local clock.
 
 ```css
 .my-city {
@@ -166,6 +185,16 @@ Pass a class and override CSS tokens for that instance. The component does not a
 ```
 
 For Tailwind 4 projects, also import `atlas-city-chart/tailwind.css` in your Tailwind-processed stylesheet and use `theme="tailwind"`. Public classes and the complete list of tokens are documented in the [package guide](https://github.com/raphox/atlas/blob/main/packages/city-chart/README.md).
+
+<h2 id="rendering">Rendering, accessibility, and WebGL errors</h2>
+
+The 3D map requires a browser with WebGL and graphics acceleration. Server rendering produces an accessible shell; it does not render a static city image or an SVG fallback.
+
+If WebGL initialization fails, the map displays an accessible error message and disables unavailable controls. The chart stops reporting itself as loading. Enable WebGL or graphics acceleration, try a supported browser, and then use **Reset example** or reload the page to retry. If an existing graphics context is lost, reload the page to restore it. Your customer data remains owned by your application.
+
+You can test this behavior by opening the documentation with WebGL disabled. This is separate from the editable-code error box, which reports JavaScript or JSX errors, and from the data-validation message for malformed JSON.
+
+Provide an informative `ariaLabel`. Keyboard users can move through companies using the chart host, select records, use `+`/`-` for zoom, press `0` for the overview, and press Escape to clear selection. Reduced-motion preferences reduce animation and disable particles. Unmounting the component releases its WebGL resources, observers, and event listeners.
 
 <h2 id="deployment">Deploying to GitHub Pages</h2>
 

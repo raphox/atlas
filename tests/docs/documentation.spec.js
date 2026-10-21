@@ -16,9 +16,9 @@ test("production documentation executes edits, handles errors and restores examp
   await expect(page.locator(".map-preview canvas")).toBeVisible();
   const editor = page.getByRole("textbox", { name: "Example code" });
   await expect(editor).toBeVisible();
-  await expect(editor).toHaveValue(/showEnvironmentControls/);
-  await expect(page.getByLabel("City weather")).toBeVisible();
-  await expect(page.getByLabel("City lighting")).toBeVisible();
+  await expect(editor).toHaveValue(/showMonitor=\{false\}/);
+  await expect(page.getByLabel("City weather")).toHaveCount(0);
+  await expect(page.getByLabel("City lighting")).toHaveCount(0);
   await editor.fill(
     'render(<CityMap data={companies} title="Edited city" lightingMode="day" />);',
   );
@@ -107,6 +107,12 @@ test("production documentation executes edits, handles errors and restores examp
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toContain("onSelect={setSelected}");
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain('import { CityMap } from "atlas-city-chart/react"');
+  expect(copied).toContain('import "atlas-city-chart/styles.css"');
+  expect(copied).toContain('import companies from "./data.json"');
+  expect(copied).toContain("export default Example;");
+  expect(copied).not.toMatch(/^render\(/m);
   await page.getByRole("button", { name: "Code", exact: true }).click();
   await expect(page.locator(".preview-panel")).toBeHidden();
   await page.getByRole("button", { name: "Preview", exact: true }).click();
@@ -171,7 +177,7 @@ test("Features, weather documentation and mobile navigation survive direct reloa
 test("all map overlays are available and monitoring survives hiding the UI", async ({
   page,
 }) => {
-  await page.goto("./");
+  await page.goto("./?example=complete");
   const map = page.locator(".map-preview");
   const clock = map.getByTestId("monitor-clock");
   await expect(clock).toHaveText(/\d{2}:\d{2}:\d{2}/);
@@ -216,7 +222,7 @@ for (const width of [1512, 390]) {
     page,
   }) => {
     await page.setViewportSize({ width, height: 1100 });
-    await page.goto("./");
+    await page.goto("./?example=complete");
     const map = page.locator(".map-preview .atlas-city-map");
     const monitor = map.getByLabel("Operations monitoring");
     const topControls = map.locator(".atlas-city-top-controls");
@@ -277,3 +283,132 @@ for (const width of [1512, 390]) {
     ).toBeVisible();
   });
 }
+
+test("data updates preserve selection and an empty portfolio can be restored", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("./?example=updates#playground");
+  const preview = page.locator(".map-preview");
+  await expect(preview.locator(".atlas-city-chart")).toHaveAttribute(
+    "aria-busy",
+    "false",
+  );
+  await preview
+    .getByRole("button", { name: "Select first company", exact: true })
+    .click();
+  await expect(preview.locator(".selection-output")).toHaveText(
+    "Aurora 1: 40 (Monthly revenue)",
+  );
+  await preview
+    .getByRole("button", { name: "Update metrics", exact: true })
+    .click();
+  await expect(preview.locator(".selection-output")).toHaveText(
+    "Aurora 1: 640 (Monthly revenue)",
+  );
+  await expect(preview.getByLabel("Company details")).toContainText("640");
+  await preview
+    .getByRole("button", { name: "Clear companies", exact: true })
+    .click();
+  await expect(
+    preview.getByText("No companies to display.", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    preview.getByRole("button", { name: "Select first company" }),
+  ).toBeDisabled();
+  await expect(preview.getByLabel("Company details")).toHaveCount(0);
+  await preview
+    .getByRole("button", { name: "Restore companies", exact: true })
+    .click();
+  await expect(
+    preview.getByText("No companies to display.", { exact: false }),
+  ).toHaveCount(0);
+  await preview.getByRole("button", { name: "Select first company" }).click();
+  await expect(preview.locator(".selection-output")).toHaveText(
+    "Aurora 1: 40 (Monthly revenue)",
+  );
+  await expect(preview.locator("canvas")).toHaveCount(1);
+  await page.reload();
+  await expect(
+    page.getByRole("combobox", { name: "Example", exact: true }),
+  ).toHaveValue("updates");
+  expect(errors).toEqual([]);
+});
+
+for (const width of [1512, 390]) {
+  test(`basic map fits its preview at ${width}px and teaches all height bands`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 1100 });
+    await page.goto("./#playground");
+    const map = page.locator(".map-preview .atlas-city-map");
+    await expect(map.locator("canvas")).toBeVisible();
+    await expect(map.getByLabel("Operations monitoring")).toHaveCount(0);
+    await expect(map.getByLabel("City weather")).toHaveCount(0);
+    const bounds = await map.boundingBox();
+    expect(bounds.height).toBeLessThanOrEqual(width === 390 ? 440 : 580);
+    expect(bounds.width).toBeLessThanOrEqual(width);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await expect(page.locator("#reading")).toHaveText("How to read the city");
+    await expect(
+      page.locator(".prose").filter({ has: page.locator("#reading") }),
+    ).toContainText("Values inside a band have the same building height");
+  });
+}
+
+test("WebGL failure is explained and does not leave the chart loading", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+      if (["webgl", "webgl2", "experimental-webgl"].includes(kind)) return null;
+      return getContext.call(this, kind, ...args);
+    };
+  });
+  await page.goto("./#playground");
+  const preview = page.locator(".map-preview");
+  await expect(preview.getByRole("alert")).toContainText(
+    "Could not open the 3D city",
+  );
+  await expect(preview.locator(".atlas-city-chart")).toHaveAttribute(
+    "aria-busy",
+    "false",
+  );
+  await expect(
+    preview.getByRole("button", { name: "Zoom in", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("textbox", { name: "Example code" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Reset example" }).click();
+  await expect(preview.getByRole("alert")).toContainText("WebGL enabled");
+});
+
+test("context-loss guidance survives a subsequent data update", async ({
+  page,
+}) => {
+  await page.goto("./?example=updates#playground");
+  const preview = page.locator(".map-preview");
+  await expect(preview.locator(".atlas-city-chart")).toHaveAttribute(
+    "aria-busy",
+    "false",
+  );
+  await preview.locator("canvas").evaluate((canvas) => {
+    const gl = canvas.getContext("webgl2");
+    const extension = gl.getExtension("WEBGL_lose_context");
+    if (!extension)
+      throw new Error("Context-loss testing requires WEBGL_lose_context");
+    extension.loseContext();
+  });
+  await expect(preview.getByRole("alert")).toContainText(
+    "graphics connection was lost",
+  );
+  await preview.getByRole("button", { name: "Update metrics" }).click();
+  await expect(preview.getByRole("alert")).toContainText("Reload the page");
+});

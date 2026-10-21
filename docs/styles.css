@@ -1,6 +1,6 @@
 /* Documentation styles are separate from the Atlas application and map theme. */
 .playground-loading {
-  min-height: 740px;
+  min-height: 480px;
   padding: 32px;
   color: #617087;
   font-size: 13px;
@@ -403,6 +403,7 @@ body {
 .playground-panels {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: start;
 }
 .playground-panels.layout-code,
 .playground-panels.layout-preview {
@@ -445,10 +446,10 @@ body {
   background: #c13d35;
 }
 .map-preview {
-  min-height: 560px;
+  min-height: 0;
 }
 .map-preview .atlas-city-map {
-  --atlas-city-height: 720px;
+  --atlas-city-height: clamp(360px, 42vw, 560px);
 }
 .map-preview .atlas-city-map:fullscreen {
   --atlas-city-height: 100%;
@@ -861,10 +862,8 @@ body {
     padding: 10px 12px;
     font-size: 9px;
   }
-  .map-preview,
   .map-preview .atlas-city-map {
-    --atlas-city-height: 760px;
-    min-height: 640px;
+    --atlas-city-height: 400px;
   }
   .code-editor {
     font-size: 11px;
@@ -1076,4 +1075,26 @@ body {
     gap: 22px;
     margin-top: 0;
   }
+}
+
+.example-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: #f7f9f5;
+}
+.example-actions button {
+  padding: 8px 10px;
+  border: 1px solid #cbd5c3;
+  border-radius: 6px;
+  background: white;
+  color: #17263a;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.example-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

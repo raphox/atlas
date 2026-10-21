@@ -21,7 +21,7 @@ Atlas transforms records in the browser using Three.js and a TanStack Charts ext
 | Feature | How it works |
 | --- | --- |
 | Districts and intersections | Up to three distinct categories form up to seven combinations. Each company appears exactly once. |
-| Buildings sized by metric | `metric.value` controls size; its label appears in details and tooltips. |
+| Buildings sized by metric | `metric.value` selects a fixed size band (below 90, 550, 1800, or 1800+); exact values and labels appear in details and tooltips. |
 | Visual health | `healthy`, `warning`, and `critical` identify health states. Risk effects can be disabled. |
 | City life | Cars, pedestrians, traffic lights, and vegetation complete the scene. |
 | Rendering | Instanced geometry is reused for buildings, windows, vegetation, traffic, and particles. |
@@ -32,7 +32,7 @@ Drag with the left mouse button to rotate horizontally, use the wheel or a pinch
 
 Search finds companies by name. Selecting a building opens its details and emits `onSelect`. Fullscreen requests a Screen Wake Lock, when available, to keep the display awake. Exiting fullscreen, hiding the tab, or unmounting releases the lock. Optional automatic rotation pauses during interactions.
 
-Map controls follow the browser's language: `pt-BR` or `en-US`, with English for other locales. Supplied names and labels are preserved. Reduced-motion preferences disable particles and reduce animations. The 3D scene requires WebGL.
+Map controls follow the browser's language: `pt-BR` or `en-US`, with English for other locales. Supplied names and labels are preserved. Reduced-motion preferences disable particles and reduce animations. The 3D scene requires WebGL. Initialization failures display an accessible error message; there is no static city fallback. See [rendering and errors](./#rendering).
 
 <h2 id="weather">Weather API integration</h2>
 
