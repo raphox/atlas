@@ -131,7 +131,7 @@ export function demoCompanies(count = 1400) {
     };
   });
 }
-// Share one domain across the complete dataset, including filtered/paginated rows.
+// Share one domain across the complete dataset.
 export function metricDomainFor(records) {
   let min = Infinity,
     max = -Infinity;
@@ -155,24 +155,6 @@ export function sizeForValue(value, [min, max] = [0, 4200]) {
 }
 // Compatibility for integrations using the previous helper name.
 export const sizeForUsers = sizeForValue;
-export function filteredCompanies(
-  companies,
-  { region = "all", status = "all", query = "" } = {},
-) {
-  const q = query.trim().toLocaleLowerCase("pt-BR");
-  // Keep single-status callers compatible; an empty selection means all.
-  const statuses = Array.isArray(status)
-    ? status
-    : status === "all"
-      ? []
-      : [status];
-  return companies.filter(
-    (c) =>
-      (region === "all" || c.mask === Number(region)) &&
-      (!statuses.length || statuses.includes(c.status)) &&
-      (!q || c.name.toLocaleLowerCase("pt-BR").includes(q)),
-  );
-}
 // Legacy records remain readable; all visual consumers use the generic metric.
 export function metricFor(record) {
   return record.metric ?? { label: "Usuários", value: record.users };
@@ -183,10 +165,6 @@ export function categoryLabel(record) {
     REGIONS.find((region) => region.mask === record.mask)?.label ??
     ""
   );
-}
-export function metricLabel(records) {
-  const labels = new Set(records.map((record) => metricFor(record).label));
-  return labels.size === 1 ? [...labels][0] : "Valor";
 }
 export function regionsFor(records) {
   const labels = new Map();
@@ -298,32 +276,7 @@ export function placeCompanies(records) {
     ),
   }));
 }
-export const PAGE_SIZE = 100;
-export const PAGE_SIZES = [100, 250, 500, 1000, "all"];
 export const ROAD_EVERY = 4;
-export function paginateCompanies(
-  companies,
-  filters = {},
-  page = 1,
-  pageSize = PAGE_SIZE,
-) {
-  const matching = filteredCompanies(companies, filters),
-    total = matching.length;
-  if (!PAGE_SIZES.includes(pageSize))
-    throw new Error("Tamanho de página inválido.");
-  const limit = pageSize === "all" ? Math.max(1, total) : pageSize;
-  const pages = Math.max(1, Math.ceil(total / limit));
-  const current = Math.max(1, Math.min(pages, Math.floor(page) || 1));
-  return {
-    companies: matching.slice((current - 1) * limit, current * limit),
-    total,
-    pages,
-    page: current,
-    pageSize,
-    start: total ? (current - 1) * limit + 1 : 0,
-    end: Math.min(current * limit, total),
-  };
-}
 function boundsFor(p) {
   return {
     a: { x1: -p.cx - p.ab, x2: p.cx + p.ac, z1: -p.cz - p.a, z2: p.cz },

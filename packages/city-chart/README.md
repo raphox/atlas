@@ -1,6 +1,6 @@
 # atlas-city-chart
 
-A reusable 3D city: map, rain, snow, lighting, traffic, risk effects, search, selection, zoom, perspectives, and fullscreen mode. Receives data from the consuming project. It does not require the Atlas application, its own backend, or a Tailwind setup.
+A reusable 3D city: map, rain, snow, lighting, traffic, risk effects, search, selection, zoom, perspectives, and fullscreen mode. Receives data from the consuming project. It does not require its own backend or a Tailwind setup.
 
 ## Install the local package
 
@@ -186,7 +186,7 @@ npm run test:e2e -- tests/e2e/city-package.spec.js
 npm run pack:package
 ```
 
-The build compiles sources shared with Atlas into `packages/city-chart/dist`, including ESM JavaScript, TypeScript declarations, CSS, and source maps. React, Three.js, and TanStack are external bundle dependencies. The tarball contains only distribution files, the README, and the Three.js notice; it does not include the SPA or its data.
+The build compiles sources shared with Atlas into `packages/city-chart/dist`, including ESM JavaScript, TypeScript declarations, CSS, and source maps. React, Three.js, and TanStack are external bundle dependencies. The tarball contains only distribution files, the README, and the Three.js notice; it does not include the documentation site or its sample data.
 
 To publish, after choosing a name/scope, version, and license and authenticating with npm, run `npm publish` inside `packages/city-chart`. The `prepack` hook rebuilds the package from this checkout. Build, test, and packaging commands do not publish anything.
 
@@ -202,6 +202,12 @@ From the repository root, `npm run audit:contrast` checks day, sunrise/sunset, a
 
 In fullscreen mode, `CityMap` requests a [Screen Wake Lock](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) to keep the screen awake. The lock is released on exit, when the page is hidden, or when the map unmounts, and requested again when the page becomes visible in fullscreen mode. It requires a secure context (HTTPS or localhost) and browser/system support and permission; it does not prevent manual suspension. If unavailable or denied, the interface displays a notice and keeps fullscreen working.
 
-Records also accept optional `updatedAt` (last update) and `statusChangedAt` (start of the current status) timestamps in ISO 8601 with a time zone. An ordinary update preserves `statusChangedAt`; a health change updates both fields. Supplied dates are validated, and `statusChangedAt` cannot be later than `updatedAt`. The Atlas application uses these dates in the monitoring panel and table; the reusable map preserves the fields in the data.
+Records also accept optional `updatedAt` (last update) and `statusChangedAt` (start of the current status) timestamps in ISO 8601 with a time zone. An ordinary update preserves `statusChangedAt`; a health change updates both fields. Supplied dates are validated, and `statusChangedAt` cannot be later than `updatedAt`. The reusable map uses these dates in the monitoring panel and company details.
 
 The eye button preserves the clock, monitoring panel, compass, selected-company details, footer, and camera toolbar while hiding the other UI. Monitoring uses the supplied `data`; no company polling or weather requests are added. Use `showMonitor={false}`, `showCompass={false}`, or `showInstructions={false}` to remove these overlays.
+
+## Portfolio extensions
+
+`CityMap` accepts two optional composition props: `metricDomain={[min, max]}` fixes the height scale across filtered or paginated subsets; `monitorData={allCompanies}` supplies the full portfolio for recent-risk monitoring. They default to the existing behavior: scale and monitoring both use `data`. The domain must contain finite, nonnegative values in ascending order.
+
+See the [extension guide](https://raphox.github.io/atlas/?page=extending) for a working integration with filters, counts, pagination, a synchronized table, JSON import/download, HTTP sources, and opt-in weather. These integrations belong to the documentation example; they are not package dependencies.

@@ -11,6 +11,8 @@ import { defineCityChart } from "./definition.js";
 import { CityChart } from "./react.jsx";
 import { CompanyDate, CompanyMonitor } from "./company-monitor.jsx";
 import { useFullscreenWakeLock } from "./use-fullscreen-wake-lock.js";
+import { validateCityData } from "./data.js";
+import { layoutCity } from "../../model.js";
 import { categoryLabel, metricFor } from "../../model.js";
 
 function useSetting(value, initial, onChange) {
@@ -28,6 +30,8 @@ function useSetting(value, initial, onChange) {
 export const CityMap = forwardRef(function CityMap(
   {
     data,
+    metricDomain,
+    monitorData = data,
     onSelect,
     onFocusChange,
     view: viewProp,
@@ -83,7 +87,22 @@ export const CityMap = forwardRef(function CityMap(
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false);
   const [fullscreenError, setFullscreenError] = useState(null);
   const wakeLockStatus = useFullscreenWakeLock(panelRef);
-  const definition = useMemo(() => defineCityChart(data), [data]);
+  const definition = useMemo(() => {
+    if (metricDomain === undefined) return defineCityChart(data);
+    if (
+      !Array.isArray(metricDomain) ||
+      metricDomain.length !== 2 ||
+      !metricDomain.every(Number.isFinite) ||
+      metricDomain[0] < 0 ||
+      metricDomain[1] < metricDomain[0]
+    )
+      throw new TypeError(
+        "metricDomain must be a nonnegative [min, max] range.",
+      );
+    return defineCityChart(data, {
+      layout: { ...layoutCity(validateCityData(data)), metricDomain },
+    });
+  }, [data, metricDomain]);
   const selected = data.find((datum) => datum.id === selectedId) ?? null;
   const matches = query.trim()
     ? data
@@ -269,7 +288,7 @@ export const CityMap = forwardRef(function CityMap(
                 <div className="atlas-city-monitor-layout">
                   {showMonitor && (
                     <CompanyMonitor
-                      companies={data}
+                      companies={monitorData}
                       matching={data}
                       pageSize="all"
                       loading={false}

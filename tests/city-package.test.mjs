@@ -84,3 +84,44 @@ test("distribution includes entry points, types and two themes without applicati
   const react = await readFile(new URL("react.js", dist), "utf8");
   assert.match(react, /^"use client";/);
 });
+
+test("portfolio options preserve defaults and validate shared height domains", () => {
+  const baseline = renderToString(createElement(CityMap, { data }));
+  assert.equal(
+    renderToString(
+      createElement(CityMap, {
+        data,
+        monitorData: data,
+        metricDomain: [2500, 2500],
+      }),
+    ),
+    baseline,
+  );
+  const outside = {
+    ...data[0],
+    id: "outside",
+    name: "Outside current city",
+    statusChangedAt: "2026-10-22T10:00:00Z",
+  };
+  const extended = renderToString(
+    createElement(CityMap, {
+      data: [],
+      monitorData: [outside],
+      metricDomain: [0, 3000],
+    }),
+  );
+  assert.match(extended, /Outside current city/);
+  assert.doesNotMatch(baseline, /Outside current city/);
+  for (const metricDomain of [
+    [-1, 10],
+    [10, 0],
+    [0, Infinity],
+    [0],
+    "invalid",
+  ]) {
+    assert.throws(
+      () => renderToString(createElement(CityMap, { data, metricDomain })),
+      /metricDomain/,
+    );
+  }
+});

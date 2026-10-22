@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Content from "./content/city-map.mdx";
 import Features from "./content/features.mdx";
+const Extensions = lazy(() => import("./content/extending.mdx"));
 const LazyPlayground = lazy(() =>
   import("./playground.jsx").then((module) => ({ default: module.Playground })),
 );
@@ -48,26 +49,46 @@ const featureSections = [
   ["weather", "Weather API"],
   ["lighting", "Lighting"],
   ["monitoring", "Monitoring and data"],
+  ["extensions", "Chart extensions"],
   ["integration", "Integration"],
+];
+
+const extensionSections = [
+  ["extending", "Extending CityMap"],
+  ["composition", "Composition"],
+  ["extension-example", "Working example"],
+  ["extension-filters", "Filters and pagination"],
+  ["extension-table", "Synchronized table"],
+  ["extension-data", "JSON and data sources"],
+  ["extension-weather", "Live weather"],
+  ["extension-source", "Working source"],
 ];
 
 export function Docs() {
   const isFeatures =
     new URLSearchParams(location.search).get("page") === "features";
-  const navigation = isFeatures ? featureSections : sections;
+  const isExtending =
+    new URLSearchParams(location.search).get("page") === "extending";
+  const navigation = isExtending
+    ? extensionSections
+    : isFeatures
+      ? featureSections
+      : sections;
   const firstSection = navigation[0][0];
   const [menuOpen, setMenuOpen] = useState(false);
   const [active, setActive] = useState(location.hash.slice(1) || firstSection);
   useEffect(() => {
-    document.title = isFeatures
-      ? "Features · Atlas Docs"
-      : "CityMap · Atlas Docs";
+    document.title = isExtending
+      ? "Extending CityMap · Atlas Docs"
+      : isFeatures
+        ? "Features · Atlas Docs"
+        : "CityMap · Atlas Docs";
     const update = () => setActive(location.hash.slice(1) || firstSection);
     window.addEventListener("hashchange", update);
     // MDX is mounted after the browser's initial fragment navigation.
     document.getElementById(location.hash.slice(1))?.scrollIntoView();
     return () => window.removeEventListener("hashchange", update);
-  }, [isFeatures, firstSection]);
+  }, [isFeatures, isExtending, firstSection]);
   return (
     <div className="docs">
       <a className="skip-link" href="#content">
@@ -84,7 +105,7 @@ export function Docs() {
           <a
             className="header-page-link"
             href="./"
-            aria-current={!isFeatures ? "page" : undefined}
+            aria-current={!isFeatures && !isExtending ? "page" : undefined}
           >
             Documentation
           </a>
@@ -94,6 +115,13 @@ export function Docs() {
             aria-current={isFeatures ? "page" : undefined}
           >
             Features
+          </a>
+          <a
+            className="header-page-link"
+            href="?page=extending"
+            aria-current={isExtending ? "page" : undefined}
+          >
+            Extending
           </a>
           <span className="version">v0.1.0</span>
           <a
@@ -154,13 +182,30 @@ export function Docs() {
         <div className="breadcrumbs">
           {isFeatures ? "Project" : "Components"} <span>/</span>{" "}
           {isFeatures ? "Features and integrations" : "Data visualization"}{" "}
-          <span>/</span> <strong>{isFeatures ? "Features" : "CityMap"}</strong>
+          <span>/</span>{" "}
+          <strong>
+            {isExtending ? "Extending" : isFeatures ? "Features" : "CityMap"}
+          </strong>
         </div>
-        {isFeatures ? <Features /> : <Content components={{ Playground }} />}
+        {isExtending ? (
+          <Suspense
+            fallback={
+              <div className="playground-loading" role="status">
+                Loading the extension example…
+              </div>
+            }
+          >
+            <Extensions />
+          </Suspense>
+        ) : isFeatures ? (
+          <Features />
+        ) : (
+          <Content components={{ Playground }} />
+        )}
         <footer className="docs-footer">
           <span>Atlas · Project documentation</span>
           <a
-            href={`https://github.com/raphox/atlas/blob/main/docs/content/${isFeatures ? "features" : "city-map"}.mdx`}
+            href={`https://github.com/raphox/atlas/blob/main/docs/content/${isExtending ? "extending" : isFeatures ? "features" : "city-map"}.mdx`}
             target="_blank"
             rel="noreferrer"
           >

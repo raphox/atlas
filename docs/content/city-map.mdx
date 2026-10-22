@@ -42,7 +42,7 @@ npm run pack:package
 npm install /path/to/atlas-city-chart-0.1.0.tgz
 ```
 
-Start with the same basic component that runs in the playground below. Its package imports and default export are included here. Save the playground's **data.json** beside this component, or replace it with your own records. The default theme does not require Tailwind or the Atlas application's CSS.
+Start with the same basic component that runs in the playground below. Its package imports and default export are included here. Save the playground's **data.json** beside this component, or replace it with your own records. The default theme does not require Tailwind.
 
 <ExampleSource id="basic" />
 
@@ -56,7 +56,7 @@ District colors identify category combinations. Health status controls risk effe
 
 Building height uses a **continuous square-root scale adapted to the dataset**. The smallest metric maps to a one-floor house and the largest to a 14-floor building; intermediate values produce continuous intermediate heights. The scale takes the square root of each value’s normalized position between the dataset minimum and maximum, giving smaller and intermediate companies more visible height when large values dominate. Height is not proportional to the metric: twice the height does not mean twice the value. Equal values always produce equal heights. If every company has the same value (including a single company or all zeros), all buildings use the midpoint height.
 
-The scale is shared across districts and recalculated when the dataset changes. Search and selection preserve the scale. In the Atlas application, filters and pagination also preserve the full dataset's scale, so the same company keeps its height across pages. Heights express relative values within this dataset; separately supplied datasets can have different scales.
+The scale is shared across districts and recalculated when the dataset changes. Search and selection preserve the scale. Heights express relative values within this dataset; separately supplied datasets can have different scales.
 
 Select a company or use its tooltip to inspect the exact value. The demo uses 40, 250, 1000, and 3000 to show four distinct heights in each district. These are illustrative monthly-revenue amounts, not calculated health scores.
 
@@ -100,11 +100,13 @@ When health changes, update both timestamps. When only the metric changes, prese
 
 <h2 id="props">Props</h2>
 
-These props belong to `CityMap` from `atlas-city-chart/react`. Internal application wrappers may have different defaults.
+These props belong to `CityMap` from `atlas-city-chart/react`.
 
 | Prop | Default | Behavior |
 | --- | --- | --- |
 | `data` | Required | Company records. |
+| `metricDomain` | Computed from `data` | Optional `[min, max]` height domain shared across filtered or paginated views. |
+| `monitorData` | `data` | Optional full portfolio for recent-risk monitoring. |
 | `theme` | `"default"` | `"default"`, `"tailwind"`, or `null` for a custom theme. |
 | `view` | `"iso"` | `"iso"` or `"top"` perspective. |
 | `life` / `effects` | `true` | City animation / risk effects. |
@@ -206,3 +208,5 @@ The independent **Tests** workflow runs on each push to `main` and appears separ
 Screens use query parameters and fragment links, so direct links and reloads work on static hosting without rewrite rules. Edit `docs/content/` to maintain the MDX content, and `docs/examples.js` to add examples.
 
 </div>
+
+<div className="callout">Need portfolio filters, pagination, a synchronized table, JSON imports, or live weather? [Explore the extension guide and working example](?page=extending).</div>

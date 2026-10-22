@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const basePath = process.env.DOCS_BASE_PATH || "/atlas/";
 export default defineConfig({
+  outputDir: "./test-results/docs",
   testDir: "./tests/docs",
   workers: 1,
   timeout: 60000,

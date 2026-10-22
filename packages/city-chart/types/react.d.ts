@@ -36,6 +36,10 @@ export interface CityChartHandle<T extends CityDatum = CityDatum> {
 }
 export interface CityMapProps<T extends CityDatum = CityDatum> {
   data: readonly T[];
+  /** Optional shared height domain for filtered or paginated views. */
+  metricDomain?: readonly [number, number];
+  /** Optional full portfolio for risk monitoring; defaults to data. */
+  monitorData?: readonly T[];
   ref?: Ref<CityChartHandle<T>>;
   className?: string;
   /** "default" applies default CSS variables; null uses only the host theme. */

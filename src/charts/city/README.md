@@ -2,7 +2,7 @@
 
 A local extension for TanStack Charts **1.1.0**. A company is a spatial mark: its category combination determines its district and color, metric values determine building size, and its health classification determines risk indicators. Current records provide `status`, not a numeric score; the chart neither invents nor calculates such a score.
 
-Consumers use TanStack's `defineChart`, `ChartMark`, `ChartRenderer`, `ChartPoint`, focus, tooltip, and callbacks. Three.js implements the 3D surface. The Atlas application, its filters, and its interface components are not required.
+Consumers use TanStack's `defineChart`, `ChartMark`, `ChartRenderer`, `ChartPoint`, focus, tooltip, and callbacks. Three.js implements the 3D surface. The component can be used directly in consumer applications.
 
 ## Using React
 
@@ -90,7 +90,7 @@ const companies = [
 
 The generic contract can be passed directly to `defineCityChart`/`cityMark`. `placeCompanies` validates the data and calculates `mask` (bits 1, 2, and 4 assigned to category identifiers in text order). Combinations determine up to seven regions. The same `value` must retain the same `label` throughout the dataset. When calculated outside the mark, the layout must use the already normalized dataset, before pagination.
 
-Existing integrations with `{ users, mask }` are still accepted by the mark. The Atlas importer also accepts `{ users, systems: ["A", "B"] }`, converting them to the generic fields. `metric.value` preserves decimals; building heights use a continuous square-root scale from the dataset minimum to its maximum (0.95–16.8 scene units, 1–14 floors). For a nonconstant domain, height = 0.95 + sqrt(clamp((value − min) / (max − min), 0, 1)) × 15.85. This gives intermediate values more height than linear scaling; height ratios are not metric ratios. Equal-valued datasets use the midpoint height (8.875 scene units). The scale is shared across districts and recalculated on data updates; Atlas filters and pagination retain the full dataset domain. `sizeForValue(value, [min, max])` applies this scale; omitting the domain defaults to [0, 4200] for standalone legacy callers. `sizeForUsers` remains as a compatibility alias.
+Existing integrations with `{ users, mask }` are still accepted by the mark. `placeCompanies` also accepts `{ users, systems: ["A", "B"] }`, converting them to the generic fields. `metric.value` preserves decimals; building heights use a continuous square-root scale from the dataset minimum to its maximum (0.95–16.8 scene units, 1–14 floors). For a nonconstant domain, height = 0.95 + sqrt(clamp((value − min) / (max − min), 0, 1)) × 15.85. This gives intermediate values more height than linear scaling; height ratios are not metric ratios. Equal-valued datasets use the midpoint height (8.875 scene units). The scale is shared across districts and recalculated on data updates; consumers can supply a full dataset domain when displaying subsets. `sizeForValue(value, [min, max])` applies this scale; omitting the domain defaults to [0, 4200] for standalone legacy callers. `sizeForUsers` remains as a compatibility alias.
 
 The point preserves `datum === data[datumIndex]`. The mark does not mutate input rows, including frozen ones. `xValue` and `yValue` are the lots' spatial x/z coordinates. Mutable Three.js geometry receives separate copies. New data requires a new definition, as in other TanStack charts; keep data immutable and memoize definitions that capture props.
 
@@ -118,7 +118,7 @@ The point preserves `datum === data[datumIndex]`. The mark does not mutate input
 | `three/effects.js` | warnings, risk colors, and particle coordination |
 | `../../city.js` | scene, camera, animation, and WebGL resources |
 
-`src/components/city-map.jsx` consumes the extension, connecting the chart to Atlas data and controls. The React component accepts `showDistrictLabels` (default `false`) to display category and intersection labels; the corresponding Atlas checkbox controls this prop without rebuilding the scene. The renderer does not import `useAtlas`, pagination, shadcn, or React. Traffic simulation remains separate in `src/traffic.js`.
+`src/charts/city/map.jsx` provides the reusable `CityMap` component used by the package and documentation. It accepts `showDistrictLabels` (default `false`) to display category and intersection labels without rebuilding the scene. The renderer is independent of React. Traffic simulation remains separate in `src/traffic.js`.
 
 Critical flashing uses a fixed red (`#ff2525`), independent of lights and exposure. Outside the red phase, the building retains its category color under the current lighting. The exclamation icon also preserves its colors, without lighting or tone mapping. Both remain constant during lighting period transitions.
 
@@ -146,9 +146,9 @@ Browser tests verify sleeping without new frames or uploads, animation and camer
 
 ## Optional weather
 
-`CityChart` accepts `weather="none" | "rain" | "snow"` (default `none`); direct integrations use `city.setWeather(type)`. The scene does not query APIs or request location: the Atlas application does that in `src/hooks/use-weather.js` and `src/weather.js`, following **City life**. The extension remains provider-independent.
+`CityChart` accepts `weather="none" | "rain" | "snow"` (default `none`); direct integrations use `city.setWeather(type)`. The scene does not query APIs or request location: consumer applications own any provider integration. The extension remains provider-independent.
 
-Particles only appear and keep the loop active with `life=true` and without reduced motion. The layer reuses two geometries and materials across conditions and pages, adjusts its bounds to the layout, and releases its resources with the scene. Weather effects do not alter clock-based lighting or depend on `effects`, which controls only risk. Attribution, endpoint configuration, and commercial responsibilities are documented in the main README.
+Particles only appear and keep the loop active with `life=true` and without reduced motion. The layer reuses two geometries and materials across conditions and pages, adjusts its bounds to the layout, and releases its resources with the scene. Weather effects do not alter clock-based lighting or depend on `effects`, which controls only risk. Consumer applications are responsible for any provider attribution and service terms.
 
 ## Simplified geometry
 
@@ -182,7 +182,7 @@ Reproduce with `node scripts/benchmark-city.mjs`. These are geometry counts, not
 ## Verification and limitations
 
 - `npm test`: mark contracts, immutable data, SSR, surface isolation, geometry budget, simulation, emitters, and resource release.
-- `npm run test:e2e`: direct use through the TanStack host, events/keyboard/tooltips, two mounts, and Atlas flows on desktop and mobile.
+- `npm run test:e2e`: standalone package controls, themes, independent mounts, selection, and mobile layout.
 - `npm run build` and `npm run format:check`: production build and formatting.
 
 The surface is dedicated to a city: it does not draw axes, grids, or arbitrary Cartesian marks over WebGL. Use one `cityMark` per surface. SVG and Canvas do not become 3D renderers; the mark's semantic geometry allows a flat representation when drawn with SVG, but the city requires `createCityRenderer`. SSR produces a deterministic accessible shell; WebGL starts only when mounted in the browser. The npm package is generated in `packages/city-chart`; see its README for distribution, CSS/Tailwind themes, and use of the complete component.
@@ -191,7 +191,7 @@ API references: [custom marks and renderers](https://tanstack.com/charts/latest/
 
 ### Optional selectors in the React component
 
-`CityChart` and `CityMap` accept `showEnvironmentControls` (equivalent to `showEnvironmentControls={true}`) to display two independent lighting and weather dropdowns. The prop defaults to `false` on both components, including the reusable package's `CityMap`. The Atlas demo omits it in `src/App.jsx`, keeping these selectors hidden.
+`CityChart` and `CityMap` accept `showEnvironmentControls` (equivalent to `showEnvironmentControls={true}`) to display two independent lighting and weather dropdowns. The prop defaults to `false` on both components, including the reusable package's `CityMap`.
 
 ```jsx
 <CityChart

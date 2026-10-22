@@ -8,11 +8,14 @@
 <div className="feature-grid">
   <a href="#visualization"><span className="feature-number">01 / VISUALIZATION</span><h2>Companies become buildings</h2><p>Height reflects metrics. Categories form districts and intersections without duplicating companies.</p><span className="feature-link">Explore the map ↗</span></a>
   <a href="#interaction"><span className="feature-number">02 / INTERACTION</span><h2>From overview to detail</h2><p>Search, selection, zoom, perspectives, and fullscreen in one reusable component.</p><span className="feature-link">Explore interactions ↗</span></a>
-  <a href="#weather"><span className="feature-number">03 / ENVIRONMENT</span><h2>Weather joins the scene</h2><p>Rain and snow from Open-Meteo, using approximate location and updates every 15 minutes.</p><span className="feature-link">Understand the integration ↗</span></a>
-  <a href="#monitoring"><span className="feature-number">04 / OPERATIONS</span><h2>Company health in perspective</h2><p>Risk effects, recent events, filters, and pagination help you monitor your company portfolio.</p><span className="feature-link">Explore monitoring ↗</span></a>
+  <a href="#weather"><span className="feature-number">03 / ENVIRONMENT</span><h2>Weather joins the scene</h2><p>Simulate rain and snow, or connect live weather through the extension example.</p><span className="feature-link">Understand the integration ↗</span></a>
+  <a href="#monitoring"><span className="feature-number">04 / OPERATIONS</span><h2>Company health in perspective</h2><p>Monitor risk and extend the chart with portfolio filters, pagination, and a synchronized table.</p><span className="feature-link">Explore monitoring ↗</span></a>
 </div>
 
 <div className="prose">
+
+Extend the chart with application features while keeping its existing controls and default behavior. The [Extending CityMap guide](?page=extending) includes a working example and its complete source.
+
 
 <h2 id="visualization">Visualization and organization</h2>
 
@@ -36,82 +39,25 @@ Map controls follow the browser's language: `pt-BR` or `en-US`, with English for
 
 <h2 id="weather">Weather API integration</h2>
 
-**In the Atlas application**, `useWeather` queries Open-Meteo while **City life** is enabled. **In the `atlas-city-chart` package and this playground**, the map receives a `weather` prop and does not query weather services or request geolocation. The playground's selectors simulate the environment locally.
+[Open the extension guide](?page=extending#extension-weather) for a working, opt-in Open-Meteo connection with location, caching, and lifecycle cleanup.
 
-<div className="weather-flow" aria-label="Weather integration flow">
-  <div><span>01</span><strong>Permission</strong><small>Browser geolocation</small></div><b aria-hidden="true">→</b>
-  <div><span>02</span><strong>Request</strong><small>Approximate coordinates</small></div><b aria-hidden="true">→</b>
-  <div><span>03</span><strong>Validation</strong><small>Fresh, complete data</small></div><b aria-hidden="true">→</b>
-  <div><span>04</span><strong>Scene</strong><small>No precipitation, rain, or snow</small></div>
-</div>
+The reusable `CityMap` receives a `weather` prop and does not query weather services or request geolocation. The playground's selectors simulate the environment locally.
 
-### 1. Location and request
-
-The application requests location without high accuracy, with a **10-second** timeout, over HTTPS or localhost. Latitude and longitude are rounded to **two decimal places**. Coordinates and cached results stay in memory; they are not written to cookies, `localStorage`, or company records.
-
-The client sends a GET request to `https://api.open-meteo.com/v1/forecast` with `credentials: "omit"` and these parameters:
-
-```text
-latitude=-23.55
-longitude=-46.63
-current=weather_code,rain,showers,snowfall
-timeformat=unixtime
-forecast_days=1
-```
-
-These coordinates are illustrative. The application uses the approximate location authorized by the visitor. The provider receives the connection's IP address and the submitted coordinates.
-
-### 2. Response and interpretation
-
-The adapter reads `current.time` in Unix seconds, `weather_code`, `rain`, `showers`, and `snowfall`. It rejects incomplete responses, unrecognized codes, negative precipitation values, and timestamps more than **90 minutes** away from the client's clock.
-
-| Condition | Scene result |
-| --- | --- |
-| Positive snowfall or a snow code | `snow`, taking priority over rain. |
-| Positive rain + showers or a rain code | `rain`. |
-| Neither condition applies | `none`. |
-
-Effects represent a regional estimate. Rain includes particles and simulated lightning; flashes do not indicate actual lightning detection. Drops have independently randomized positions, fall speeds, lengths, and wind drift to avoid regular bands. Rain particle counts scale with city area, capped at 800, so smaller examples do not receive the same number of drops in less space. Snow gradually adds a partial layer to the ground and rooftops while the simulation is active.
-
-### 3. Cache, refreshes, and failures
-
-| Situation | Application behavior |
-| --- | --- |
-| Successful request | Keeps results in memory for 15 minutes. |
-| Hidden tab | Pauses new refreshes and checks on return. An in-flight request may still finish. |
-| Slow API | Cancels the request after 10 seconds. |
-| Network failure or invalid response | Removes precipitation, displays an unavailable message, and retries after 15 minutes. |
-| Permission denied or location unavailable | Keeps the map working without precipitation and displays the reason. |
-| Permission revoked | When supported by the Permissions API, clears coordinates and cache and cancels the request. |
-| City life disabled | Cancels requests and timers, pauses particles, and restores daylight. |
-
-Re-enable **City life** to request location again. A still-valid cache may be reused. Manual environment selectors override the scene, but automatic requests in the application continue to follow the **City life** setting.
-
-### 4. Custom endpoint
-
-Configure the endpoint when building the **Atlas application**:
-
-```sh
-VITE_WEATHER_API_URL=https://weather.example.com/v1/forecast npm run build
-```
-
-The service must accept the parameters above, return the [Forecast API](https://open-meteo.com/en/docs) `current` contract, and allow CORS for your application origin. `VITE_*` variables are public in the bundle: add private keys on a backend, never in the client URL.
-
-If your project uses only the package, connect your own provider and pass the converted weather state:
+Connect a provider in your own application and convert its response to `"none"`, `"rain"`, or `"snow"`:
 
 ```jsx
 <CityMap
   data={companies}
-  weather={weatherState.type} // "none", "rain", or "snow"
+  weather={weatherState.type}
   lightingMode="auto"
 />
 ```
 
-`weatherState` belongs to your application's integration. The Atlas hook and adapter are implemented in [`use-weather.js`](https://github.com/raphox/atlas/blob/main/src/hooks/use-weather.js) and [`weather.js`](https://github.com/raphox/atlas/blob/main/src/weather.js); they are not package exports.
+`weatherState` belongs to your application's integration. Your application manages requests, permissions, caching, refreshes, and failures. Pass `"none"` when weather is unavailable. Check your provider's attribution and service terms when displaying live data.
 
-### Attribution and commercial use
+Rain includes particles and simulated lightning; flashes do not indicate actual lightning detection. Drops have independently randomized positions, fall speeds, lengths, and wind drift. Rain particle counts scale with city area, capped at 800. Snow gradually adds a partial layer to the ground and rooftops while the simulation is active.
 
-Open-Meteo data uses [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Preserve provider attribution when displaying its data. Service access terms are separate from the data license: check the [Open-Meteo terms](https://open-meteo.com/en/terms), including commercial eligibility and request limits, before operating an instance. The free endpoint is intended for noncommercial use; commercial deployments need a compatible service. This documentation's playground uses simulation only.
+Weather particles pause when **City life** is disabled or reduced motion is requested. Optional environment selectors override the supplied props locally; **Automatic** resumes following the supplied weather and lighting values.
 
 <h2 id="lighting">Lighting and simulation</h2>
 
@@ -119,13 +65,31 @@ Automatic lighting follows the browser's local clock independently of the weathe
 
 [Try the weather example in the playground](./#playground).
 
-<h2 id="monitoring">Monitoring and application data</h2>
+<h2 id="monitoring">Monitoring and company data</h2>
 
-In the Atlas application, the table, filters, and pagination stay synchronized with the city. Filter by health or categories, search companies, and display 100, 250, 500, 1,000, or all companies per city. Filters are applied before pagination.
+The reusable `CityMap` and documentation playground include an optional monitoring panel. It remains visible when the eye button hides the other UI; set `showMonitor={false}` to remove it. The panel shows a local clock and up to four companies currently at high risk, ordered by the start of their current status (`statusChangedAt`). Records without that timestamp are counted separately.
 
-The monitoring panel is also available in the reusable `CityMap` and the documentation playground. It remains visible when the eye button hides the other UI; set `showMonitor={false}` to remove it. The monitoring panel shows a local clock and up to four companies currently at high risk, ordered by the start of their current status (`statusChangedAt`), using the full dataset. Records without that timestamp are counted separately. The panel reflects the latest load or import; company records are not polled automatically.
+The package receives records through `data`. Replace the array when your application loads new data or receives an update. Company records are not fetched or polled by the map. Your application owns any tables, filters, pagination, and import flows. [Try all of these in the extension example](?page=extending#extension-example).
 
-JSON imports up to 5 MB are validated in the browser and do not persist after reload. An invalid import preserves the previous city. To connect a backend, set `dataUrl` and `mode` in `public/config.json`; the endpoint can return an array or `{ companies: [...] }`. This flow belongs to the application. The reusable package receives records through `data`.
+<h2 id="extensions">Extend the chart with application features</h2>
+
+Compose these capabilities around `CityMap`, as demonstrated in the [extension guide and working example](?page=extending#extension-example). The chart continues to own rendering, camera controls, selection, lighting, and effects; the surrounding application owns data and integration workflows.
+
+| Extension | What you can add | Details and working example |
+| --- | --- | --- |
+| Combined filters | Filter the full portfolio by name, one or more health states, and an exact category/intersection. | [Filters and pagination](?page=extending#extension-filters) |
+| Portfolio counts | Show total and matching companies, health counts, and counts per category/intersection. | [Filters and counts](?page=extending#extension-filters) |
+| Paginated cities | Display 100, 250, 500, 1,000, or all companies per city, with transitions between pages. | [City pagination](?page=extending#extension-filters) |
+| Comparable building heights | Supply `metricDomain` to preserve the full portfolio's height scale across filters and cities. | [Shared height scale](?page=extending#extension-filters) |
+| Synchronized table | List the same companies as the map, reflect selection, and locate a company with focus and zoom. | [Table integration](?page=extending#extension-table) |
+| Full-portfolio monitoring | Supply `monitorData` to monitor recent high-risk entries across the portfolio while displaying a subset. | [Monitoring and selection](?page=extending#extension-table) |
+| JSON import and sample download | Import and validate files up to 5 MB, download an example, and preserve the current portfolio if validation fails. | [JSON workflows](?page=extending#extension-data) |
+| External company data | Load an HTTP(S) JSON source with loading, cancellation, timeout, and error handling. | [Connecting a data source](?page=extending#extension-data) |
+| Live rain and snow | Opt in to location-based Open-Meteo weather, with caching, refreshes, and cleanup when paused or disconnected. | [Live weather integration](?page=extending#extension-weather) |
+
+These integrations are available in the extension example. The basic playground continues to use local data and simulated weather. Optional `metricDomain` and `monitorData` props default to the chart's existing behavior when omitted.
+
+[Inspect the implementation source](?page=extending#extension-source).
 
 <h2 id="integration">Integration and distribution</h2>
 

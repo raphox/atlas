@@ -134,8 +134,12 @@ test("Features, weather documentation and mobile navigation survive direct reloa
   await expect(
     page.getByRole("heading", { name: "Weather API integration" }),
   ).toBeInViewport();
-  await expect(page.locator(".prose")).toContainText("15 minutes");
-  await expect(page.locator(".prose")).toContainText("VITE_WEATHER_API_URL");
+  await expect(page.locator(".prose")).toContainText(
+    "does not query weather services or request geolocation",
+  );
+  await expect(page.locator(".prose")).toContainText(
+    "Your application manages requests",
+  );
   await page.reload();
   await expect(
     page.getByRole("heading", { name: "Weather API integration" }),

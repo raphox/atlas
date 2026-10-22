@@ -7,10 +7,9 @@ dist/
 # Local npm logs
 npm-debug.log*
 
-# Generated packages and data
+# Generated packages
 *.tar.gz
 *.tgz
-/public/data/empresas.json
 
 # Test results
 test-results/

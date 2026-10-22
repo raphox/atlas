@@ -3,20 +3,16 @@ import assert from "node:assert/strict";
 import {
   REGIONS,
   regionsFor,
-  metricLabel,
   categoryLabel,
   sizeForValue,
   membership,
   isPark,
   demoCompanies,
-  filteredCompanies,
   placeCompanies,
   sizeForUsers,
-  paginateCompanies,
   layoutCity,
   layoutMembership,
   ROAD_EVERY,
-  PAGE_SIZES,
 } from "../src/model.js";
 test("the seven regions exactly match the systems present", () => {
   const cases = [
@@ -50,26 +46,6 @@ test("more than a thousand companies occupy unique lots without streets or dupli
   }
   for (const r of REGIONS) assert.ok(companies.some((c) => c.mask === r.mask));
   assert.deepEqual(companies, demoCompanies());
-});
-test("filtering keeps only the requested exact intersection, risk and search matches", () => {
-  const companies = demoCompanies();
-  const selected = filteredCompanies(companies, {
-    region: "3",
-    status: "warning",
-    query: "Aurora",
-  });
-  for (const c of selected) {
-    assert.equal(c.mask, 3);
-    assert.equal(c.status, "warning");
-    assert.ok(c.name.includes("Aurora"));
-  }
-  const allAB = filteredCompanies(companies, { region: "3" });
-  assert.ok(allAB.length > 0);
-  assert.ok(allAB.every((c) => c.mask === 3));
-  assert.equal(
-    filteredCompanies(companies, { query: "inexistente-xyz" }).length,
-    0,
-  );
 });
 test("imported data preserves memberships, users and risk with validation before replacing the city", () => {
   const valid = [
@@ -106,47 +82,9 @@ test("size grows with user count regardless of health status", () => {
     sizeForUsers(3000, domain).height > sizeForUsers(500, domain).height,
   );
 });
-test("default pagination of 100 neither loses nor repeats companies between cities", () => {
-  const companies = demoCompanies();
-  const ids = [];
-  for (let page = 1; page <= 14; page++) {
-    const p = paginateCompanies(companies, {}, page);
-    assert.equal(p.companies.length, 100);
-    ids.push(...p.companies.map((c) => c.id));
-  }
-  assert.equal(new Set(ids).size, 1400);
-  assert.deepEqual(
-    ids,
-    companies.map((c) => c.id),
-  );
-});
-test("filters apply before pagination and all page-size options work", () => {
-  const companies = demoCompanies();
-  const filters = { status: "warning" };
-  const matching = filteredCompanies(companies, filters);
-  for (const size of PAGE_SIZES) {
-    const p = paginateCompanies(companies, filters, 1, size);
-    assert.equal(p.total, matching.length);
-    assert.ok(p.companies.every((c) => c.status === "warning"));
-    assert.equal(
-      p.companies.length,
-      Math.min(size === "all" ? Infinity : size, matching.length),
-    );
-  }
-  assert.equal(
-    paginateCompanies(companies, {}, 1, "all").companies.length,
-    1400,
-  );
-  assert.equal(paginateCompanies(companies, {}, 99, 1000).page, 2);
-  assert.equal(
-    paginateCompanies(companies, { query: "sem-resultados-xyz" }, 99).page,
-    1,
-  );
-  assert.throws(() => paginateCompanies(companies, {}, 1, 99));
-});
 test("each city grows through lots near the center, preserving exact membership and reserving streets and parks", () => {
   const datasets = [
-    paginateCompanies(demoCompanies()).companies,
+    demoCompanies().slice(0, 100),
     demoCompanies(),
     ...REGIONS.map((r) =>
       Array.from({ length: 1000 }, (_, i) => ({
@@ -176,11 +114,11 @@ test("each city grows through lots near the center, preserving exact membership 
       distances.set(c.mask, d);
     }
   }
-  const page = paginateCompanies(demoCompanies()).companies;
+  const page = demoCompanies().slice(0, 100);
   assert.deepEqual(layoutCity(page), layoutCity(page));
   assert.equal(layoutCity([]).companies.length, 0);
 });
-test("imports accept more than a thousand companies in one intersection for subsequent pagination", () => {
+test("normalization accepts more than a thousand companies in one intersection", () => {
   const data = Array.from({ length: 1401 }, (_, i) => ({
     id: String(i),
     name: `Empresa ${i}`,
@@ -189,10 +127,6 @@ test("imports accept more than a thousand companies in one intersection for subs
     status: "healthy",
   }));
   assert.equal(placeCompanies(data).length, 1401);
-  assert.equal(
-    paginateCompanies(placeCompanies(data), {}, 15).companies.length,
-    1,
-  );
 });
 
 test("generic metrics and categories preserve decimal values and identities", () => {
@@ -231,9 +165,7 @@ test("generic metrics and categories preserve decimal values and identities", ()
   assert.equal(data[2].mask, 1);
   assert.deepEqual(source, original);
   assert.deepEqual(placeCompanies([...source].reverse()).reverse(), data);
-  const page = paginateCompanies(data, { region: "6" });
-  assert.equal(page.companies[0].id, "b");
-  assert.equal(layoutCity(page.companies).companies[0].metric.value, 1350.75);
+  assert.equal(layoutCity(data).companies[0].metric.value, 1350.75);
 });
 
 test("the generic contract rejects inconsistent values and categories before import", () => {
@@ -286,7 +218,7 @@ test("the generic contract rejects inconsistent values and categories before imp
   );
 });
 
-test("category and metric names follow filters and pagination", () => {
+test("category names preserve the supplied labels", () => {
   const data = placeCompanies([
     {
       id: "1",
@@ -306,7 +238,6 @@ test("category and metric names follow filters and pagination", () => {
       status: "healthy",
     },
   ]);
-  assert.equal(metricLabel(data), "Receita");
   assert.equal(categoryLabel(data[0]), "Premium + Regional");
   assert.deepEqual(
     regionsFor(data).map((region) => region.label),
@@ -316,56 +247,8 @@ test("category and metric names follow filters and pagination", () => {
     regionsFor([data[1]]).map((region) => [region.mask, region.label]),
     [[2, "Regional"]],
   );
-  assert.equal(metricLabel([]), "Valor");
-  assert.equal(
-    metricLabel([
-      data[0],
-      { ...data[1], metric: { label: "Contratos", value: 20 } },
-    ]),
-    "Valor",
-  );
   assert.ok(
     sizeForValue(data[1].metric.value).height >
       sizeForValue(data[0].metric.value).height,
   );
-});
-
-test("health accepts multiple statuses and combines their union with category and search before pagination", () => {
-  const companies = demoCompanies();
-  const statuses = ["warning", "critical"];
-  const expected = companies.filter((company) =>
-    statuses.includes(company.status),
-  );
-  assert.deepEqual(
-    filteredCompanies(companies, { status: statuses }),
-    expected,
-  );
-  assert.deepEqual(filteredCompanies(companies, { status: [] }), companies);
-  assert.deepEqual(
-    filteredCompanies(companies, { status: ["healthy", ...statuses] }),
-    companies,
-  );
-  assert.deepEqual(
-    filteredCompanies(companies, { status: ["critical"] }),
-    filteredCompanies(companies, { status: "critical" }),
-  );
-  assert.deepEqual(
-    filteredCompanies(companies, {
-      status: statuses,
-      region: "3",
-      query: "Aurora",
-    }),
-    expected.filter(
-      (company) => company.mask === 3 && company.name.includes("Aurora"),
-    ),
-  );
-  const pages = [1, 2].map((page) =>
-    paginateCompanies(companies, { status: statuses }, page, 100),
-  );
-  assert.ok(expected.length > 100);
-  assert.deepEqual(
-    pages.flatMap((page) => page.companies),
-    expected,
-  );
-  assert.ok(pages.every((page) => page.total === expected.length));
 });

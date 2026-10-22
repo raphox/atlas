@@ -1,0 +1,111 @@
+import { ExtensionDemo } from "../extensions/demo.jsx";
+import { ExtensionSources } from "../extensions/sources.jsx";
+
+<div id="extending" className="page-intro">
+  <div className="eyebrow"><span /> EXTENDING CITYMAP</div>
+  <h1>One chart. <span>Your application around it.</span></h1>
+  <p className="lead">Compose portfolio filters, a synchronized table, JSON sources, and live weather around the same reusable CityMap. Explore a working integration, then inspect the exact source that powers it.</p>
+  <div className="intro-tags"><span>Working example</span><span>1,400 sample companies</span><span>Optional live integrations</span></div>
+</div>
+
+<div className="prose">
+<h2 id="composition">Extend through composition</h2>
+
+Keep the chart responsible for rendering, camera controls, selection, effects, and lighting. Keep data loading, filters, pagination, imports, and API lifecycles in the surrounding application. The default documentation playground and the package's existing defaults remain unchanged.
+
+The example below imports the same `CityMap` source as the package. Its integration lives in `docs/extensions/`, separate from the chart engine. Run `npm run dev` and open `?page=extending` to work on it locally.
+
+```jsx
+const domain = metricDomainFor(companies);
+const matching = filterCompanies(companies, filters);
+const city = paginate(matching, page, pageSize);
+
+<CityMap
+  ref={mapRef}
+  data={city.rows}
+  metricDomain={domain}
+  monitorData={companies}
+  weather={weather.type}
+  life={life}
+  onLifeChange={setLife}
+  onSelect={setSelected}
+  showEnvironmentControls
+/>
+```
+
+`filterCompanies`, `paginate`, and the weather hook belong to this example, not the public package. `metricDomainFor` is a repository model helper; in another application, compute the minimum and maximum of the complete portfolio's `metric.value`. See the source below for the complete integration.
+</div>
+
+<div id="extension-example" className="section-heading"><h2>Try the extended chart</h2><span>MAP + APPLICATION</span></div>
+
+<ExtensionDemo />
+
+<div className="prose">
+<h2 id="extension-filters">Filters, counts, and pagination</h2>
+
+Normalize the entire dataset before filtering. This assigns stable district identities, so a category keeps its color when a subset contains fewer categories. Combine selected health states with an exact district/intersection and a company-name query. An empty health selection includes all statuses. District counts respect the health and name filters before applying the selected district.
+
+Apply filters before pagination. Choose 100, 250, 500, 1,000, or all companies per city. Changing filters, page size, or data returns to the first city and clears selection. Previous/next uses the chart's existing `capture()` and `play(direction)` methods for transitions; reduced motion retains the engine's existing behavior.
+
+The optional `metricDomain={[min, max]}` prop keeps building heights comparable across cities and filters. Without it, CityMap continues calculating its scale from `data`, exactly as before. The optional `monitorData` prop supplies the full portfolio to recent-risk monitoring while `data` contains the current city. Without it, monitoring continues using `data`.
+
+<h2 id="extension-table">A synchronized table</h2>
+
+Render the same `city.rows` in the map and table. `onSelect` updates the selected table row when a building is selected. **View on map** calls `mapRef.current.select(company, true, true)` to select, focus, and zoom into a company, then scrolls the map into view. Categories, metric values, health, and update timestamps remain ordinary application-owned table cells.
+
+The monitoring panel still shows the latest high-risk entries from the full portfolio, even when the table is filtered or the city changes. Neither the table nor the map invents missing status-change timestamps.
+
+<h2 id="extension-data">Import JSON and connect a source</h2>
+
+**Download example JSON** supplies a valid file. **Import JSON** accepts up to 5 MB; the complete payload is validated before replacing the current portfolio. Legacy JSON records with `users` and `systems` (`A`, `B`, `C`) are converted to the generic metric/category contract as in the previous application. Failed imports preserve the previous data. **Restore sample portfolio** restores 1,400 sample records. Nothing is persisted after reload.
+
+Enter an HTTP(S) endpoint in **Company JSON endpoint** and select **Load source**. The endpoint may return an array or an object with a `companies` array:
+
+```json
+{
+  "companies": [
+    {
+      "id": "account-1",
+      "name": "Aurora",
+      "metric": { "label": "Monthly revenue", "value": 2200 },
+      "categories": [{ "label": "Services", "value": "services" }],
+      "status": "critical",
+      "updatedAt": "2026-10-22T12:00:00Z",
+      "statusChangedAt": "2026-10-22T11:00:00Z"
+    }
+  ]
+}
+```
+
+The wrapper shows loading and errors, cancels after 10 seconds, and allows retry or cancellation. A failed request or invalid payload preserves the previous city. Concurrent requests are cancelled or ignored so an older result cannot replace a newer portfolio. Empty arrays are supported. Data loads only when requested; company records are not polled automatically.
+
+Cross-origin endpoints must allow CORS. Same-origin cookies can be used; cross-origin credentials are omitted. Keep private credentials on your backend. This page replaces the old fixed `public/config.json` flow with an explicit endpoint field, while keeping the reusable chart independent of HTTP.
+
+<h2 id="extension-weather">Connect rain and snow to live weather</h2>
+
+Enable **Connect local weather** to request location and query [Open-Meteo's Forecast API](https://open-meteo.com/en/docs). Visiting this page alone makes no location or weather request. HTTPS or localhost is required. Location is requested without high accuracy and rounded to two decimal places; coordinates and cached responses remain in memory. The provider receives the submitted coordinates and connection IP address.
+
+The adapter requests `current=weather_code,rain,showers,snowfall` with Unix timestamps. Snow codes or positive snowfall produce `snow`; otherwise rain codes or positive rain/showers produce `rain`; dry conditions produce `none`. Incomplete, invalid, or stale responses are rejected. These are regional conditions rather than detection at the visitor's exact street. Lightning remains a visual simulation.
+
+Results are cached for 15 minutes. Refreshes pause while the tab is hidden, requests time out after 10 seconds, and unavailable weather removes precipitation with a visible status. Denied location access keeps the map available. Disabling **City life**, disconnecting weather, or leaving the page cancels pending work. Re-enabling may reuse a fresh in-memory result. Permission revocation clears cached coordinates and results when the browser supports permission-change notifications.
+
+Manual **Weather** and **Lighting** selectors retain the chart's current override behavior. Choose **Automatic** to resume the incoming props. The local clock controls automatic lighting independently of the weather API.
+
+For a compatible provider or your own proxy, set the public endpoint when building:
+
+```sh
+VITE_WEATHER_API_URL=https://weather.example.com/v1/forecast npm run build
+```
+
+The endpoint must accept the same parameters, return the same current-weather contract, and allow CORS. Add any private provider keys on your server.
+
+Open-Meteo data requires [CC BY 4.0 attribution](https://creativecommons.org/licenses/by/4.0/), shown in the connected example. Its free service is for noncommercial use; check the [provider's terms](https://open-meteo.com/en/terms) and use a compatible plan or endpoint for commercial deployments.
+
+<h2 id="extension-source">Inspect the working source</h2>
+
+These are the actual files used by the example, including lifecycle cleanup and error handling. Repository-relative chart/model imports refer to the shared source. In a consuming project, import `CityMap` from `atlas-city-chart/react`, its CSS from `atlas-city-chart/styles.css`, and provide your own data normalization and application helpers.
+
+<ExtensionSources />
+
+[Return to the component API and basic playground](./#props).
+</div>

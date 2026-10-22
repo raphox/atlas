@@ -1,10 +1,10 @@
-import { useMapI18n } from "../charts/city/use-map-i18n.js";
+import { useMapI18n } from "../../src/charts/city/use-map-i18n.js";
 import { useEffect, useRef, useState } from "react";
 import {
   fetchWeather,
   weatherCoordinates,
   WEATHER_REFRESH_MS,
-} from "@/weather";
+} from "./weather.js";
 
 const inactive = { type: "none", status: "idle", message: "weatherPaused" };
 const descriptions = {

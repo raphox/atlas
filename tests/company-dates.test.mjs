@@ -5,7 +5,6 @@ import {
   recentCriticalCompanies,
 } from "../src/lib/company-dates.js";
 import { placeCompanies, layoutCity } from "../src/model.js";
-import { parseCompanyPayload } from "../src/data-source.js";
 import { validateCityData } from "../src/charts/city/data.js";
 
 const row = {
@@ -16,7 +15,7 @@ const row = {
   categories: [{ label: "Varejo", value: "retail" }],
 };
 
-test("timestamps are preserved through HTTP, imports and layout with time zone normalization", () => {
+test("timestamps are preserved through normalization and layout with time zone normalization", () => {
   const input = {
     ...row,
     updatedAt: "2026-10-19T12:00:00-03:00",
@@ -25,7 +24,6 @@ test("timestamps are preserved through HTTP, imports and layout with time zone n
   const companies = placeCompanies([input]);
   assert.equal(companies[0].updatedAt, "2026-10-19T15:00:00.000Z");
   assert.equal(companies[0].statusChangedAt, "2026-10-19T14:00:00.000Z");
-  assert.deepEqual(parseCompanyPayload({ companies: [input] }), companies);
   assert.equal(
     layoutCity(companies).companies[0].statusChangedAt,
     companies[0].statusChangedAt,

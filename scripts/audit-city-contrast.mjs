@@ -11,7 +11,10 @@ const output = resolve(
 );
 await mkdir(output, { recursive: true });
 await import("./build-city-package.mjs");
-const server = await createServer({ server: { port: 4175, strictPort: true } });
+const server = await createServer({
+  configFile: "vite.e2e.config.js",
+  server: { port: 4175, strictPort: true },
+});
 await server.listen();
 const browser = await chromium.launch({
   args: [
@@ -297,70 +300,12 @@ async function audit(page, name, scope) {
 }
 
 try {
-  for (const [mode, hour] of [
-    ["day", 12],
-    ["twilight", 7],
-    ["night", 22],
-  ]) {
+  for (const mode of ["day", "twilight", "night"]) {
     if (
       process.env.ATLAS_CONTRAST_LIGHT &&
       mode !== process.env.ATLAS_CONTRAST_LIGHT
     )
       continue;
-    const context = await browser.newContext({
-      locale: "pt-BR",
-      viewport: { width: 1440, height: 1100 },
-      timezoneId: "America/Sao_Paulo",
-      reducedMotion: "reduce",
-    });
-    const page = await context.newPage();
-    await page.route("https://fonts.googleapis.com/**", (route) =>
-      route.abort(),
-    );
-    await page.addInitScript(() => {
-      navigator.geolocation.getCurrentPosition = (_ok, fail) =>
-        fail({ code: 1 });
-    });
-    await page.clock.install({
-      time: new Date(`2026-10-18T${String(hour).padStart(2, "0")}:00:00-03:00`),
-    });
-    await page.goto("http://127.0.0.1:4175/", {
-      waitUntil: "domcontentloaded",
-    });
-    await page.waitForFunction(
-      (mode) =>
-        window.atlas?.summary.lightingPeriod === mode &&
-        window.atlas.summary.companies === 1400,
-      mode,
-    );
-    await page.getByRole("checkbox", { name: "Efeitos de risco" }).uncheck();
-    await page
-      .getByRole("checkbox", { name: "Categorias e interseções" })
-      .check();
-    await audit(page, `atlas-${mode}-labels`, "#city-map");
-    await page
-      .getByRole("button", { name: /^Ver .* no mapa$/ })
-      .first()
-      .click();
-    await page.locator("#city-map").scrollIntoViewIfNeeded();
-    await page.getByRole("button", { name: "Aproximar empresa" }).hover();
-    await audit(page, `atlas-${mode}-details`, "#city-map");
-    await page.getByRole("button", { name: "Fechar detalhes" }).click();
-    await page.getByRole("button", { name: "Restaurar visão geral" }).click();
-    const bounds = await page.locator("#viewport").boundingBox();
-    for (const x of [0.5, 0.4, 0.6, 0.3, 0.7]) {
-      await page.mouse.move(
-        bounds.x + bounds.width * x,
-        bounds.y + bounds.height * 0.5,
-      );
-      if (await page.locator(".atlas-city-tooltip").count()) break;
-    }
-    if (await page.locator(".atlas-city-tooltip").count())
-      await audit(page, `atlas-${mode}-tooltip`, "#city-map");
-    await context.close();
-
-    if (process.env.ATLAS_CONTRAST_TARGET === "atlas") continue;
-
     for (const theme of ["package", "package-tailwind"]) {
       const context = await browser.newContext({
         locale: "pt-BR",

@@ -32,13 +32,9 @@ jobs:
         run: npm test
 
   browser:
-    name: Browser tests (shard ${{ matrix.shard }}/2)
+    name: Package browser tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -56,13 +52,13 @@ jobs:
         run: npx playwright install --with-deps --only-shell chromium
 
       - name: Run browser tests
-        run: npm run test:e2e -- --shard=${{ matrix.shard }}/2
+        run: npm run test:e2e
 
       - name: Save test results and failure traces
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: browser-tests-${{ matrix.shard }}
+          name: browser-tests
           path: test-results/
           retention-days: 7
 

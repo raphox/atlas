@@ -8,8 +8,7 @@
       "!!**/dist",
       "!!**/test-results",
       "!!**/playwright-report",
-      "!package-lock.json",
-      "!public/data/empresas.json"
+      "!package-lock.json"
     ]
   },
   "formatter": {

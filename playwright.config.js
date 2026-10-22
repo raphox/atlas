@@ -1,5 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
+  outputDir: "./test-results/package",
   testDir: "./tests/e2e",
   fullyParallel: false,
   workers: 1,
@@ -33,7 +34,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "npx vite --config vite.e2e.config.js",
-    url: "http://127.0.0.1:4176",
+    url: "http://127.0.0.1:4176/tests/e2e/fixtures/package.html",
     reuseExistingServer: false,
   },
 });

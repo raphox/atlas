@@ -1,4 +1,4 @@
-/* Documentation styles are separate from the Atlas application and map theme. */
+/* Documentation styles are separate from the map theme. */
 .playground-loading {
   min-height: 480px;
   padding: 32px;
@@ -1097,4 +1097,231 @@ body {
 .example-actions button:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.extension-demo {
+  border: 1px solid var(--docs-border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 24px 0 48px;
+  background: #f8fafc;
+  min-width: 0;
+}
+.extension-demo-heading,
+.extension-filters,
+.extension-weather,
+.extension-pagination,
+.extension-actions,
+.extension-data-controls form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+}
+.extension-demo-heading {
+  justify-content: space-between;
+}
+.extension-demo h3 {
+  margin: 8px 0 0;
+  font-size: 24px;
+}
+.extension-source,
+.extension-note {
+  font-size: 12px;
+  color: var(--docs-muted);
+}
+.extension-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-block: 1px solid var(--docs-border);
+  background: white;
+}
+.extension-summary > div {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  gap: 6px;
+}
+.extension-summary strong {
+  font-size: 24px;
+}
+.extension-summary span {
+  font-size: 12px;
+  color: var(--docs-muted);
+}
+.extension-demo label:not(.atlas-city-map *) {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  align-items: center;
+}
+.extension-filters > label,
+.extension-data-controls form > label,
+.extension-pagination > label {
+  flex-direction: column;
+  align-items: stretch;
+}
+.extension-filters > label {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.extension-demo
+  input:not(.atlas-city-map *):not([type="checkbox"]):not([type="file"]),
+.extension-demo select:not(.atlas-city-map *) {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #bcc9d8;
+  border-radius: 6px;
+  background: white;
+  color: #17263a;
+  font: inherit;
+}
+.extension-demo fieldset:not(.atlas-city-map *) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  border: 1px solid var(--docs-border);
+  border-radius: 6px;
+  padding: 10px;
+}
+.extension-demo legend:not(.atlas-city-map *) {
+  font-size: 12px;
+  padding: 0 4px;
+}
+.extension-demo button:not(.atlas-city-map *),
+.extension-upload {
+  border: 1px solid #bcc9d8;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: white;
+  color: #173f75;
+  font-size: 12px;
+}
+.extension-demo button:not(.atlas-city-map *):disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.extension-demo .atlas-city-map {
+  --atlas-city-height: 620px;
+}
+.extension-weather {
+  padding-block: 12px;
+  background: #eef4ff;
+  font-size: 12px;
+}
+.extension-weather a {
+  text-decoration: underline;
+}
+.extension-note {
+  margin: 0;
+  padding: 12px 20px;
+  line-height: 1.6;
+}
+.extension-pagination {
+  justify-content: space-between;
+  border-block: 1px solid var(--docs-border);
+}
+.extension-pagination > span {
+  font-size: 13px;
+}
+.extension-table-scroll {
+  overflow: auto;
+  max-height: 360px;
+  background: white;
+}
+.extension-demo table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+.extension-demo caption {
+  text-align: left;
+  padding: 16px 20px;
+  color: var(--docs-muted);
+}
+.extension-demo th,
+.extension-demo td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--docs-border);
+  text-align: left;
+}
+.extension-demo thead th {
+  background: #eef2f7;
+  position: sticky;
+  top: 0;
+}
+.extension-demo tr[aria-selected="true"] {
+  background: #e9f1ff;
+}
+.extension-data-controls {
+  padding-bottom: 8px;
+  border-top: 1px solid var(--docs-border);
+}
+.extension-data-controls form {
+  padding-top: 0;
+  align-items: flex-end;
+}
+.extension-data-controls form > label {
+  flex: 1 1 260px;
+}
+.extension-data-controls > p {
+  padding-inline: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.extension-data-controls [role="alert"] {
+  color: #9f2020;
+}
+.extension-upload {
+  position: relative;
+  cursor: pointer;
+}
+.extension-upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  cursor: pointer;
+}
+.extension-upload:focus-within {
+  outline: 3px solid #448bf0;
+  outline-offset: 3px;
+}
+.extension-sources details {
+  border: 1px solid var(--docs-border);
+  border-radius: 8px;
+  margin-block: 12px;
+  overflow: hidden;
+}
+.extension-sources summary {
+  cursor: pointer;
+  padding: 16px;
+  font-size: 13px;
+}
+.extension-sources pre {
+  max-height: 520px;
+  margin: 0;
+  overflow: auto;
+}
+@media (max-width: 560px) {
+  .header-links {
+    gap: 9px;
+  }
+  .extension-summary > div {
+    padding: 14px 10px;
+  }
+  .extension-summary strong {
+    font-size: 20px;
+  }
+  .extension-summary span {
+    font-size: 10px;
+  }
+  .extension-pagination {
+    justify-content: center;
+  }
+  .extension-demo .atlas-city-map {
+    --atlas-city-height: 760px;
+  }
 }
