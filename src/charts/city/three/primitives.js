@@ -23,7 +23,7 @@ export function instances(geometry, mat, items, scene) {
   for (let i = 0; i < items.length; i++) {
     const it = items[i];
     dummy.position.set(it.x, it.y, it.z);
-    dummy.rotation.set(0, it.ry ?? 0, 0);
+    dummy.rotation.set(it.rx ?? 0, it.ry ?? 0, it.rz ?? 0);
     dummy.scale.set(it.w ?? 1, it.h ?? 1, it.d ?? 1);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);

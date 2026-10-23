@@ -55,6 +55,9 @@ export const STATUS = {
   healthy: { label: "Saudável", color: "#4c9878" },
   warning: { label: "Risco médio", color: "#c28b29" },
   critical: { label: "Alto risco", color: "#db654d" },
+  configuring: { label: "Em configuração", color: "#708493" },
+  disabled: { label: "Desativada", color: "#41464c" },
+  cancelled: { label: "Cancelada", color: "#41464c" },
 };
 export function random(seed) {
   let s = seed >>> 0;
@@ -126,7 +129,18 @@ export function demoCompanies(count = 1400) {
       id: `empresa-${i + 1}`,
       name: `${names[i % names.length]} ${sectors[Math.floor(i / names.length) % sectors.length]} ${String(i + 1).padStart(4, "0")}`,
       users: Math.round(8 + Math.pow(rng(), 3) * 4200),
-      status: risk < 0.024 ? "critical" : risk < 0.1 ? "warning" : "healthy",
+      status:
+        risk < 0.024
+          ? "critical"
+          : risk < 0.1
+            ? "warning"
+            : risk < 0.14
+              ? "configuring"
+              : risk < 0.17
+                ? "disabled"
+                : risk < 0.2
+                  ? "cancelled"
+                  : "healthy",
       ...lot,
     };
   });

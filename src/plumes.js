@@ -32,7 +32,7 @@ export function facadeWindows(company, size, width, depth) {
 }
 
 export function windowEmitters(company, windows) {
-  if (company.status === "healthy") return [];
+  if (company.status !== "warning" && company.status !== "critical") return [];
   const critical = company.status === "critical";
   const floors = new Set(windows.map((w) => w.y)).size;
   const count = Math.min(

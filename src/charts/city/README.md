@@ -86,7 +86,7 @@ const companies = [
 | `name` | nonempty string | company identification |
 | `metric` | `{ label: string, value: number }`, finite value ≥ 0 | label in the interface; value determines size |
 | `categories` | list of `{ label: string, value: string }` | district and color; up to three distinct values across the dataset |
-| `status` | `healthy`, `warning`, or `critical` | normal operation, smoke/warning, or fire/flashing |
+| `status` | `healthy`, `warning`, `critical`, `configuring`, `disabled`, or `cancelled` | normal operation, smoke/warning, fire/flashing, scaffolding, opaque dark graphite, or ruins |
 
 The generic contract can be passed directly to `defineCityChart`/`cityMark`. `placeCompanies` validates the data and calculates `mask` (bits 1, 2, and 4 assigned to category identifiers in text order). Combinations determine up to seven regions. The same `value` must retain the same `label` throughout the dataset. When calculated outside the mark, the layout must use the already normalized dataset, before pagination.
 
@@ -136,7 +136,7 @@ The layout is calculated by the mark (or supplied by the application) and attach
 
 With City life, effects, and auto-rotation disabled, the loop sleeps after the camera settles. Camera, selection, data, controls, and resizing request a new frame; animations keep the loop active only while needed. When integrating directly with the engine, use `setActivity({ life, effects })` and `select(company)`/`select(null)` to invalidate the scene as well.
 
-With City life enabled, lighting follows the browser's local time: sunrise from 6:00 to 8:00 a.m., day from 8:00 a.m. to 5:00 p.m., sunset from 5:00 to 7:00 p.m., and night from 7:00 p.m. to 6:00 a.m. Sunrise and sunset share the same warm lighting level. Windows are lit during those periods and at night, including when risk effects are disabled; fire and warnings retain their signals. The time is checked every minute and when returning to the tab, including with reduced motion. Disabling City life restores the original daylight and stops periodic checks.
+With City life enabled, lighting follows the browser's local time: sunrise from 6:00 to 8:00 a.m., day from 8:00 a.m. to 5:00 p.m., sunset from 5:00 to 7:00 p.m., and night from 7:00 p.m. to 6:00 a.m. Sunrise and sunset share the same warm lighting level. Windows of operational companies are lit during those periods and at night, including when risk effects are disabled; fire and warnings retain their signals. The time is checked every minute and when returning to the tab, including with reduced motion. Disabling City life restores the original daylight and stops periodic checks.
 
 The **Lighting** selector allows manual testing of **Sunrise/sunset**, **Day**, and **Night**. **Automatic** is the default and resumes local time when selected. Lighting and window changes are gradual, taking 1.8 seconds, including when toggling City life. Changing the option during a transition starts from the current lighting, without jumps. The first render already uses the correct period. The selector is disabled when City life is off and preserves the choice for when it is re-enabled. `CityChart` accepts the `lightingMode` prop (`auto`, `twilight`, `day`, `night`); direct engine integrations can use `setLightingMode(mode)`. Periodic clock checks are suspended during a manual selection. The color transition works with reduced motion and keeps the loop active only until it finishes, even without traffic or animated effects.
 
@@ -168,14 +168,16 @@ Particles only appear and keep the loop active with `life=true` and without redu
 
 Tree and bench placement uses coordinate-based seeds: it stays stable when rebuilding the same city, keeps canopies within the lot, and reserves space between trees and benches.
 
-Extra per-building shadow planes and duplicate roofs in the selection outline have also been removed. Color still represents categories; health does not change size or district membership.
+Extra per-building shadow planes and duplicate roofs in the selection outline have also been removed. Category colors remain the default, including configuring companies; disabled and cancelled states override the facade color without changing district membership or the maximum height that encodes the metric. Configuring adds thicker instanced scaffold bars in tiers spanning at most two building floors, with yellow/black construction bands using one shared small texture. All lifecycle buildings and windows are opaque and write depth, so neighboring buildings remain visually separate. Cancelled concentrates broad flat-edged breaks on all four faces of the upper 16% (capped at 1.8 units), using one shared low-poly crown. Its walls use irregular patches of procedural exposed brick over the dark plaster with consistent brick size and distance filtering, without extra geometry, texture downloads or render batches; windows intersecting the missing walls are omitted. The broken upper floors have open window cutouts instead of black glass; opaque fragment cutouts preserve the shared body/crown batches. These additions share batches across companies and have no animation loop. Configuring, disabled and cancelled windows stay unlit at night. Flat snow caps are omitted from ruined roofs.
 
 Deterministic measurement of base geometry, without fire/smoke or camera culling:
 
-| Companies | Previous triangles | Current triangles | Reduction | Previous → current draw batches |
+| Companies | Operational/risk only | Including lifecycle statuses | Triangle increase | Base → lifecycle batches |
 | --- | ---: | ---: | ---: | ---: |
-| 100 | 96,830 | 26,022 | 73.1% | 26 → 17 |
-| 1,400 | 804,354 | 198,042 | 75.4% | 26 → 17 |
+| 100 | 28,470 | 30,904 | 8.5% | 17 → 21 |
+| 1,400 | 235,746 | 251,532 | 6.7% | 17 → 21 |
+
+The comparison uses the same records, metric heights and lots, mapping lifecycle records to healthy for the baseline. The four extra batches are shared unlit lifecycle windows, ruined crowns, scaffolding, and construction bands. Their number does not grow with the number of companies; triangle cost depends on the status mix.
 
 Reproduce with `node scripts/benchmark-city.mjs`. These are geometry counts, not an FPS promise. Actual per-frame counts also depend on effects, selection, visibility, and camera.
 

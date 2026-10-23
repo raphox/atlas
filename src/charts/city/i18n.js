@@ -87,6 +87,15 @@ export const mapMessages = {
     "status.healthy": "Saudável",
     "status.warning": "Risco médio",
     "status.critical": "Alto risco",
+    "status.configuring": "Em configuração",
+    "status.disabled": "Desativada",
+    "status.cancelled": "Cancelada",
+    "description.configuring":
+      "Empresa em configuração, representada na cor do grupo, com andaimes e faixas amarelas e pretas.",
+    "description.disabled":
+      "Empresa desativada, representada em grafite escuro com janelas pretas apagadas.",
+    "description.cancelled":
+      "Empresa cancelada, representada por um prédio em ruínas, com partes faltando e janelas vazadas nos andares quebrados.",
     "description.healthy":
       "Operação saudável. A construção mantém sua aparência normal.",
     "description.warning":
@@ -194,6 +203,15 @@ export const mapMessages = {
     "status.healthy": "Healthy",
     "status.warning": "Medium risk",
     "status.critical": "High risk",
+    "status.configuring": "Configuring",
+    "status.disabled": "Disabled",
+    "status.cancelled": "Cancelled",
+    "description.configuring":
+      "A company being configured, shown in its group color with scaffolding and yellow/black bands.",
+    "description.disabled":
+      "A disabled company, shown in opaque dark graphite with unlit black windows.",
+    "description.cancelled":
+      "A cancelled company, shown as a ruined building with missing sections and open upper-floor windows.",
     "description.healthy":
       "Healthy operation. The building retains its normal appearance.",
     "description.warning":

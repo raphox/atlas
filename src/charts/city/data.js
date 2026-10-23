@@ -8,7 +8,7 @@ import { normalizeCompanyDates } from "../../lib/company-dates.js";
  * @property {{label: string, value: number}} metric Nonnegative metric; encodes building height.
  * @property {{label: string, value: string}[]} [categories] Generic district memberships.
  * @property {1|2|3|4|5|6|7} [mask] Normalized category intersection; encodes district/color.
- * @property {"healthy"|"warning"|"critical"} status Health classification.
+ * @property {"healthy"|"warning"|"critical"|"configuring"|"disabled"|"cancelled"} status Health or lifecycle classification.
  * @property {string} [updatedAt] Last record update, ISO 8601 with timezone.
  * @property {string} [statusChangedAt] Start of the current health status.
  */

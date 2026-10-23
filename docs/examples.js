@@ -13,13 +13,22 @@ const names = [
   "Beacon",
 ];
 
+function getExampleStatus(index) {
+  if (index % 9 === 0) return "critical";
+  if (index % 5 === 0) return "warning";
+  if (index % 11 === 0) return "configuring";
+  if (index % 13 === 0) return "disabled";
+  if (index % 17 === 0) return "cancelled";
+  return "healthy";
+}
+
 export const initialData = JSON.stringify(
   Array.from({ length: 28 }, (_, i) => ({
     id: `company-${i + 1}`,
     name: `${names[i % names.length]} ${Math.floor(i / names.length) + 1}`,
     metric: { label: "Monthly revenue", value: [40, 250, 1000, 3000][i % 4] },
     categories: categories.filter((_, bit) => ((i % 7) + 1) & (1 << bit)),
-    status: i % 9 === 0 ? "critical" : i % 5 === 0 ? "warning" : "healthy",
+    status: getExampleStatus(i),
     updatedAt: "2026-10-20T12:00:00Z",
     statusChangedAt: new Date(Date.UTC(2026, 9, 20, 11, 59 - i)).toISOString(),
   })),

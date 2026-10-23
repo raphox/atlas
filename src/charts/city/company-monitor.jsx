@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMapI18n } from "./use-map-i18n.js";
+import { STATUS } from "../../model.js";
 import {
   recentCriticalCompanies,
   timestampValue,
@@ -83,7 +84,7 @@ function CompanyMetrics({ matching, pageSize, loading }) {
         </p>
       </div>
       <div className="atlas-monitor-statuses">
-        {["healthy", "warning", "critical"].map((status) => (
+        {Object.keys(STATUS).map((status) => (
           <div
             key={status}
             className={`atlas-monitor-status atlas-monitor-status--${status}`}

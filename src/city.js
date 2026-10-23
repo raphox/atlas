@@ -5,6 +5,7 @@ import { SelectionHighlight } from "./selection-highlight.js";
 import { REGIONS, metricFor } from "./model.js";
 import { buildTerrain } from "./charts/city/three/terrain.js";
 import { buildBuildings } from "./charts/city/three/buildings.js";
+import { companyColor } from "./charts/city/three/lifecycle.js";
 import { buildTraffic, updateTraffic } from "./charts/city/three/traffic.js";
 import { buildEffects, updateEffects } from "./charts/city/three/effects.js";
 import { CityWeather } from "./charts/city/three/weather.js";
@@ -132,6 +133,9 @@ export class City {
     this.plumes = null;
     this.simulation = null;
     this.body = null;
+    this.bodyMeshes = [];
+    this.ruinCrowns = null;
+    this.inactiveWindows = null;
     this.windows = null;
     this.windowGlow = null;
     this.warning = null;
@@ -199,9 +203,9 @@ export class City {
       // Preserve per-building shading and the current critical blink phase.
       for (const item of this.body.userData.items) {
         const company = this.companiesById.get(item.company);
-        item.color
-          .copy(this.palettes.get(company.mask))
-          .multiplyScalar(item.shade);
+        item.color.copy(
+          companyColor(company, this.palettes.get(company.mask), item.shade),
+        );
       }
       this.body.userData.items.forEach((item, i) =>
         this.body.setColorAt(i, item.color),
@@ -242,13 +246,17 @@ export class City {
     );
     this.raycaster.setFromCamera(this.pointer, this.camera);
     const hit = this.raycaster
-      .intersectObject(this.body, false)
+      .intersectObjects(this.bodyMeshes ?? [this.body], false)
       .find(
         (h) =>
           h.instanceId !== undefined &&
-          this.active.has(this.companies[h.instanceId].id),
+          this.active.has(h.object.userData.items[h.instanceId].company),
       );
-    return hit ? this.companies[hit.instanceId] : null;
+    return hit
+      ? this.companiesById.get(
+          hit.object.userData.items[hit.instanceId].company,
+        )
+      : null;
   }
   select(c) {
     this.selectedId = c?.id ?? null;

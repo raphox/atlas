@@ -52,7 +52,7 @@ The basic example uses fixed daylight and keeps camera, perspective, and selecti
 
 Each building is one company. Districts represent exact combinations of up to three categories. A company in Commerce and Services appears once, in their shared district. Position expresses category membership rather than geographic coordinates or distance.
 
-District colors identify category combinations. Health status controls risk effects: `healthy`, `warning`, or `critical`. These effects can be disabled without changing the data.
+District colors identify category combinations. Status accepts `healthy`, `warning`, `critical`, `configuring`, `disabled`, or `cancelled`. Risk effects (smoke, fire, warning) can be disabled without changing the data. Lifecycle appearances remain visible: group-colored buildings with scaffolding for configuring, opaque dark graphite with unlit windows for disabled, and ruins with missing sections for cancelled.
 
 Building height uses a **continuous square-root scale adapted to the dataset**. The smallest metric maps to a one-floor house and the largest to a 14-floor building; intermediate values produce continuous intermediate heights. The scale takes the square root of each value’s normalized position between the dataset minimum and maximum, giving smaller and intermediate companies more visible height when large values dominate. Height is not proportional to the metric: twice the height does not mean twice the value. Equal values always produce equal heights. If every company has the same value (including a single company or all zeros), all buildings use the midpoint height.
 
@@ -82,7 +82,7 @@ Each company occupies one lot in the district matching its exact combination of 
 | `name` | `string` | Nonempty name shown in search and details. |
 | `metric` | `{ label, value }` | Nonempty label and a finite, nonnegative number. |
 | `categories` | `{ label, value }[]` | 1–3 categories per company; up to 3 distinct values across the dataset. |
-| `status` | `string` | `healthy`, `warning`, or `critical`. |
+| `status` | `string` | `healthy`, `warning`, `critical`, `configuring`, `disabled`, or `cancelled`. |
 | `updatedAt` | `string?` | Last update, in ISO 8601 with a time zone. |
 | `statusChangedAt` | `string?` | Start of the current status; cannot be later than `updatedAt`. |
 

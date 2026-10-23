@@ -6,8 +6,13 @@ import { disposeSceneGroups } from "../src/scene-resources.js";
 
 // Deterministic geometry budget. No browser, WebGL, timers or particle effects.
 // Counts all static base meshes and instances, independent of camera culling.
-export function measureCityGeometry(count) {
-  const layout = layoutCity(demoCompanies(count));
+export function measureCityGeometry(count, { lifecycle = true } = {}) {
+  const records = demoCompanies(count);
+  if (!lifecycle)
+    for (const record of records)
+      if (["configuring", "disabled", "cancelled"].includes(record.status))
+        record.status = "healthy";
+  const layout = layoutCity(records);
   const city = Object.assign(Object.create(City.prototype), {
     scene: new THREE.Scene(),
     terrain: new THREE.Group(),

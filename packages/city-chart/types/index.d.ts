@@ -12,7 +12,13 @@ export interface CityDatum {
   name: string;
   metric: { label: string; value: number };
   categories: { label: string; value: string }[];
-  status: "healthy" | "warning" | "critical";
+  status:
+    | "healthy"
+    | "warning"
+    | "critical"
+    | "configuring"
+    | "disabled"
+    | "cancelled";
   /** Last record update, ISO 8601 with timezone. */
   updatedAt?: string;
   /** When the current status began, ISO 8601 with timezone. */

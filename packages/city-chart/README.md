@@ -134,7 +134,7 @@ Interface components do not generate `style` attributes. Dynamic label and toolt
 
 ## Props and data
 
-`data` is an immutable list. Each company has a unique `id` (string or number), `name`, `metric: { label, value }`, `categories: [{ label, value }]`, and `status: "healthy" | "warning" | "critical"`. The metric must be finite and nonnegative. Use one to three categories per company, with up to three distinct values across the dataset. A category must keep the same label. A new list updates the chart; `[]` displays an empty city.
+`data` is an immutable list. Each company has a unique `id` (string or number), `name`, `metric: { label, value }`, `categories: [{ label, value }]`, and `status: "healthy" | "warning" | "critical" | "configuring" | "disabled" | "cancelled"`. The metric must be finite and nonnegative. Use one to three categories per company, with up to three distinct values across the dataset. A category must keep the same label. A new list updates the chart; `[]` displays an empty city.
 
 | Prop | Default | Purpose |
 | --- | --- | --- |

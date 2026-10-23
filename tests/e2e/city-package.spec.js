@@ -147,3 +147,77 @@ for (const theme of ["package", "package-tailwind"]) {
     expect(errors).toEqual([]);
   });
 }
+
+test("lifecycle statuses render, select and update through the public package", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/tests/e2e/fixtures/package.html");
+  await page.evaluate(() =>
+    window.renderPackage([
+      {
+        id: "setup",
+        name: "Configurando",
+        metric: { label: "Receita", value: 600 },
+        categories: [{ label: "Serviços", value: "services" }],
+        status: "configuring",
+      },
+      {
+        id: "disabled",
+        name: "Desativada teste",
+        metric: { label: "Receita", value: 600 },
+        categories: [{ label: "Serviços", value: "services" }],
+        status: "disabled",
+      },
+      {
+        id: "cancelled",
+        name: "Cancelada teste",
+        metric: { label: "Receita", value: 600 },
+        categories: [{ label: "Serviços", value: "services" }],
+        status: "cancelled",
+      },
+    ]),
+  );
+  const first = page.locator(".atlas-city-map").first();
+  await expect
+    .poll(() =>
+      page.evaluate(() => window.packageRefs[0].current?.stats()?.chartPoints),
+    )
+    .toBe(3);
+  for (const [name, label] of [
+    ["Configurando", "Em configuração"],
+    ["Desativada teste", "Desativada"],
+    ["Cancelada teste", "Cancelada"],
+  ]) {
+    await first.getByRole("searchbox").fill(name);
+    await first.getByRole("button", { name, exact: true }).click();
+    await expect(first.locator(".atlas-city-details-status")).toHaveText(label);
+  }
+  await first.getByLabel("Iluminação da cidade").selectOption("night");
+  await first.getByRole("checkbox", { name: "Efeitos de risco" }).uncheck();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => window.packageRefs[0].current?.stats()?.lightingPeriod,
+      ),
+    )
+    .toBe("night");
+  await page.evaluate(() =>
+    window.renderPackage([
+      {
+        id: "disabled",
+        name: "Reativada",
+        metric: { label: "Receita", value: 600 },
+        categories: [{ label: "Serviços", value: "services" }],
+        status: "healthy",
+      },
+    ]),
+  );
+  await first.getByRole("searchbox").fill("Reativada");
+  await first.getByRole("button", { name: "Reativada", exact: true }).click();
+  await expect(first.locator(".atlas-city-details-status")).toHaveText(
+    "Saudável",
+  );
+  expect(errors).toEqual([]);
+});

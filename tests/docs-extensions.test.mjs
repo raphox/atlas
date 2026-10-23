@@ -85,3 +85,15 @@ test("weather adapter prioritizes snow, rejects stale results and rounds locatio
     { latitude: "-23.55", longitude: "-46.63" },
   );
 });
+
+test("the first sample page shows varied metrics for every lifecycle status", () => {
+  const first = paginate(sampleCompanies(), 1, 100).rows;
+  for (const status of ["configuring", "disabled", "cancelled"]) {
+    const values = new Set(
+      first
+        .filter((company) => company.status === status)
+        .map((company) => company.metric.value),
+    );
+    assert.ok(values.size >= 3, status);
+  }
+});

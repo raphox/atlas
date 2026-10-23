@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CityMap } from "../../src/charts/city/map.jsx";
-import { categoryLabel, metricDomainFor, regionsFor } from "../../src/model.js";
+import {
+  STATUS,
+  categoryLabel,
+  metricDomainFor,
+  regionsFor,
+} from "../../src/model.js";
 import { useWeather } from "./use-weather.js";
 import {
   downloadJson,
@@ -221,8 +226,8 @@ export function ExtensionDemo() {
           </select>
         </label>
         <fieldset>
-          <legend>Health</legend>
-          {["healthy", "warning", "critical"].map((status) => (
+          <legend>Status</legend>
+          {Object.keys(STATUS).map((status) => (
             <label key={status}>
               <input
                 type="checkbox"

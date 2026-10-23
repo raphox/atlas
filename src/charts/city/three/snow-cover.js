@@ -61,6 +61,8 @@ export class SnowCover extends THREE.Group {
       }
     this.groundCount = patches.length;
     for (const c of layout.companies) {
+      // A flat patch would fill the missing portion of a ruined roof.
+      if (c.status === "cancelled") continue;
       if (![c.x, c.z, c.roofTop, c.width, c.depth].every(Number.isFinite))
         continue;
       const w = c.width * (0.5 + rng() * 0.25);

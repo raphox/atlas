@@ -572,6 +572,15 @@
 .atlas-monitor-status--critical > span {
   background: var(--atlas-city-risk-critical, #db654d);
 }
+.atlas-monitor-status--configuring > span {
+  background: var(--atlas-city-status-configuring, #708493);
+}
+.atlas-monitor-status--disabled > span {
+  background: var(--atlas-city-status-disabled, #41464c);
+}
+.atlas-monitor-status--cancelled > span {
+  background: var(--atlas-city-status-cancelled, #41464c);
+}
 .atlas-city-layout {
   position: relative;
   z-index: 10;

@@ -7,9 +7,22 @@ export const MAX_JSON_BYTES = 5 * 1024 * 1024;
 
 export function sampleCompanies() {
   const base = JSON.parse(initialData);
+  const metricValues = [
+    ...new Set(base.map((company) => company.metric.value)),
+  ];
   return normalizePayload(
     Array.from({ length: 1400 }, (_, i) => ({
       ...base[i % base.length],
+      // Rotate the sample metrics between copies so every status has varied heights.
+      metric: {
+        ...base[i % base.length].metric,
+        value:
+          metricValues[
+            (metricValues.indexOf(base[i % base.length].metric.value) +
+              Math.floor(i / base.length)) %
+              metricValues.length
+          ],
+      },
       id: `extension-${i + 1}`,
       name: `${base[i % base.length].name} · ${i + 1}`,
     })),
